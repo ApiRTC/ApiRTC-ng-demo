@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 
 function AccessToken(apiKey, secret, options) {
     if (!apiKey) {
