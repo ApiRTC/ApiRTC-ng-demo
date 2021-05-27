@@ -803,7 +803,7 @@ export class ConversationComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (streamInfo.isRemote === true) {
         if (streamInfo.listEventType === 'added') {
-          console.log('adding Stream:', streamId);
+          console.log('new remote stream', streamId);
 
           const streamHolder: StreamDecorator = StreamDecorator.build(streamInfo);
           console.log(streamHolder.getId() + "->", streamHolder);
@@ -813,6 +813,8 @@ export class ConversationComponent implements OnInit, AfterViewInit, OnDestroy {
           contactHolder.addStream(streamHolder);
 
           console.log('subscribeToStream', streamId);
+          // TODO : some options may be specified to subscribe to a stream
+          // demonstrate them here ?
           this.conversation.subscribeToStream(streamId)
             .then((stream: any) => {
               console.log('subscribeToStream success:', stream);
@@ -820,12 +822,13 @@ export class ConversationComponent implements OnInit, AfterViewInit, OnDestroy {
               console.error('subscribeToStream error', err);
             });
         } else if (streamInfo.listEventType === 'removed') {
+          console.log('remote stream removed', streamId);
+
           // TODO : is that mandatory ?
           // this sounds a better reflection to 'added' case but may not be required
           console.log('unsubscribeToStream', streamId);
           this.conversation.unsubscribeToStream(streamId);
 
-          console.log('removing Stream:', streamId);
           this.streamHoldersById.delete(streamId);
           const contactHolder = this.contactHoldersById.get(contactId);
           contactHolder.removeStream(streamId);
@@ -1197,11 +1200,13 @@ export class ConversationComponent implements OnInit, AfterViewInit, OnDestroy {
 
   subscribeOrUnsubscribeToStream(event: StreamSubscribeEvent) {
     console.log("subscribeOrUnsubscribeToStream", event);
-    if (event.doSubscribe) {
+    if (event.doSubscribe == true) {
+      // TODO : some options may be specified to subscribe to a stream
+      // demonstrate them here ?
       this.conversation.subscribeToStream(event.streamHolder.getId()).then((stream: any) => {
-        console.log('onStreamSubscribe success:', stream);
+        console.log('subscribeToStream success', stream);
       }).catch((err: any) => {
-        console.error('onStreamSubscribe error', err);
+        console.error('subscribeToStream error', err);
       });
     } else {
       this.conversation.unsubscribeToStream(event.streamHolder.getId());
@@ -1215,6 +1220,7 @@ export class ConversationComponent implements OnInit, AfterViewInit, OnDestroy {
 
   publishStream(): void {
     const stream = this.localStreamHolder.getStream();
+
     console.log("publishStream()", stream);
 
     // Publish your own stream to the conversation
@@ -1230,7 +1236,9 @@ export class ConversationComponent implements OnInit, AfterViewInit, OnDestroy {
 
   unpublishStream(): void {
     const stream = this.localStreamHolder.getStream();
+
     console.log("unpublishStream()", stream);
+
     this.conversation.unpublish(this.localStreamHolder.getStream());
     this.localStreamHolder.setPublished(false);
   }
