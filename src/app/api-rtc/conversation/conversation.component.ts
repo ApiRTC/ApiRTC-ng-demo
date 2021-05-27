@@ -232,7 +232,7 @@ export class ConversationComponent implements OnInit, AfterViewInit, OnDestroy {
       if (params['apiKey']) {
         this.apiKeyFc.setValue(params['apiKey']);
       }
-      if (params['private']) {
+      if (params['private'] && params['private'] === 'true') {
         this.isPrivate = true;
       }
     });
@@ -812,13 +812,19 @@ export class ConversationComponent implements OnInit, AfterViewInit, OnDestroy {
           console.log("typeof streamInfo.contact.getId()", typeof streamInfo.contact.getId());
           contactHolder.addStream(streamHolder);
 
-          this.conversation.subscribeToStream(streamInfo.streamId)
+          console.log('subscribeToStream', streamId);
+          this.conversation.subscribeToStream(streamId)
             .then((stream: any) => {
               console.log('subscribeToStream success:', stream);
             }).catch((err: any) => {
               console.error('subscribeToStream error', err);
             });
         } else if (streamInfo.listEventType === 'removed') {
+          // TODO : is that mandatory ?
+          // this sounds a better reflection to 'added' case but may not be required
+          console.log('unsubscribeToStream', streamId);
+          this.conversation.unsubscribeToStream(streamId);
+
           console.log('removing Stream:', streamId);
           this.streamHoldersById.delete(streamId);
           const contactHolder = this.contactHoldersById.get(contactId);
