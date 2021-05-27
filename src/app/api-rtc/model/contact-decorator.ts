@@ -16,7 +16,6 @@ export class ContactDecorator {
     private readonly streamHoldersById: Map<string, StreamDecorator> = new Map();
 
     constructor(contact: any) {
-        //console.log("typeof contact.getId()", typeof contact.getId());
         this.id = String(contact.getId());
         this.update(contact);
     }

@@ -34,11 +34,6 @@ import { ApiRtcModule } from './api-rtc/api-rtc.module';
     // Project
     ApiRtcModule
   ],
-  providers: [
-    // TODO : remove this
-    //9669e2ae3eb32307853499850770b0c3
-    // { provide: 'apiKey', useValue: 'myDemoApiKey' }
-  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {

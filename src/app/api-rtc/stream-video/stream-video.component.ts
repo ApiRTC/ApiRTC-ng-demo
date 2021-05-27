@@ -1,11 +1,11 @@
-import { Component, OnInit, Input, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, Input, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 
 @Component({
   selector: 'app-stream-video',
   templateUrl: './stream-video.component.html',
   styleUrls: ['./stream-video.component.css']
 })
-export class StreamVideoComponent implements OnInit, AfterViewInit {
+export class StreamVideoComponent implements AfterViewInit {
 
   @ViewChild("video") videoRef: ElementRef;
 
@@ -16,16 +16,10 @@ export class StreamVideoComponent implements OnInit, AfterViewInit {
     this._mirror = mirror;
   }
 
-  constructor() { }
-
-  ngOnInit(): void {
-
-  }
-
   ngAfterViewInit() {
     // remote stream is attached to DOM during ngAfterViewInit because @ViewChild is not bound before this stage
-    //this.remoteVideoRef.nativeElement.srcObject = this.stream;
-    //this.remoteVideoRef.nativeElement.muted = false;
+    //this.videoRef.nativeElement.srcObject = this.stream;
+    //this.videoRef.nativeElement.muted = false;
     this.stream.attachToElement(this.videoRef.nativeElement);
   }
 

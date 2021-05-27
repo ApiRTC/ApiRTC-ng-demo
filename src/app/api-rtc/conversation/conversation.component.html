@@ -1,19 +1,5 @@
 <div class="container-fluid">
 
-    <!-- TODO : Shall we explain here how to load the apiRTC lib because this is a bit specific for angular so maybe worth explain it... -->
-    <!-- <div class="container">
-        <div class="row">
-            <div class="col">
-                <h1>0. Load apiRTC</h1>
-                <p>In order to user apiRTC, please add :
-                </p>
-                <p><code>&lt;script type="text/javascript" src="https://cloud.apirtc.com/apiRTC/apiRTC-latest.min.js"&gt;&lt;/script&gt;</code></p>
-                <p>inside <code>&lt;head&gt;...&lt;/head&gt;</code> tags of <code>index.html</code></p>
-                <p><code>declare var apiRTC: any;</code></p>
-            </div>
-        </div>
-    </div> -->
-
     <!-- hidden video tag to be able to load MediaStrem from input file video -->
     <video #fileVideo autoplay playsinline [hidden]="true"></video>
 
@@ -21,7 +7,6 @@
         <div class="row">
             <div class="col">
                 <h1>1. Create UserAgent</h1>
-                <!-- <p>Entry point to <strong>apiRTC</strong> is to create a <code>UserAgent</code> :</p> -->
             </div>
         </div>
         <div class="row">
@@ -32,15 +17,15 @@
                         <mat-label>apiKey</mat-label>
                         <input matInput placeholder="apiKey" [formControl]="apiKeyFc">
                         <mat-icon matSuffix>fingerprint</mat-icon>
-                        <mat-hint>Get your own apiKey from <a href="https://cloud.apirtc.com/register#account" target="_blank">https://cloud.apirtc.com/register</a>
+                        <mat-hint>Get your own apiKey from <a href="https://cloud.apirtc.com/register#account" target="_blank" rel="noopener">https://cloud.apirtc.com/register</a>
                         </mat-hint>
                     </mat-form-field>
                     &nbsp;
-                    <button mat-raised-button color="primary" (click)="createUserAgent()" [disabled]="userAgent" title="Create UserAgent">new UserAgent&nbsp;<i class="bi bi-file-earmark-plus"></i></button>
+                    <button mat-raised-button color="primary" (click)="createUserAgent()" [disabled]="userAgent" title="Create UserAgent">new UserAgent&nbsp;<em class="bi bi-file-earmark-plus"></em></button>
                 </div>
             </div>
             <div class="col">
-                <p>Create <code>UserAgent</code> with the <code>username</code> of a user created within your enterprise account on <a href="https://cloud.apirtc.com/users" target="_blank">https://cloud.apirtc.com/users</a> :
+                <p>Create <code>UserAgent</code> with the <code>username</code> of a user created within your enterprise account on <a href="https://cloud.apirtc.com/users" target="_blank" rel="noopener">https://cloud.apirtc.com/users</a> :
                 </p>
                 <div class="text-center">
                     <mat-form-field [style.width.%]="50">
@@ -54,8 +39,8 @@
                         </mat-error>
                     </mat-form-field>
                     &nbsp;
-                    <button mat-raised-button color="primary" (click)="createUserAgentWithUsername()" [disabled]="userAgent" title="Create UserAgent">new UserAgent&nbsp;<i
-                            class="bi bi-file-earmark-plus"></i></button>
+                    <button mat-raised-button color="primary" (click)="createUserAgentWithUsername()" [disabled]="userAgent" title="Create UserAgent">new UserAgent&nbsp;<em
+                            class="bi bi-file-earmark-plus"></em></button>
                 </div>
             </div>
         </div>
@@ -64,8 +49,8 @@
             <div class="col">
                 <div *ngIf="userAgent" class="alert alert-success clearfix" role="alert"><code>UserAgent</code> created.
                     <span class="float-right"><button mat-raised-button color="warn" (click)="nullifyUserAgent()"
-                            [disabled]="session" title="Set to null"><i
-                                class="bi bi-trash"></i>&nbsp;Trash</button></span>
+                            [disabled]="session" title="Set to null"><em
+                                class="bi bi-trash"></em>&nbsp;Trash</button></span>
                 </div>
             </div>
         </div>
@@ -88,14 +73,11 @@
                     <div class="col with-divider">
                         <p>Registering as guest is simple but less secured.</p>
                         <button mat-raised-button color="primary" (click)="registerWithoutAuth()" [disabled]="!userAgent||registerInPrgs||session||userAgentCreationType === userAgentCreationTypeEnum.Username" title="Register as guest">Register as
-                            Guest&nbsp;<i class="bi bi-box-arrow-in-right"></i></button>
+                            Guest&nbsp;<em class="bi bi-box-arrow-in-right"></em></button>
                     </div>
                     <div class="col with-divider">
                         <p>Using your own authentication server that provides a <strong>Json Web Token</strong> allows to register the <code>UserAgent</code> with <strong>ApiRTC</strong>'s servers in a more secure way.</p>
                         <app-login [btnText]="'Register with JWT'" [enable]="!registerInPrgs&&!session&&(userAgentCreationType === userAgentCreationTypeEnum.Key)" (credentials)="registerWithJWTAuth($event)"></app-login>
-                        <!-- <p *ngIf="token" class="text-success">Got token &lt;<code>{{token}}</code>&gt;</p>
-                        <button mat-raised-button color="primary" (click)="registerWithToken()" [disabled]="!token" title="Register with token">Register with token
-                            &nbsp;<i class="bi bi-box-arrow-in-right"></i></button> -->
                     </div>
                     <div class="col">
                         <p>Authentication with third party server that generates a <strong>token</strong> and that
@@ -105,12 +87,11 @@
                         </app-login>
                     </div>
                 </div>
-                <!-- *ngIf="!session&&(userAgentCreationType === userAgentCreationTypeEnum.Key)" -->
                 <div class="row">
                     <div class="col">
                         <br>
                         <p class="alert alert-warning" role="alert">You need to configure authentication at
-                            <a href="https://cloud.apirtc.com/enterprise/users-authentication" target="_blank">https://cloud.apirtc.com/enterprise/users-authentication</a> according to the one you want to use.
+                            <a href="https://cloud.apirtc.com/enterprise/users-authentication" target="_blank" rel="noopener">https://cloud.apirtc.com/enterprise/users-authentication</a> according to the one you want to use.
                         </p>
                     </div>
                 </div>
@@ -124,7 +105,6 @@
                         </app-login>
                     </div>
                 </div>
-                <!-- *ngIf="!session&&(userAgentCreationType === userAgentCreationTypeEnum.Username)" -->
                 <div class="row">
                     <div class="col">
                         <br>
@@ -148,8 +128,8 @@
                                 *ngIf="showToken">{{token}}</strong>&gt;</span>
                     </span>
                     <span class="float-right"><button mat-raised-button color="warn" (click)="unregister()"
-                            [disabled]="conversation" title="Unregister"><i
-                                class="bi bi-box-arrow-left"></i>&nbsp;Unregister</button></span>
+                            [disabled]="conversation" title="Unregister"><em
+                                class="bi bi-box-arrow-left"></em>&nbsp;Unregister</button></span>
                 </p>
                 <p *ngIf="registrationError" class="alert alert-danger" role="alert">{{registrationError | json}}
                 </p>
@@ -175,8 +155,8 @@
                             <span matPrefix>{{conversationBaseUrl}}/</span>
                             <input type="text" matInput placeholder="abcd" formControlName="name">
                         </mat-form-field>&nbsp;
-                        <button mat-raised-button color="primary" type="submit" [disabled]="!conversationFormGroup.valid||!session||conversation" title="Get Or Create Conversation">GetOrCreateConversation&nbsp;<i
-                                class="bi bi-telephone-forward-fill"></i></button>
+                        <button mat-raised-button color="primary" type="submit" [disabled]="!conversationFormGroup.valid||!session||conversation" title="Get Or Create Conversation">GetOrCreateConversation&nbsp;<em
+                                class="bi bi-telephone-forward-fill"></em></button>
                     </form>
                 </div>
             </div>
@@ -186,8 +166,8 @@
                         <p>Or create a <code>Conference</code> (a private conversation, with moderation capabilities)
                         </p>
                         <div class="text-center">
-                            <button mat-raised-button color="primary" type="button" (click)="createConference()" [disabled]="!session||createConferenceInPrgs||conversation||(userAgentAuthType !== userAgentAuthTypeEnum.CloudApiRTC)" title="Create Conference">CreateConference&nbsp;<i
-                                    class="bi bi-telephone-forward-fill"></i>
+                            <button mat-raised-button color="primary" type="button" (click)="createConference()" [disabled]="!session||createConferenceInPrgs||conversation||(userAgentAuthType !== userAgentAuthTypeEnum.CloudApiRTC)" title="Create Conference">CreateConference&nbsp;<em
+                                    class="bi bi-telephone-forward-fill"></em>
                                 <mat-icon *ngIf="createConferenceInPrgs">
                                     <mat-spinner [diameter]="16"></mat-spinner>
                                 </mat-icon>
@@ -213,10 +193,10 @@
                     <p class="clearfix">Got <code>Conversation</code> with <code>name</code>
                         <span>&lt;<strong>{{conversationNameFc.value}}</strong>&gt;</span>.
                         <br>Others can join at url
-                        <a href="{{conversationUrlWithApiKey}}" target="_blank">{{conversationUrl}}</a>
+                        <a href="{{conversationUrlWithApiKey}}" target="_blank" rel="noopener">{{conversationUrl}}</a>
                         <span class="float-right"><button mat-raised-button color="primary"
                                 [cdkCopyToClipboard]="conversationUrlWithApiKey" title="Copy to clipboard">Copy
-                                link&nbsp;<i class="bi bi-clipboard"></i></button></span>
+                                link&nbsp;<em class="bi bi-clipboard"></em></button></span>
                     </p>
                     <p class="clearfix"><span class="float-right">
                             <button mat-raised-button color="warn" (click)="destroyConversation()"
@@ -233,8 +213,8 @@
                     <code>Session</code> take part of the <strong>conversation</strong> :
                 </p>
                 <p class="text-center">
-                    <button mat-raised-button color="{{joined?'accent':'primary'}}" (click)="!joined?join():leave()" [disabled]="!conversation||joinInPrgs" title="{{!joined?'Join':'Leave'}} Conversation">{{!joined?'Join':'Leave'}}&nbsp;<i
-                            class="bi bi-chat-quote"></i>
+                    <button mat-raised-button color="{{joined?'accent':'primary'}}" (click)="!joined?join():leave()" [disabled]="!conversation||joinInPrgs" title="{{!joined?'Join':'Leave'}} Conversation">{{!joined?'Join':'Leave'}}&nbsp;<em
+                            class="bi bi-chat-quote"></em>
                         <mat-icon *ngIf="joinInPrgs">
                             <mat-spinner [diameter]="16"></mat-spinner>
                         </mat-icon>
@@ -292,8 +272,8 @@
                         <mat-label>Message</mat-label>
                         <input type="text" matInput placeholder="abcd" formControlName="message">
                     </mat-form-field>&nbsp;
-                    <button mat-raised-button color="primary" type="submit" [disabled]="!messageFormGroup.valid||!joined" title="Send Message">Send&nbsp;<i
-                            class="bi bi-chat-left"></i></button>
+                    <button mat-raised-button color="primary" type="submit" [disabled]="!messageFormGroup.valid||!joined" title="Send Message">Send&nbsp;<em
+                            class="bi bi-chat-left"></em></button>
                 </form>
             </div>
             <div class="col">
@@ -303,7 +283,7 @@
                 <form [formGroup]="fileFormGroup" (ngSubmit)="sendFile()">
                     <input type="file" formControlName="file" (change)="selectFile($event)" /> &nbsp;
                     <button mat-raised-button color="primary" type="submit" [disabled]="!fileFormGroup.valid||!joined||!selectedFile" title="Send File">Upload
-                        file&nbsp;<i class="bi bi-upload"></i></button>
+                        file&nbsp;<em class="bi bi-upload"></em></button>
                 </form>
             </div>
         </div>
@@ -394,10 +374,10 @@
         <div class="row">
             <div class="col">
                 <p class="alert alert-info" role="alert" *ngFor="let kv of joinRequestsById | keyvalue">
-                    <button mat-raised-button color="primary" (click)="acceptJoinRequest(kv.value)" title="Accept">{{kv.value.sender.getUsername()}}&nbsp;<i
-                            class="bi bi-person-check"></i></button>
-                    <button mat-raised-button color="warn" (click)="declineJoinRequest(kv.value)" title="Decline"><i
-                            class="bi bi-person-x"></i></button>
+                    <button mat-raised-button color="primary" (click)="acceptJoinRequest(kv.value)" title="Accept">{{kv.value.sender.getUsername()}}&nbsp;<em
+                            class="bi bi-person-check"></em></button>
+                    <button mat-raised-button color="warn" (click)="declineJoinRequest(kv.value)" title="Decline"><em
+                            class="bi bi-person-x"></em></button>
                 </p>
             </div>
         </div>
@@ -420,7 +400,7 @@
                 <div class="text-center">
                     <p>
                         <button mat-stroked-button color="warn" (click)="toggleRecording()" [disabled]="!joined" title="{{!recording?'Record':'Stop Recording'}} Conversation">{{!recording?'Record':'Stop
-                            Recording'}}&nbsp;<i class="bi bi-record-circle"></i>
+                            Recording'}}&nbsp;<em class="bi bi-record-circle"></em>
                             <mat-icon *ngIf="recording">
                                 <mat-spinner [diameter]="16"></mat-spinner>
                             </mat-icon>
@@ -430,9 +410,9 @@
                     </p>
                     <div class="alert alert-success clearfix text-center" *ngIf="recordingsByMediaId.size>0">
                         <mat-chip-list aria-label="record selection">
-                            <mat-chip *ngFor="let kv of recordingsByMediaId | keyvalue"><a href="{{kv.value.recordingInfo.mediaURL}}" target="_blank">{{kv.value.recordingInfo.recordedFileName}}</a>
-                                <span>&nbsp;<span *ngIf="kv.value.available; else elseBlockUnavalable"><i
-                                            class="bi bi-cloud-download"></i></span>
+                            <mat-chip *ngFor="let kv of recordingsByMediaId | keyvalue"><a href="{{kv.value.recordingInfo.mediaURL}}" target="_blank" rel="noopener">{{kv.value.recordingInfo.recordedFileName}}</a>
+                                <span>&nbsp;<span *ngIf="kv.value.available; else elseBlockUnavalable"><em
+                                            class="bi bi-cloud-download"></em></span>
                                 <ng-template #elseBlockUnavalable>
                                     <mat-spinner [diameter]="16"></mat-spinner>
                                 </ng-template>

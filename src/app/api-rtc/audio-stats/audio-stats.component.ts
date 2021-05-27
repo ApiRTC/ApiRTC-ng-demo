@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 
 // "audioReceived": {
@@ -49,7 +49,7 @@ import { Component, OnInit, Input } from '@angular/core';
   templateUrl: './audio-stats.component.html',
   styleUrls: ['./audio-stats.component.css']
 })
-export class AudioStatsComponent implements OnInit {
+export class AudioStatsComponent {
 
   bitRate: number;
   bitRateKbps: number;
@@ -74,13 +74,6 @@ export class AudioStatsComponent implements OnInit {
     }
     this.bitRateKbps = Math.round(this.bitRate / 1000);
     this.packetLossRatio = stats.packetLossRatio;
-
-    //console.log("AudioStatsComponent", stats)
-  };
-
-  constructor() { }
-
-  ngOnInit(): void {
   }
 
 }

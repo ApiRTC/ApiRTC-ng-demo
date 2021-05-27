@@ -90,8 +90,6 @@ export class StreamComponent implements OnInit, OnDestroy {
   // Video quality selection
   videoQualityFc = new FormControl();
 
-  constructor() { }
-
   ngOnInit(): void {
     // Audio/Video muting
     //
@@ -137,9 +135,7 @@ export class StreamComponent implements OnInit, OnDestroy {
     console.log("chooseImage", file);
 
     // if (apiRTC.browser === 'Firefox') {
-
     //   var fr = new FileReader;
-
     //   fr.onload = () => { // file is loaded
     //     var img = new Image;
     //     img.onload = () => {
@@ -168,7 +164,6 @@ export class StreamComponent implements OnInit, OnDestroy {
       URL.revokeObjectURL(img.src);
     };
     img.src = url;
-    // }
   }
 
   ngOnDestroy(): void {

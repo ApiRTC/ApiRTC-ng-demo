@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 // "videoReceived": {
 //   "packetsReceived": 5469,
@@ -59,14 +59,12 @@ import { Component, OnInit, Input } from '@angular/core';
 //   "packetLossRatio": 0
 // }
 
-
-
 @Component({
   selector: 'app-video-stats',
   templateUrl: './video-stats.component.html',
   styleUrls: ['./video-stats.component.css']
 })
-export class VideoStatsComponent implements OnInit {
+export class VideoStatsComponent {
 
   bitRate: number;
   bitRateKbps: number;
@@ -95,11 +93,6 @@ export class VideoStatsComponent implements OnInit {
     this.packetLossRatio = stats.packetLossRatio;
     this.height = stats.height;
     this.width = stats.width;
-  };
-
-  constructor() { }
-
-  ngOnInit(): void {
   }
 
 }

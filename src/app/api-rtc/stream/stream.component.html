@@ -3,9 +3,6 @@
         <app-stream-video *ngIf="streamHolder.stream" [stream]="streamHolder.stream" [mirror]="mirrorVideoFc.value">
         </app-stream-video>
         <div class="mycard-text">
-            <!-- TODO should be handled by parent component (contact level) -->
-            <!-- <h5>{{streamHolder.streamInfo.contact.userData.username}}</h5> -->
-
             <div *ngIf="withDevicesControl">
                 <form class="row row-cols-lg-auto g-3 align-items-center">
                     <div class="col-12">

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 
 import { FormBuilder, Validators, FormControl } from '@angular/forms';
 
@@ -7,7 +7,7 @@ import { FormBuilder, Validators, FormControl } from '@angular/forms';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent {
 
   fgroup = this.fb.group({
     username: ['', Validators.required],
@@ -35,10 +35,6 @@ export class LoginComponent implements OnInit {
   @Output() credentials = new EventEmitter<Object>();
 
   constructor(private fb: FormBuilder) { }
-
-  ngOnInit(): void {
-
-  }
 
   get usernameFc() {
     return this.fgroup.get('username') as FormControl;

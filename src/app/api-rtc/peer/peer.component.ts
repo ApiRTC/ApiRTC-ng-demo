@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
+import { Component, Input, EventEmitter, Output } from '@angular/core';
 
 import { ContactDecorator, StreamDecorator } from '../model/model.module';
 
@@ -10,9 +10,9 @@ import { StreamSubscribeEvent } from '../stream/stream.component';
   templateUrl: './peer.component.html',
   styleUrls: ['./peer.component.css']
 })
-export class PeerComponent implements OnInit {
+export class PeerComponent {
 
-  streamHoldersById: Map<String, StreamDecorator>;
+  streamHoldersById: Map<string, StreamDecorator>;
 
   activeIndex = 0;
 
@@ -20,7 +20,7 @@ export class PeerComponent implements OnInit {
   @Input() set contactHolder(contactHolder: ContactDecorator) {
     this._contactHolder = contactHolder;
     this.streamHoldersById = contactHolder.getStreamHoldersById();
-  };
+  }
 
   @Input() withModeration: boolean = false;
 
@@ -28,10 +28,6 @@ export class PeerComponent implements OnInit {
 
   @Output() onEject = new EventEmitter<boolean>();
 
-  constructor() { }
-
-  ngOnInit(): void {
-  }
 
   emitStreamSubscription(event: StreamSubscribeEvent) {
     this.onStreamSubscription.emit(event);

@@ -47,7 +47,6 @@ export function handleError(response: HttpErrorResponse): Error {
 	// In a real world app, we might use a remote logging infrastructure
 	let errMsg: string;
 
-	//if (response instanceof HttpErrorResponse) {
 	try {
 		const errObj = response.error instanceof Object ? response.error : JSON.parse(response.error);
 		const error: Error = Error.build(errObj.errorCode || -1, errObj.errorReason);
@@ -62,12 +61,8 @@ export function handleError(response: HttpErrorResponse): Error {
 	} catch (e) {
 		console.error('Misc::handleError|Exception : ' + e);
 	}
-	//            response.message ||
 	const err = JSON.stringify(response);
 	errMsg = `${response.status} - ${response.statusText || ''} ${err}`;
-	//	} else {
-	//		errMsg = response.message ? response.message : response.toString();
-	//	}
 	console.error('Misc::handleError|building error with' + errMsg);
 	return Error.build(-1, errMsg);
 }

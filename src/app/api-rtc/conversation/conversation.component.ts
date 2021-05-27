@@ -1,5 +1,4 @@
-import { Component, OnDestroy, OnInit, AfterViewInit, ViewChild, ElementRef, HostListener } from '@angular/core';
-import { Inject } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute } from "@angular/router";
 
@@ -48,7 +47,7 @@ enum Role {
   templateUrl: './conversation.component.html',
   styleUrls: ['./conversation.component.css']
 })
-export class ConversationComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ConversationComponent implements OnInit, OnDestroy {
 
   @ViewChild('fileVideo') fileVideoRef: ElementRef;
 
@@ -236,9 +235,6 @@ export class ConversationComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isPrivate = true;
       }
     });
-  }
-
-  ngAfterViewInit() {
   }
 
   ngOnDestroy(): void {
@@ -574,72 +570,69 @@ export class ConversationComponent implements OnInit, AfterViewInit, OnDestroy {
 
   changeLocalStream(): void {
 
-    if (this.localStreamHolder) {
+    const published = this.localStreamHolder.isPublished();
+    const audioMuted = this.localStreamHolder.getStream().isAudioMuted();
 
-      const published = this.localStreamHolder.isPublished();
-      const audioMuted = this.localStreamHolder.getStream().isAudioMuted();
-
-      // first, unpublish and release current local stream
-      if (published) {
-        this.conversation.unpublish(this.localStreamHolder.getStream());
-      }
-      this.localStreamHolder.getStream().release();
-
-      // Set localStreamHolder to null in order to destroy the associated component
-      this.localStreamHolder = null;
-
-      // get selected devices
-      const options = {};
-      if (this.selectedAudioInDevice) {
-        options['audioInputId'] = this.selectedAudioInDevice.id;
-      }
-      if (this.selectedVideoDevice) {
-        options['videoInputId'] = this.selectedVideoDevice.id;
-      }
-      if (this.selectedVideoQuality) {
-        options['constraints'] = {
-          audio: !audioMuted,
-          video: {
-            width: { min: QVGA.width, ideal: this.selectedVideoQuality.width },
-            height: { min: QVGA.height, ideal: this.selectedVideoQuality.height }
-          }
-        }
-      }
-
-      if (this.currentBackground instanceof BackgroundImageEvent) {
-        options['filters'] = [{ type: 'backgroundSubtraction', options: { backgroundMode: 'image', image: this.currentBackground.imageData } }];
-      }
-      else {
-        switch (this.currentBackground) {
-          case 'none':
-            break;
-          case 'blur':
-            console.log('blur selected');
-            options['filters'] = [{ type: 'backgroundSubtraction', options: { backgroundMode: 'blur' } }];
-            break;
-          case 'transparent':
-            options['filters'] = [{ type: 'backgroundSubtraction', options: { backgroundMode: 'transparent' } }];
-            break;
-          //case 'image':
-          // TODO request for an image  
-          //options['filters'][{ type: 'backgroundSubtraction', options: { backgroundMode: 'image', image: imageData } }];
-          //console.log("backgroundMode 'image' not implemented");
-          //  break;
-          default:
-            console.log(`Sorry, not a good filter value`);
-        }
-      }
-
-      // and recreate a new stream
-      this.createStream(options)
-        .then((stream) => {
-          // if local stream was published consider we should publish changed one
-          if (published) {
-            this.publishStream();
-          }
-        })
-        .catch(err => { console.error('createStream error', err); });
+    // first, unpublish and release current local stream
+    if (published) {
+      this.conversation.unpublish(this.localStreamHolder.getStream());
     }
+    this.localStreamHolder.getStream().release();
+
+    // Set localStreamHolder to null in order to destroy the associated component
+    this.localStreamHolder = null;
+
+    // get selected devices
+    const options = {};
+    if (this.selectedAudioInDevice) {
+      options['audioInputId'] = this.selectedAudioInDevice.id;
+    }
+    if (this.selectedVideoDevice) {
+      options['videoInputId'] = this.selectedVideoDevice.id;
+    }
+    if (this.selectedVideoQuality) {
+      options['constraints'] = {
+        audio: !audioMuted,
+        video: {
+          width: { min: QVGA.width, ideal: this.selectedVideoQuality.width },
+          height: { min: QVGA.height, ideal: this.selectedVideoQuality.height }
+        }
+      }
+    }
+
+    if (this.currentBackground instanceof BackgroundImageEvent) {
+      options['filters'] = [{ type: 'backgroundSubtraction', options: { backgroundMode: 'image', image: this.currentBackground.imageData } }];
+    }
+    else {
+      switch (this.currentBackground) {
+        case 'none':
+          break;
+        case 'blur':
+          console.log('blur selected');
+          options['filters'] = [{ type: 'backgroundSubtraction', options: { backgroundMode: 'blur' } }];
+          break;
+        case 'transparent':
+          options['filters'] = [{ type: 'backgroundSubtraction', options: { backgroundMode: 'transparent' } }];
+          break;
+        //case 'image':
+        // TODO request for an image  
+        //options['filters'][{ type: 'backgroundSubtraction', options: { backgroundMode: 'image', image: imageData } }];
+        //console.log("backgroundMode 'image' not implemented");
+        //  break;
+        default:
+          console.log(`Sorry, not a good filter value`);
+      }
+    }
+
+    // and recreate a new stream
+    this.createStream(options)
+      .then((stream) => {
+        // if local stream was published consider we should publish changed one
+        if (published) {
+          this.publishStream();
+        }
+      })
+      .catch(err => { console.error('createStream error', err); });
   }
 
   setCapabilitiesOfLocalStream() {
@@ -785,7 +778,8 @@ export class ConversationComponent implements OnInit, AfterViewInit, OnDestroy {
     this.joinRequestsById.delete(request.getId());
   }
 
-  doListenToConversationEvents() {
+
+  doListenToStreamListChanged() {
 
     // List of Streams published by peers in the Conversation shall be maintained in the application
     // by listening on streamListChanged event
@@ -836,6 +830,9 @@ export class ConversationComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
+  }
+
+  doListenToStreamEvents() {
     this.conversation.on('streamAdded', (stream: any) => {
       console.log('on:streamAdded:', stream);
       // 'streamAdded' actually means that a stream is published by a peer and thus is ready to be displayed.
@@ -869,31 +866,33 @@ export class ConversationComponent implements OnInit, AfterViewInit, OnDestroy {
       // for debug only (this function getAvailableStreamList shall be hidden in apiRTC public api)
       console.log("getAvailableStreamList:", this.conversation.getAvailableStreamList());
     })
+  }
 
-    // Contacts
-    //
+  doListenToContactsEvents() {
     this.conversation.on('contactJoined', (contact: any) => {
       console.log("on:contactJoined:", contact);
-      const contactHolder: ContactDecorator = this.getOrCreateContactHolder(contact);
+      this.getOrCreateContactHolder(contact);
     }).on('contactLeft', (contact: any) => {
       console.log("on:contactLeft:", contact);
       this.contactHoldersById.delete(contact.getId());
     });
+  }
 
-    // Messages
-    //
+  doListenToMessages() {
     this.conversation.on('message', (message: any) => {
       console.log("on:message:", message);
       this.messages.push(MessageDecorator.build(message));
     });
+  }
 
-    // QoS Statistics
-    //
+  doListenToQosStatistics() {
+
     if ((apiRTC.browser === 'Chrome') || (apiRTC.browser === 'Firefox')) {
       // TODO : safari ??
       this.userAgent.enableCallStatsMonitoring(true, { interval: 10000 });
       this.userAgent.enableActiveSpeakerDetecting(true, { threshold: 50 });
     }
+
     this.conversation.on('callStatsUpdate', (callStats: any) => {
       console.log("on:callStatsUpdate:", callStats);
 
@@ -937,8 +936,10 @@ export class ConversationComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     });
+  }
 
-    // Speaker detection
+  doListenToAudioAmplitude() {
+    // For speaker detection
     //
     this.conversation.on('audioAmplitude', (amplitudeInfo: any) => {
       //console.log("on:audioAmplitude", amplitudeInfo);
@@ -958,16 +959,16 @@ export class ConversationComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     });
+  }
 
-    // Recording
-    //
+  doListenToRecording() {
     this.conversation.on('recordingAvailable', (recordingInfo: any) => {
       console.log("on:recordingAvailable", recordingInfo);
       this.recordingsByMediaId.set(recordingInfo.mediaId, new RecordingInfoDecorator(recordingInfo, true));
     });
+  }
 
-    // File upload
-    //
+  doListenToFileUpload() {
     this.conversation.on('transferBegun', () => {
       this.uploadProgressPercentage = 0;
     });
@@ -977,32 +978,51 @@ export class ConversationComponent implements OnInit, AfterViewInit, OnDestroy {
     this.conversation.on('transferEnded', () => {
       this.uploadProgressPercentage = 100;
     });
+  }
 
-    // Moderation events
-    //
-    //console.log("this.conversation instanceof apiRTC.Conference", this.conversation instanceof apiRTC.Conference);
-    //console.log("typeof this.conversation ", typeof this.conversation);
-    if (this.isPrivate) {
-      this.conversation.on('waitingForModeratorAcceptance', (moderator: any) => {
-        console.log("on:waitingForModeratorAcceptance", moderator);
-        this.moderator = moderator;
-        this.waitingForModeratorAcceptance = true;
-      }).on('participantEjected', (data: any) => {
-        console.log('on:participantEjected', data);
-        if (this.role === Role.Default) {
-          if (data.self) {
-            console.log('User was ejected');
-            this.destroyConversation();
-          }
-        } else if (this.role === Role.Moderator) {
-          // Nothing to do here ?, the application on Default Role side shall leave and destroy conversation
-          if (data.contact) {
-            // Remove Eject button for the user
-            //
-            //this.contactHoldersById.delete(data.contact.getId());
-          }
+  doListenToModerationEvents() {
+    this.conversation.on('waitingForModeratorAcceptance', (moderator: any) => {
+      console.log("on:waitingForModeratorAcceptance", moderator);
+      this.moderator = moderator;
+      this.waitingForModeratorAcceptance = true;
+    }).on('participantEjected', (data: any) => {
+      console.log('on:participantEjected', data);
+      if (this.role === Role.Default) {
+        if (data.self) {
+          console.log('User was ejected');
+          this.destroyConversation();
         }
-      });
+      } else if (this.role === Role.Moderator) {
+        // Nothing to do here ?, the application on Default Role side shall leave and destroy conversation
+        if (data.contact) {
+          // Remove Eject button for the user
+          //
+          //this.contactHoldersById.delete(data.contact.getId());
+        }
+      }
+    });
+  }
+
+  doListenToConversationEvents() {
+
+    this.doListenToStreamListChanged();
+
+    this.doListenToStreamEvents();
+
+    this.doListenToContactsEvents();
+
+    this.doListenToMessages();
+
+    this.doListenToQosStatistics();
+
+    this.doListenToAudioAmplitude();
+
+    this.doListenToRecording();
+
+    this.doListenToFileUpload();
+
+    if (this.isPrivate) {
+      this.doListenToModerationEvents();
     }
   }
 
@@ -1200,7 +1220,7 @@ export class ConversationComponent implements OnInit, AfterViewInit, OnDestroy {
 
   subscribeOrUnsubscribeToStream(event: StreamSubscribeEvent) {
     console.log("subscribeOrUnsubscribeToStream", event);
-    if (event.doSubscribe == true) {
+    if (event.doSubscribe === true) {
       // TODO : some options may be specified to subscribe to a stream
       // demonstrate them here ?
       this.conversation.subscribeToStream(event.streamHolder.getId()).then((stream: any) => {
@@ -1219,13 +1239,14 @@ export class ConversationComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   publishStream(): void {
-    const stream = this.localStreamHolder.getStream();
+    const localStream = this.localStreamHolder.getStream();
 
-    console.log("publishStream()", stream);
+    console.log("publishStream()", localStream);
 
     // Publish your own stream to the conversation
     this.publishInPrgs = true;
-    this.conversation.publish(stream).then((stream: any) => {
+    this.conversation.publish(localStream).then((stream: any) => {
+      console.log("publishStream() published", stream);
       this.localStreamHolder.setPublished(true);
       this.publishInPrgs = false;
     }).catch((err: any) => {
@@ -1280,10 +1301,11 @@ export class ConversationComponent implements OnInit, AfterViewInit, OnDestroy {
           this.screenSharingStreamHolder = StreamDecorator.build(streamInfo);
           this.screenSharingStreamHolder.setStream(stream);
           // and publish it
-          console.log("publish", stream);
-          this.conversation.publish(this.screenSharingStreamHolder.getStream()).then((stream: any) => {
+          console.log("toggleScreenSharing()::publish", stream);
+          this.conversation.publish(this.screenSharingStreamHolder.getStream()).then((l_stream: any) => {
+            console.log("toggleScreenSharing() published", l_stream);
             this.screenSharingStreamHolder.setPublished(true);
-          }).catch(err => {
+          }).catch((err: any) => {
             console.error('toggleScreenSharing()::publish', err);
           });
         })

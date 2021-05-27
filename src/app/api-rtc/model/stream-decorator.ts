@@ -1,6 +1,6 @@
 declare var apiRTC: any;
 
-import { VideoQuality, QVGA, VGA, HD, FHD, FourK, VideoQualities } from '../../consts';
+import { VideoQuality, VideoQualities } from '../../consts';
 
 // Decorator for apiRTC.Stream class
 //
@@ -31,7 +31,7 @@ export class StreamDecorator {
         // console.log("StreamDecorator: typeof streamInfo.streamId :", typeof streamInfo.streamId) => number
         this.id = String(streamInfo.streamId);
 
-        this.qosStat = qosStat && qosStat || undefined;
+        this.qosStat = qosStat ? qosStat : undefined;
     }
 
     /**
@@ -60,7 +60,7 @@ export class StreamDecorator {
     public setStream(stream: any) {
         this.stream = stream;
 
-        //getCapabilities only supported by Chrome ?
+        // getCapabilities only supported by Chrome ?
         if ((apiRTC.browser !== 'Firefox') && (apiRTC.browser !== 'IE')) {
             this.capabilities = stream.getCapabilities();
             console.log('stream capabilities :', this.capabilities);

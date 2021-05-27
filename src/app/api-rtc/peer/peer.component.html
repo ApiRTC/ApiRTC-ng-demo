@@ -8,14 +8,10 @@
     </p>
     <div id="{{_contactHolder.id}}-streams" class="carousel slide" data-ride="carousel">
         <ol class="carousel-indicators">
-            <!-- <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li> -->
             <li [attr.data-target]="'#'+_contactHolder.id+'-streams'" [attr.data-slide-to]="i" [ngClass]="{'active': i === activeIndex}" *ngFor="let kv of streamHoldersById | keyvalue; index as i" (click)="navTo(i)">
             </li>
         </ol>
         <div class="carousel-inner">
-            <!-- <div class="carousel-item active">
-                <img src="..." class="d-block w-100" alt="...">
-            </div> -->
             <div class="carousel-item" [ngClass]="{'active': i === activeIndex}" *ngFor="let kv of streamHoldersById | keyvalue; index as i; first as isFirst">
                 <div class="d-block w-100 h-100">
                     <app-stream [streamHolder]="kv.value" withSubscription="true" (onSubscription)="emitStreamSubscription($event)">
