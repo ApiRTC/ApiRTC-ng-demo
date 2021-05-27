@@ -1,0 +1,100 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import "~bootstrap-icons/font/bootstrap-icons.css";
+
+/**/
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+
+/* You can add global styles to this file, and also import other style files */
+
+.solid {
+    border-style: solid;
+}
+
+.videoInsert {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -100;
+    background-size: cover;
+    overflow: hidden;
+}
+
+video {
+    max-width: 100%;
+    height: auto;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.mycard {
+    position: relative;
+    overflow: hidden;
+}
+
+.mycard:before {
+    position: absolute;
+    content: '';
+    width: 80%;
+    height: 220%;
+    background: rgba(105, 235, 53, 0.7);
+    top: -50%;
+    left: -100%;
+    z-index: 1;
+    transform: rotate(25deg);
+    transform-origin: center top 0;
+    transition: .5s;
+}
+
+.mycard:hover:before {
+    left: 10%;
+}
+
+.mycard video {
+    width: 100%;
+    height: auto;
+}
+
+.mycard-text {
+    width: 100%;
+    padding: 0 20px;
+    position: absolute;
+    top: -100%;
+    color: #fff;
+    z-index: 2;
+    transition: 1.1s;
+}
+
+.mycard:hover .mycard-text {
+    top: 40px;
+}
+
+.mycard-over {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}

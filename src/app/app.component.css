@@ -1,0 +1,12 @@
+/* @media (min-width: 768px),
+all {
+    .navbar-expand-md .navbar-toggler {
+        display: none;
+    }
+} */
+
+
+/* .navbar-expand-md {
+    -ms-flex-flow: column wrap !important;
+    flex-flow: column wrap !important;
+} */
