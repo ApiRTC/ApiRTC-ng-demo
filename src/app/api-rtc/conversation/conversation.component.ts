@@ -101,7 +101,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
   conversation: any = null;
 
   // apiRTC data objects
-  //joinRequests: Array<any> = new Array();
   joinRequestsById: Map<string, any> = new Map();
   moderator: any = null;
   waitingForModeratorAcceptance = false;
@@ -771,10 +770,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
 
   doRemoveJoinRequest(request: any) {
-    // const index = this.joinRequests.indexOf(request, 0);
-    // if (index > -1) {
-    //   this.joinRequests.splice(index, 1);
-    // }
     this.joinRequestsById.delete(request.getId());
   }
 
@@ -940,7 +935,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
         // There is a problem here, it seems the amplitudeInfo.callId is actually a streamId
         const streamHolder: StreamDecorator = this.streamHoldersById.get(amplitudeInfo.callId);
         if (!streamHolder) {
-          // TODO : is this a bug ? even after having unscribscribed to a stream I still receive audioAmplitude events corresponding to it 
+          // TODO : is this a bug ? even after having unsubscribed to a stream I still receive audioAmplitude events corresponding to it 
           console.log("UNDEFINED ? amplitudeInfo.callId=" + amplitudeInfo.callId, amplitudeInfo, this.streamHoldersById)
         }
         streamHolder.setSpeaking(amplitudeInfo.descriptor.isSpeaking);
@@ -986,6 +981,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
       } else if (this.role === Role.Moderator) {
         // Nothing to do here ?, the application on Default Role side shall leave and destroy conversation
         if (data.contact) {
+          // TODO
           // Remove Eject button for the user
           //
           //this.contactHoldersById.delete(data.contact.getId());
@@ -1040,9 +1036,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
         console.info('Conversation left');
         this.joined = false;
         this.joinInPrgs = false;
-        // do not destroy otherwise you cannot join back !
-        // this.conversation.destroy();
-        // this.conversation = null;
+        // do not call conversation.destroy() here otherwise you cannot join back !
       })
       .catch((err: any) => {
         console.error('Conversation leave error', err);
