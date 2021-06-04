@@ -41,7 +41,7 @@ video {
     content: '';
     width: 80%;
     height: 220%;
-    background: rgba(105, 235, 53, 0.7);
+    background: rgba(53, 235, 181, 0.7);
     top: -50%;
     left: -100%;
     z-index: 1;
@@ -65,7 +65,7 @@ video {
     position: absolute;
     top: -100%;
     color: #fff;
-    z-index: 2;
+    z-index: 3;
     transition: 1.1s;
 }
 
@@ -79,4 +79,5 @@ video {
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 2;
 }

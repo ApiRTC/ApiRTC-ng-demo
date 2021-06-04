@@ -806,15 +806,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
           console.log("typeof streamInfo.contact.getId()", typeof streamInfo.contact.getId());
           contactHolder.addStream(streamHolder);
 
-          console.log('subscribeToStream', streamId);
-          // TODO : some options may be specified to subscribe to a stream
-          // demonstrate them here ?
-          this.conversation.subscribeToStream(streamId)
-            .then((stream: any) => {
-              console.log('subscribeToStream success:', stream);
-            }).catch((err: any) => {
-              console.error('subscribeToStream error', err);
-            });
         } else if (streamInfo.listEventType === 'removed') {
           console.log('remote stream removed', streamId);
 

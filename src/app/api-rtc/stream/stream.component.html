@@ -2,94 +2,92 @@
     <div id="{{streamHolder.id}}" class="embed-responsive embed-responsive-4by3">
         <app-stream-video *ngIf="streamHolder.stream" [stream]="streamHolder.stream" [mirror]="mirrorVideoFc.value">
         </app-stream-video>
-        <div class="mycard-text">
-            <div *ngIf="withDevicesControl">
-                <form class="row row-cols-lg-auto g-3 align-items-center">
-                    <div class="col-12">
-                        <div class=row>
-                            <div class="col">
-                                <mat-slide-toggle [formControl]="muteVideoFc">
-                                    Mute Video
-                                </mat-slide-toggle>
-                                <br>
-                                <mat-slide-toggle [formControl]="mirrorVideoFc">
-                                    Mirror Video
-                                </mat-slide-toggle>
-                            </div>
-                            <div class="col">
-                                <mat-slide-toggle [formControl]="muteAudioFc">
-                                    Mute Audio
-                                </mat-slide-toggle>
-                            </div>
+    </div>
+    <div class="mycard-text" *ngIf="streamHolder.stream">
+        <div *ngIf="withDevicesControl">
+            <form class="row row-cols-lg-auto g-3 align-items-center">
+                <div class="col-12">
+                    <div class=row>
+                        <div class="col">
+                            <mat-slide-toggle [formControl]="muteVideoFc">
+                                Mute Video
+                            </mat-slide-toggle>
+                            <br>
+                            <mat-slide-toggle [formControl]="mirrorVideoFc">
+                                Mirror Video
+                            </mat-slide-toggle>
                         </div>
-                        <div class=row>
-                            <div class="col">
-                                <mat-form-field appearance="fill">
-                                    <mat-label>VideoIn</mat-label>
-                                    <mat-select [formControl]="videoFc">
-                                        <mat-option *ngFor="let device of _videoDevices" [value]="device">
-                                            {{device.label}}
-                                        </mat-option>
-                                    </mat-select>
-                                </mat-form-field>
-                            </div>
-                            <div class="col">
-                                <mat-form-field appearance="fill">
-                                    <mat-label>AudioIn</mat-label>
-                                    <mat-select [formControl]="audioInFc">
-                                        <mat-option *ngFor="let device of _audioInDevices" [value]="device">
-                                            {{device.label}}
-                                        </mat-option>
-                                    </mat-select>
-                                </mat-form-field>
-                            </div>
-                        </div>
-                        <div class=row>
-                            <div class="col">
-                                <mat-form-field appearance="fill">
-                                    <mat-label>Background</mat-label>
-                                    <mat-select [formControl]="backgroundFc">
-                                        <mat-option *ngFor="let background of backgrounds" [value]="background.value">
-                                            {{background.viewValue}}
-                                        </mat-option>
-                                    </mat-select>
-                                </mat-form-field>
-                                <input *ngIf="backgroundFc.value==='image'" type="file" (change)="chooseImage($event)" />
-                                <br>
-                                <mat-form-field *ngIf="streamHolder.videoQualityOptions.length>0" appearance="fill">
-                                    <mat-label>VideoQuality</mat-label>
-                                    <mat-select [formControl]="videoQualityFc">
-                                        <mat-option *ngFor="let videoQuality of streamHolder.videoQualityOptions" [value]="videoQuality">
-                                            {{videoQuality.name}} : {{videoQuality.width}}x{{videoQuality.height}}
-                                        </mat-option>
-                                    </mat-select>
-                                </mat-form-field>
-                            </div>
+                        <div class="col">
+                            <mat-slide-toggle [formControl]="muteAudioFc">
+                                Mute Audio
+                            </mat-slide-toggle>
                         </div>
                     </div>
-                </form>
-            </div>
-
-            <app-audio-stats [stats]="streamHolder.qosStat?.audio"></app-audio-stats>
-            <app-video-stats [stats]="streamHolder.qosStat?.video"></app-video-stats>
-
+                    <div class=row>
+                        <div class="col">
+                            <mat-form-field appearance="fill">
+                                <mat-label>VideoIn</mat-label>
+                                <mat-select [formControl]="videoFc">
+                                    <mat-option *ngFor="let device of _videoDevices" [value]="device">
+                                        {{device.label}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        <div class="col">
+                            <mat-form-field appearance="fill">
+                                <mat-label>AudioIn</mat-label>
+                                <mat-select [formControl]="audioInFc">
+                                    <mat-option *ngFor="let device of _audioInDevices" [value]="device">
+                                        {{device.label}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div class=row>
+                        <div class="col">
+                            <mat-form-field appearance="fill">
+                                <mat-label>Background</mat-label>
+                                <mat-select [formControl]="backgroundFc">
+                                    <mat-option *ngFor="let background of backgrounds" [value]="background.value">
+                                        {{background.viewValue}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <input *ngIf="backgroundFc.value==='image'" type="file" (change)="chooseImage($event)" />
+                            <br>
+                            <mat-form-field *ngIf="streamHolder.videoQualityOptions.length>0" appearance="fill">
+                                <mat-label>VideoQuality</mat-label>
+                                <mat-select [formControl]="videoQualityFc">
+                                    <mat-option *ngFor="let videoQuality of streamHolder.videoQualityOptions" [value]="videoQuality">
+                                        {{videoQuality.name}} : {{videoQuality.width}}x{{videoQuality.height}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <app-audio-stats [stats]="streamHolder.qosStat?.audio"></app-audio-stats>
+        <app-video-stats [stats]="streamHolder.qosStat?.video"></app-video-stats>
+    </div>
+    <div class="mycard-over">
+        <p>
+            <span class="badge badge-info">streamId:{{streamHolder.id}}</span>
             <button *ngIf="withSubscription" mat-raised-button color="primary" (click)="toggleSubscribe()">{{streamHolder.stream?'Unsubscribe':'Subscribe'}}</button>
-        </div>
-        <div class="mycard-over">
-            <p>
-                <span class="badge badge-info">streamId:{{streamHolder.id}}</span>
-            </p>
-            <p *ngIf="streamHolder.isSpeaking">
-                <span class="badge badge-success">
-                    <mat-icon matSuffix>record_voice_over
-                    </mat-icon>
-                </span>
-            </p>
-        </div>
-        <!-- <div>
+        </p>
+        <p *ngIf="streamHolder.isSpeaking">
+            <span class="badge badge-success">
+                <mat-icon matSuffix>record_voice_over
+                </mat-icon>
+            </span>
+        </p>
+    </div>
+    <!-- <div>
             <p *ngIf="streamHolder.capabilities">capabilities = {{streamHolder.capabilities | json}}</p>
             <p *ngIf="streamHolder.constraints">constraints = {{streamHolder.constraints | json}}</p>
             <p *ngIf="streamHolder.settings">settings = {{streamHolder.constraints | json}}</p>
         </div> -->
-    </div>
 </div>

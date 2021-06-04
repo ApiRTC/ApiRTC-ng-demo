@@ -11,6 +11,8 @@ export class ContactDecorator {
     public username: string;
     public nickname: string;
 
+    public subscribableStreams: Array<any> = new Array();
+
     private contact: any;
 
     private readonly streamHoldersById: Map<string, StreamDecorator> = new Map();
