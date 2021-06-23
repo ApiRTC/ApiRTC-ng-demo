@@ -5,3 +5,7 @@
     -moz-transform: rotateY(180deg);
     /* Firefox */
 }
+
+.fullscreen {
+    width: 100vw;
+}

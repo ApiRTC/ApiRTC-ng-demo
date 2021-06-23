@@ -32,7 +32,7 @@ export class MessageDecorator {
         return new MessageDecorator(message);
     }
 
-    public static buildWithoutMessage(nickname: string, content: string): MessageDecorator {
+    public static buildLocalMessage(nickname: string, content: string): MessageDecorator {
         return new MessageDecorator(null, nickname, content);
     }
 

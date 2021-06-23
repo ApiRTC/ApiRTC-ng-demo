@@ -39,8 +39,7 @@
                         </mat-error>
                     </mat-form-field>
                     &nbsp;
-                    <button mat-raised-button color="primary" (click)="createUserAgentWithUsername()" [disabled]="userAgent" title="Create UserAgent">new UserAgent&nbsp;<em
-                            class="bi bi-file-earmark-plus"></em></button>
+                    <button mat-raised-button color="primary" (click)="createUserAgentWithUsername()" [disabled]="userAgent" title="Create UserAgent">new UserAgent&nbsp;<em class="bi bi-file-earmark-plus"></em></button>
                 </div>
             </div>
         </div>
@@ -49,8 +48,7 @@
             <div class="col">
                 <div *ngIf="userAgent" class="alert alert-success clearfix" role="alert"><code>UserAgent</code> created.
                     <span class="float-right"><button mat-raised-button color="warn" (click)="nullifyUserAgent()"
-                            [disabled]="session" title="Set to null"><em
-                                class="bi bi-trash"></em>&nbsp;Trash</button></span>
+                            [disabled]="session" title="Set to null"><em class="bi bi-trash"></em>&nbsp;Trash</button></span>
                 </div>
             </div>
         </div>
@@ -166,8 +164,7 @@
                         <p>Or create a <code>Conference</code> (a private conversation, with moderation capabilities)
                         </p>
                         <div class="text-center">
-                            <button mat-raised-button color="primary" type="button" (click)="createConference()" [disabled]="!session||createConferenceInPrgs||conversation||(userAgentAuthType !== userAgentAuthTypeEnum.CloudApiRTC)" title="Create Conference">CreateConference&nbsp;<em
-                                    class="bi bi-telephone-forward-fill"></em>
+                            <button mat-raised-button color="primary" type="button" (click)="createConference()" [disabled]="!session||createConferenceInPrgs||conversation||(userAgentAuthType !== userAgentAuthTypeEnum.CloudApiRTC)" title="Create Conference">CreateConference&nbsp;<em class="bi bi-telephone-forward-fill"></em>
                                 <mat-icon *ngIf="createConferenceInPrgs">
                                     <mat-spinner [diameter]="16"></mat-spinner>
                                 </mat-icon>
@@ -253,7 +250,16 @@
                     <ng-template #elseBlock_Alone>No one joined yet.</ng-template>
                 </div>
             </div>
-
+        </div>
+        <div class="row">
+            <div class="col">
+                <p class="alert alert-info" role="alert" *ngFor="let kv of joinRequestsById | keyvalue">
+                    <button mat-raised-button color="primary" (click)="acceptJoinRequest(kv.value)" title="Accept">{{kv.value.id}}-{{kv.value.sender.getUsername()}}&nbsp;<em
+                            class="bi bi-person-check"></em></button>
+                    <button mat-raised-button color="warn" (click)="declineJoinRequest(kv.value)" title="Decline"><em
+                            class="bi bi-person-x"></em></button>
+                </p>
+            </div>
         </div>
     </div>
 
@@ -272,8 +278,7 @@
                         <mat-label>Message</mat-label>
                         <input type="text" matInput placeholder="abcd" formControlName="message">
                     </mat-form-field>&nbsp;
-                    <button mat-raised-button color="primary" type="submit" [disabled]="!messageFormGroup.valid||!joined" title="Send Message">Send&nbsp;<em
-                            class="bi bi-chat-left"></em></button>
+                    <button mat-raised-button color="primary" type="submit" [disabled]="!messageFormGroup.valid||!joined" title="Send Message">Send&nbsp;<em class="bi bi-chat-left"></em></button>
                 </form>
             </div>
             <div class="col">
@@ -292,8 +297,9 @@
             <div class="col">
                 <div class="alert alert-success clearfix">
                     <h3>List of <code>Message</code>s in this conversation :</h3>
-                    <div *ngFor="let message of messages">
-                        <span><strong>{{message.nickname}}</strong> : <span [innerHTML]="message.content"></span></span>
+                    <div *ngFor="let message of messages" [ngClass]="{'float-right': !message.message}">
+                        <span><strong>{{message.nickname}}</strong>
+                            : <span [innerHTML]="message.content"></span></span>
                     </div>
                 </div>
             </div>
@@ -368,16 +374,6 @@
                 </p>
                 <p class="alert alert-info" role="alert" *ngIf="contactHoldersById.size===0">
                     Open this webapp in another tab, using link at <strong>3.</strong>, to simulate a peer.
-                </p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <p class="alert alert-info" role="alert" *ngFor="let kv of joinRequestsById | keyvalue">
-                    <button mat-raised-button color="primary" (click)="acceptJoinRequest(kv.value)" title="Accept">{{kv.value.sender.getUsername()}}&nbsp;<em
-                            class="bi bi-person-check"></em></button>
-                    <button mat-raised-button color="warn" (click)="declineJoinRequest(kv.value)" title="Decline"><em
-                            class="bi bi-person-x"></em></button>
                 </p>
             </div>
         </div>

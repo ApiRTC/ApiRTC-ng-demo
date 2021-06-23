@@ -193,13 +193,11 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Handle conversation name and url from RESTFUL path
+    // Get conversation name and base url from current path (pattern : "/path/to/<conversationName>")
     //
     const conversationName = this.activatedRoute.snapshot.paramMap.get("name");
     if (conversationName) {
       this.conversationNameFc.setValue(conversationName);
-      // Recreate remove conversationName from current location url :
-      // use pathname that looks like "/path/to/conversationName"
       const path = `${this.window.location.pathname}`.split('/');
       // remove last element which is the conversationName
       path.pop();
@@ -213,9 +211,11 @@ export class ConversationComponent implements OnInit, OnDestroy {
       this.conversationBaseUrl = `${this.window.location.href}`;
     }
 
+    // Build conversation links
+    //
     this.buildConversationUrls();
 
-    // Rebuild conversation url when its inputs change
+    // Rebuild conversation links when inputs change
     //
     this.conversationNameFc.valueChanges.subscribe(value => {
       this.buildConversationUrls();
@@ -224,9 +224,10 @@ export class ConversationComponent implements OnInit, OnDestroy {
       this.buildConversationUrls();
     });
 
-    // Handle apiKey, if provided as query parameter
+    // Handle query parameters
     //
     this.activatedRoute.queryParams.subscribe(params => {
+      // Get apiKey (if provided)
       if (params['apiKey']) {
         this.apiKeyFc.setValue(params['apiKey']);
       }
@@ -281,12 +282,10 @@ export class ConversationComponent implements OnInit, OnDestroy {
   /***************************************************************************
   * ApiRTC UserAgent
   * 
-  * This is the main entry to ApiRTC : create first a UserAgent, providing your apiKey, or username from a user managed by apiRTC.com
+  * This is the main entry to ApiRTC
   */
 
   createUserAgent() {
-    // 
-    //
     this.userAgent = new apiRTC.UserAgent({
       // format is like 'apzKey:<APIKEY>'
       uri: 'apzkey:' + this.apiKeyFc.value
@@ -298,8 +297,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
 
   createUserAgentWithUsername() {
-    // This is the main entry to ApiRTC : create first a UserAgent, providing your apiKey.
-    //
     this.userAgent = new apiRTC.UserAgent({
       // format is like 'apizee:<USERNAME>'
       uri: 'apizee:' + this.usernameFc.value
@@ -324,19 +321,14 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
     // Media device selection handling
     //
-    //const mediaDevices = this.userAgent.getUserMediaDevices();
-    //console.log(JSON.stringify(mediaDevices));
-    // TODO : understand why always empty:
-    // displays {"audioinput":{},"audiooutput":{},"videoinput":{}}
-    // Seems working only inside on:mediaDeviceChanged block :
-    this.userAgent.on("mediaDeviceChanged", updatedContacts => {
+    this.userAgent.on("mediaDeviceChanged", () => {
       const mediaDevices = this.userAgent.getUserMediaDevices();
       console.log("mediaDeviceChanged", JSON.stringify(mediaDevices));
       this.doUpdateMediaDevices(mediaDevices);
     });
 
     this.nicknameFc.valueChanges.subscribe((selectedValue) => {
-      console.log("name valueChanges:", selectedValue);
+      console.log("nicknameFc valueChanges:", selectedValue);
       // go through UserData to pass username to peers (do not use username for that purpose)
       this.userAgent.getUserData().setProp(PROPERTY_NICKNAME, selectedValue);
       // TODO : request to fixthis ?
@@ -492,7 +484,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
       this.doListenSessionEvents();
       this.registrationError = null;
-    }).catch(error => {
+    }).catch((error: any) => {
       console.log("Registration error", error);
       this.registerInPrgs = false;
       this.registrationError = error;
@@ -650,7 +642,13 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
     // Create the conversation
     //
-    // TODO handle differently the isPrivate from request parameters and the one set by choice locally...
+
+    // TODO: Raise a Bug here : we should not have to make a different call to getOrCreateConversation depending
+    // on the fact it is private or not, because in case we are a 'get' we shall not know wether the conversation
+    // is private (a conference).
+    // TODO: handle differently the isPrivate from request parameters and the one set by choice locally. Because in the end
+    // we should not need to know this information from the url, we should not know this information at all...
+    // I was forced to implement this trick (passing the private=true in url) because ApiRTC api forces to call getOrcreateConversation differently
     if (this.isPrivate) {
       // WARN getConference is deprecated ! shall I finally be able to have same function for both getOrcreateConversation and createConference ?
       // just making the name different ?
@@ -665,6 +663,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
     } else {
       this.conversation = this.session.getOrCreateConversation(this.conversationNameFc.value);
     }
+
 
     // force Urls build
     this.buildConversationUrls();
@@ -686,8 +685,14 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
     this.createConferenceInPrgs = true;
 
-    // TODO test with session.getOrCreateConversation with a special name name:apiKey
-    enterprise.createPrivateConference().then((conference: any) => {
+    //PrivateConferenceCreationOptions
+    const options = {
+      // TODO : check what it does because this does not seem to set the Conversation.name
+      // doc says : friendlyName 	string optional: friendly name for this conference to display in Apizee cloud
+      friendlyName: this.conversationNameFc.value
+    }
+
+    enterprise.createPrivateConference(options).then((conference: any) => {
 
       console.log("Conference", conference);
       console.log("Conference name", conference.getName());
@@ -697,13 +702,12 @@ export class ConversationComponent implements OnInit, OnDestroy {
       // A Conference is actually a Conversation but with moderation capabilities
       //
       this.conversation = conference;
-
-      this.role = Role.Moderator;
-
       this.isPrivate = true;
 
-      // in this case join is done automatically
+      // When creating a Conference, the UserAgent is automatically joint
       this.joined = true;
+      // When creating a Conference, the UserAgent is a moderator
+      this.role = Role.Moderator;
 
       this.createConferenceInPrgs = false;
 
@@ -1119,9 +1123,9 @@ export class ConversationComponent implements OnInit, OnDestroy {
   doSendMessage(messageContent: string) {
     this.conversation.sendMessage(messageContent).then((uuid: string) => {
       console.log("sendMessage", uuid, messageContent);
-      this.messages.push(MessageDecorator.buildWithoutMessage(this.userAgent.getUserData().get(PROPERTY_NICKNAME), messageContent));
+      this.messages.push(MessageDecorator.buildLocalMessage(this.userAgent.getUserData().get(PROPERTY_NICKNAME), messageContent));
     })
-      .catch(err => { console.error('sendMessage error', err); });
+      .catch((error: any) => { console.error('sendMessage error', error); });
   }
 
   /***************************************************************************
