@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -42,6 +43,7 @@ import { StreamVideoComponent } from './stream-video/stream-video.component';
     MatFormFieldModule, MatInputModule, MatIconModule, MatButtonModule,
     MatListModule, MatSlideToggleModule, MatSelectModule, MatChipsModule,
     MatProgressBarModule, MatProgressSpinnerModule, MatDividerModule,
+    MatCheckboxModule,
 
     ClipboardModule,
 

@@ -72,10 +72,12 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   nicknameFc: FormControl = new FormControl({ value: DEFAULT_NICKNAME, disabled: true });
 
+  userAgentFormGroup = this.fb.group({
+    meshRoomMode: this.fb.control(false)
+  });
   conversationFormGroup = this.fb.group({
     name: this.fb.control('', [Validators.required])
   });
-
   messageFormGroup = this.fb.group({
     message: this.fb.control('', [Validators.required])
   });
@@ -156,6 +158,10 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   // Convenient FormControl getters
   //
+  get meshRoomModeFc(): FormControl {
+    return this.userAgentFormGroup.get('meshRoomMode') as FormControl;
+  }
+
   get conversationNameFc(): FormControl {
     return this.conversationFormGroup.get('name') as FormControl;
   }
@@ -336,6 +342,19 @@ export class ConversationComponent implements OnInit, OnDestroy {
       if (this.session) {
         this.userAgent.getUserData().setToSession();
       }
+    });
+
+    this.meshRoomModeFc.valueChanges.subscribe(value => {
+      console.log("enableMeshRoomMode", value);
+      this.userAgent.enableMeshRoomMode(value);
+      // TODO :
+      // Thomas L. : pour passer de mesh à SFU 
+      // (note : que les ressources API sont nommées *MCU*)
+      // console :
+      // apiCC.session.apiCCWebRTCClient.webRTCClient.MCUClient.sessionMCUs
+      // apiCC.session.apiCCWebRTCClient.webRTCClient.MCUClient.enforceMCU()
+      // TO BE TESTED
+      // from firefox/chrome, url about:webrtc pour voir les activités webrtc, ICE stats Remote Candidate check IP 94.23.45.109 is one of our SFU
     });
   }
 

@@ -52,6 +52,13 @@
                 </div>
             </div>
         </div>
+        <div class="row" *ngIf="userAgent">
+            <div class="col">
+                <form [formGroup]="userAgentFormGroup">
+                    <mat-checkbox formControlName="meshRoomMode">meshRoomMode</mat-checkbox>
+                </form>
+            </div>
+        </div>
     </div>
 
     <hr>
