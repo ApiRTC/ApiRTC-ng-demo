@@ -170,8 +170,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
     return this.messageFormGroup.get('message') as FormControl;
   }
 
-  // Constructor
-  //
   constructor(@Inject(WINDOW) public window: Window,
     private activatedRoute: ActivatedRoute,
     private authServerService: AuthServerService,
@@ -247,7 +245,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.doDestroy();
   }
 
-  /***************************************************************************/
+  // --------------------------------------------------------------------------
+  // 
 
   _isPrivate: boolean = false;
   get isPrivate(): boolean {
@@ -285,11 +284,11 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.destroyConversation();
   }
 
-  /***************************************************************************
-  * ApiRTC UserAgent
-  * 
-  * This is the main entry to ApiRTC
-  */
+  // --------------------------------------------------------------------------
+  // ApiRTC UserAgent
+  // 
+  // This is the main entry to ApiRTC
+  //
 
   createUserAgent() {
     this.userAgent = new apiRTC.UserAgent({
@@ -368,11 +367,12 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.userAgentCreationType = null;
   }
 
-  /***************************************************************************
-  * ApiRTC authentication and registration
-  *
-  * In order to access 'connected' features of ApiRTC, a session to ApiRTC's servers has to be obtained through register
-  */
+  // --------------------------------------------------------------------------
+  // Authentication and registration
+  //
+  // In order to access 'connected' features of ApiRTC, a session to ApiRTC's servers has to be obtained through register
+  //
+
   registerWithoutAuth() {
     this.registrationError = null;
     this.registerInPrgs = true;
@@ -567,9 +567,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
     })
   }
 
-  /***************************************************************************
-  * Handle Media device change
-  */
+  // --------------------------------------------------------------------------
+  // Handle Media device change
 
   doUpdateMediaDevices(mediaDevices: any): void {
     // Convert map values to array
@@ -646,16 +645,13 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
 
   setCapabilitiesOfLocalStream() {
-
     this.localStreamHolder.getStream().setCapabilities().then(() => {
       // if local stream was published consider we should publish changed one
-    })
-      .catch(err => { console.error('createStream error', err); });
+    }).catch(err => { console.error('createStream error', err); });
   }
 
-  /***************************************************************************
-  * ApiRTC Conversation & Conference
-  */
+  // --------------------------------------------------------------------------
+  // Conversation & Conference
 
   getOrcreateConversation(): void {
 
@@ -770,32 +766,29 @@ export class ConversationComponent implements OnInit, OnDestroy {
     });
   }
 
-  acceptJoinRequest(request: any) {
-    request.accept()
-      .then(() => {
-        console.log('Join request accepted');
-        this.doRemoveJoinRequest(request);
-      })
-      .catch((err) => {
-        console.error('Request accept error', err);
-      });
+  destroyConversation(): void {
+    console.info('Destroy conversation');
+    if (this.conversation) {
+      if (this.joined) {
+        this.conversation.leave()
+          .then(() => {
+            this.joined = false;
+            this.conversation.destroy();
+            this.conversation = null;
+            this.joinRequestsById.clear();
+          })
+          .catch(err => { console.error('Conversation leave error', err); });
+      }
+      else {
+        this.conversation.destroy();
+        this.conversation = null;
+        this.joinRequestsById.clear();
+      }
+    }
   }
 
-  declineJoinRequest(request: any) {
-    request.decline()
-      .then(() => {
-        console.log('Join request declined');
-        this.doRemoveJoinRequest(request);
-      })
-      .catch((err) => {
-        console.error('Request decline error', err);
-      });
-  }
-
-  doRemoveJoinRequest(request: any) {
-    this.joinRequestsById.delete(request.getId());
-  }
-
+  // --------------------------------------------------------------------------
+  // Event listeners
 
   doListenToStreamListChanged() {
 
@@ -1036,6 +1029,9 @@ export class ConversationComponent implements OnInit, OnDestroy {
     }
   }
 
+  // --------------------------------------------------------------------------
+  // Conversation Join/Leave
+
   join(): void {
     this.joinError = null;
     this.joinInPrgs = true;
@@ -1073,30 +1069,34 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.conversation.eject(contactHolder.getContact());
   }
 
-  destroyConversation(): void {
-    console.info('Destroy conversation');
-    if (this.conversation) {
-      if (this.joined) {
-        this.conversation.leave()
-          .then(() => {
-            this.joined = false;
-            this.conversation.destroy();
-            this.conversation = null;
-            this.joinRequestsById.clear();
-          })
-          .catch(err => { console.error('Conversation leave error', err); });
-      }
-      else {
-        this.conversation.destroy();
-        this.conversation = null;
-        this.joinRequestsById.clear();
-      }
-    }
+  acceptJoinRequest(request: any) {
+    request.accept()
+      .then(() => {
+        console.log('Join request accepted');
+        this.doRemoveJoinRequest(request);
+      })
+      .catch((err) => {
+        console.error('Request accept error', err);
+      });
   }
 
-  /***************************************************************************
-  * ApiRTC Conversation Recording
-  */
+  declineJoinRequest(request: any) {
+    request.decline()
+      .then(() => {
+        console.log('Join request declined');
+        this.doRemoveJoinRequest(request);
+      })
+      .catch((err) => {
+        console.error('Request decline error', err);
+      });
+  }
+
+  doRemoveJoinRequest(request: any) {
+    this.joinRequestsById.delete(request.getId());
+  }
+
+  // --------------------------------------------------------------------------
+  // Conversation Recording
 
   toggleRecording() {
     this.recordingError = null;
@@ -1128,9 +1128,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
     }
   }
 
-  /***************************************************************************
-  * ApiRTC messages
-  */
+  // --------------------------------------------------------------------------
+  // Chat messages
 
   sendMessage() {
     const message = this.messageFc.value;
@@ -1147,9 +1146,9 @@ export class ConversationComponent implements OnInit, OnDestroy {
       .catch((error: any) => { console.error('sendMessage error', error); });
   }
 
-  /***************************************************************************
-  * Send Files
-  */
+  // --------------------------------------------------------------------------
+  // Send Files
+
   selectedFile: File;
   selectFile(event: any): void {
     const file: File | null = event.target.files.item(0);
@@ -1168,9 +1167,9 @@ export class ConversationComponent implements OnInit, OnDestroy {
       });
   }
 
-  /***************************************************************************
-  * ApiRTC Streams
-  */
+  // --------------------------------------------------------------------------
+  // Streams
+
 
   // if options are specified, this is because a specific device was selected
   createStream(options?: any): Promise<Object> {
@@ -1229,9 +1228,16 @@ export class ConversationComponent implements OnInit, OnDestroy {
   subscribeOrUnsubscribeToStream(event: StreamSubscribeEvent) {
     console.log("subscribeOrUnsubscribeToStream", event);
     if (event.doSubscribe === true) {
-      // TODO : some options may be specified to subscribe to a stream
-      // demonstrate them here ?
-      this.conversation.subscribeToStream(event.streamHolder.getId()).then((stream: any) => {
+      // SubscribeOptions
+      // audioOnly 	Boolean : true if publish is to be done in audio only. Video is used by default
+      // videoOnly 	Boolean : true if publish is to be done in video only. Video is used by default, audioOnly parameter is used in priority.
+      // turnServerAddress 	String 	 This enables to change the turn server used for the call
+      // qos Object QoS preferences.
+      // qos.videoForbidInactive 	Boolean Forbids video disabling.
+      const subscribeOptions = {
+        audioOnly: false // true
+      };
+      this.conversation.subscribeToStream(event.streamHolder.getId(), subscribeOptions).then((stream: any) => {
         console.log('subscribeToStream success', stream);
       }).catch((err: any) => {
         console.error('subscribeToStream error', err);
@@ -1272,9 +1278,71 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.localStreamHolder.setPublished(false);
   }
 
-  /***************************************************************************
-  * ApiRTC screen sharing
-  */
+  // --------------------------------------------------------------------------
+  // Stream from video file
+
+  createVideoStream(event: any) {
+    // To create a MediaStream from a video file, go through a 'video' DOM element
+    //
+
+    // Get file the user selected
+    const file: File | null = event.target.files.item(0);
+
+    // Prepare the 'loadeddata' event that will actually create Stream instance
+    const videoElement = this.fileVideoRef.nativeElement;
+    videoElement.onloadeddata = () => {
+      // Note that video handling should be applied after data loaded
+      const mediaStream = (apiRTC.browser === 'Firefox') ? videoElement.mozCaptureStream() : videoElement.captureStream();
+      apiRTC.Stream.createStreamFromMediaStream(mediaStream)
+        .then((stream: any) => {
+          const streamInfo = { streamId: String(stream.getId()), isRemote: false, type: 'regular' };
+          this.videoStreamHolder = StreamDecorator.build(streamInfo);
+          this.videoStreamHolder.setStream(stream);
+          console.info('createVideoStream()::createStreamFromMediaStream', stream);
+        })
+        .catch((err: any) => {
+          console.error('createVideoStream()::createStreamFromMediaStream', err);
+        });
+      // free memory
+      URL.revokeObjectURL(videoElement.src);
+    };
+
+    // Read from file to 'video' DOM element
+    const reader = new FileReader();
+    reader.onloadend = (e) => {
+      const buffer: ArrayBuffer = e.target.result as ArrayBuffer;
+      const videoBlob = new Blob([new Uint8Array(buffer)], { type: 'video/mp4' });
+      const url = window.URL.createObjectURL(videoBlob);
+      videoElement.src = url;
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  togglePublishVideoStream() {
+    console.info('togglePublishVideoStream()', this.videoStreamHolder);
+    if (this.videoStreamHolder.isPublished()) {
+      this.unpublishVideoStream();
+    } else {
+      this.conversation.publish(this.videoStreamHolder.getStream()).then((stream: any) => {
+        this.videoStreamHolder.setPublished(true);
+      }).catch(err => {
+        console.error('togglePublishVideoStream()::publish', err);
+      });
+    }
+  }
+
+  unpublishVideoStream() {
+    this.conversation.unpublish(this.videoStreamHolder.getStream());
+    this.videoStreamHolder.setPublished(false);
+  }
+
+  releaseVideoStream() {
+    this.videoStreamHolder.getStream().release();
+    this.videoStreamHolder = null;
+  }
+
+  // --------------------------------------------------------------------------
+  // Screen sharing
 
   toggleScreenSharing(): void {
 
@@ -1336,69 +1404,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.screenSharingStreamHolder = null;
   }
 
-  /***************************************************************************
-  * Create video Stream from file
-  */
-
-  createVideoStream(event: any) {
-    // To create a MediaStream from a video file, go through a 'video' DOM element
-    //
-
-    // Get file the user selected
-    const file: File | null = event.target.files.item(0);
-
-    // Prepare the 'loadeddata' event that will actually create Stream instance
-    const videoElement = this.fileVideoRef.nativeElement;
-    videoElement.onloadeddata = () => {
-      // Note that video handling should be applied after data loaded
-      const mediaStream = (apiRTC.browser === 'Firefox') ? videoElement.mozCaptureStream() : videoElement.captureStream();
-      apiRTC.Stream.createStreamFromMediaStream(mediaStream)
-        .then((stream: any) => {
-          const streamInfo = { streamId: String(stream.getId()), isRemote: false, type: 'regular' };
-          this.videoStreamHolder = StreamDecorator.build(streamInfo);
-          this.videoStreamHolder.setStream(stream);
-          console.info('createVideoStream()::createStreamFromMediaStream', stream);
-        })
-        .catch((err: any) => {
-          console.error('createVideoStream()::createStreamFromMediaStream', err);
-        });
-      // free memory
-      URL.revokeObjectURL(videoElement.src);
-    };
-
-    // Read from file to 'video' DOM element
-    const reader = new FileReader();
-    reader.onloadend = (e) => {
-      const buffer: ArrayBuffer = e.target.result as ArrayBuffer;
-      const videoBlob = new Blob([new Uint8Array(buffer)], { type: 'video/mp4' });
-      const url = window.URL.createObjectURL(videoBlob);
-      videoElement.src = url;
-    };
-    reader.readAsArrayBuffer(file);
-  }
-
-  togglePublishVideoStream() {
-    console.info('togglePublishVideoStream()', this.videoStreamHolder);
-    if (this.videoStreamHolder.isPublished()) {
-      this.unpublishVideoStream();
-    } else {
-      this.conversation.publish(this.videoStreamHolder.getStream()).then((stream: any) => {
-        this.videoStreamHolder.setPublished(true);
-      }).catch(err => {
-        console.error('togglePublishVideoStream()::publish', err);
-      });
-    }
-  }
-
-  unpublishVideoStream() {
-    this.conversation.unpublish(this.videoStreamHolder.getStream());
-    this.videoStreamHolder.setPublished(false);
-  }
-
-  releaseVideoStream() {
-    this.videoStreamHolder.getStream().release();
-    this.videoStreamHolder = null;
-  }
+  // --------------------------------------------------------------------------
+  // Bluetooth
 
   bluetooth: any = null;
   bluetoothDevice: any = null;
