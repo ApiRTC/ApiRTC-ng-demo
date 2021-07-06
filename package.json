@@ -8,7 +8,7 @@
         "test": "ng test",
         "lint": "ng lint",
         "e2e": "ng e2e",
-	"sonar": "sonar-scanner"
+        "sonar": "sonar-scanner"
     },
     "private": true,
     "dependencies": {
@@ -22,7 +22,7 @@
         "@angular/platform-browser": "~12.0.3",
         "@angular/platform-browser-dynamic": "~12.0.3",
         "@angular/router": "~12.0.3",
-        "@apizee/apirtc": "^4.4.11",
+        "@apizee/apirtc": "^4.5.0",
         "bootstrap": "^4.6.0",
         "bootstrap-icons": "^1.4.0",
         "jquery": "^3.6.0",

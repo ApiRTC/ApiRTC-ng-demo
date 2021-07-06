@@ -292,7 +292,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   createUserAgent() {
     this.userAgent = new apiRTC.UserAgent({
-      // format is like 'apzKey:<APIKEY>'
+      // format is like 'apzKey:<APIKEY>'  
       uri: 'apzkey:' + this.apiKeyFc.value
     });
 
@@ -376,6 +376,11 @@ export class ConversationComponent implements OnInit, OnDestroy {
   registerWithoutAuth() {
     this.registrationError = null;
     this.registerInPrgs = true;
+
+    //const options = { cloudUrl: "https://valid2.apizee.com" }
+    //const options = { ccs: "valid2-ccs.apizee.com" }
+    //console.log('options', options);
+    //this.userAgent.register(options).then((session: any) => {
     this.userAgent.register().then((session: any) => {
       this.session = session;
       console.log("Session:", session);
@@ -898,12 +903,11 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.conversation.on('callStatsUpdate', (callStats: any) => {
       console.log("on:callStatsUpdate:", callStats);
 
-      // Below line can be wrong because a the callId on a stream can change during Stream lifecycle
-      //const streamHolder: StreamDecorator = this.streamsByCallId[callStats.callId];
-
-      // TODO: waiting for a fix in apiRTC (to include streamId in callStats), workround here by using internal map Conversation#callIdToStreamId:
-      // FIXTHIS: once apiRTC bug https://apizee.atlassian.net/browse/APIRTC-873 is fixed, we can use callStats.streamId instead of erroneous callStats.callId
-      const streamId = String(this.conversation.callIdToStreamId.get(callStats.callId));
+      // DONE: waiting for a fix in apiRTC (to include streamId in callStats), workround here by using internal map Conversation#callIdToStreamId:
+      // once apiRTC bug https://apizee.atlassian.net/browse/APIRTC-873 is fixed, we can use callStats.streamId instead of erroneous callStats.callId
+      //const streamId = String(this.conversation.callIdToStreamId.get(callStats.callId));
+      // APIRTC-873 fixed :
+      const streamId = String(callStats.streamId);
 
       if (callStats.stats.videoReceived || callStats.stats.audioReceived) {
         // "received" media is from peer streams
@@ -944,20 +948,16 @@ export class ConversationComponent implements OnInit, OnDestroy {
     // For speaker detection
     //
     this.conversation.on('audioAmplitude', (amplitudeInfo: any) => {
-      //console.log("on:audioAmplitude", amplitudeInfo);
+      console.log("on:audioAmplitude", amplitudeInfo, this.localStreamHolder);
 
-      if (amplitudeInfo.callId !== null) {
-        // TODO :
-        // There is a problem here, it seems the amplitudeInfo.callId is actually a streamId
-        const streamHolder: StreamDecorator = this.streamHoldersById.get(amplitudeInfo.callId);
-        if (!streamHolder) {
-          // TODO : is this a bug ? even after having unsubscribed to a stream I still receive audioAmplitude events corresponding to it 
-          console.log("UNDEFINED ? amplitudeInfo.callId=" + amplitudeInfo.callId, amplitudeInfo, this.streamHoldersById)
-        }
-        streamHolder.setSpeaking(amplitudeInfo.descriptor.isSpeaking);
+      const streamId: string = String(amplitudeInfo.streamId);
+
+      if (this.localStreamHolder && this.localStreamHolder.id === streamId) {
+        this.localStreamHolder.setSpeaking(amplitudeInfo.descriptor.isSpeaking);
       } else {
-        if (this.localStreamHolder) { // I had to add this otherwise it crashed when localStream was released
-          this.localStreamHolder.setSpeaking(amplitudeInfo.descriptor.isSpeaking);
+        const streamHolder: StreamDecorator = this.streamHoldersById.get(streamId);
+        if (streamHolder) {
+          streamHolder.setSpeaking(amplitudeInfo.descriptor.isSpeaking);
         }
       }
     });
