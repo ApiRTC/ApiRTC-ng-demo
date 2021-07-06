@@ -393,7 +393,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
       this.doListenSessionEvents();
       this.registerInPrgs = false;
       this.registrationError = null;
-    }).catch(error => {
+    }).catch((error: any) => {
       console.log("ConversationComponent::register", error);
       this.registerInPrgs = false;
       this.registrationError = error;
@@ -646,13 +646,13 @@ export class ConversationComponent implements OnInit, OnDestroy {
           this.publishStream();
         }
       })
-      .catch(err => { console.error('createStream error', err); });
+      .catch((error: any) => { console.error('createStream error', error); });
   }
 
   setCapabilitiesOfLocalStream() {
     this.localStreamHolder.getStream().setCapabilities().then(() => {
       // if local stream was published consider we should publish changed one
-    }).catch(err => { console.error('createStream error', err); });
+    }).catch((error: any) => { console.error('createStream error', error); });
   }
 
   // --------------------------------------------------------------------------
@@ -672,13 +672,13 @@ export class ConversationComponent implements OnInit, OnDestroy {
     if (this.isPrivate) {
       // WARN getConference is deprecated ! shall I finally be able to have same function for both getOrcreateConversation and createConference ?
       // just making the name different ?
-      // Not realy because :
+      // Not really because :
       // this.conversation = this.session.getOrCreateConversation(this.conversationNameFc.value);
       // does not work, it actually creates another conversation.
-      // the folling works :
-      //this.conversation = this.session.getConference(this.conversationNameFc.value);
+      // the following works :
+      this.conversation = this.session.getConference(this.conversationNameFc.value);
       // and the following too :
-      this.conversation = this.session.getOrCreateConversation('Private:' + this.conversationNameFc.value);
+      // this.conversation = this.session.getOrCreateConversation('Private:' + this.conversationNameFc.value);
       // but this is not very cool...
     } else {
       this.conversation = this.session.getOrCreateConversation(this.conversationNameFc.value);
@@ -740,6 +740,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
         this.joinRequestsById.set(request.getId(), request);
       });
     }).catch((error: any) => {
+      console.error('createPrivateConference', error);
       this.createConferenceInPrgs = false;
     });
 
@@ -1040,10 +1041,10 @@ export class ConversationComponent implements OnInit, OnDestroy {
         console.info('Conversation joined', response);
         this.joined = true;
         this.joinInPrgs = false;
-      }).catch(err => {
-        console.error('Conversation join error', err);
+      }).catch((error: any) => {
+        console.error('Conversation join error', error);
         this.joinInPrgs = false;
-        this.joinError = err;
+        this.joinError = error;
       });
   }
 
@@ -1057,10 +1058,10 @@ export class ConversationComponent implements OnInit, OnDestroy {
         this.joinInPrgs = false;
         // do not call conversation.destroy() here otherwise you cannot join back !
       })
-      .catch((err: any) => {
-        console.error('Conversation leave error', err);
+      .catch((error: any) => {
+        console.error('Conversation leave error', error);
         this.joinInPrgs = false;
-        this.joinError = err;
+        this.joinError = error;
       });
   }
 
@@ -1075,8 +1076,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
         console.log('Join request accepted');
         this.doRemoveJoinRequest(request);
       })
-      .catch((err) => {
-        console.error('Request accept error', err);
+      .catch((error: any) => {
+        console.error('Request accept error', error);
       });
   }
 
@@ -1086,8 +1087,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
         console.log('Join request declined');
         this.doRemoveJoinRequest(request);
       })
-      .catch((err) => {
-        console.error('Request decline error', err);
+      .catch((error: any) => {
+        console.error('Request decline error', error);
       });
   }
 
@@ -1108,10 +1109,10 @@ export class ConversationComponent implements OnInit, OnDestroy {
           console.info('startRecording', recordingInfo);
 
         })
-        .catch((err: any) => {
-          console.error('startRecording', err);
-          console.error('startRecording', JSON.stringify({ message: err.error.message }));
-          this.recordingError = err;
+        .catch((error: any) => {
+          console.error('startRecording', error);
+          console.error('startRecording', JSON.stringify({ message: error.error.message }));
+          this.recordingError = error;
           this.recording = false;
         });
     }
@@ -1121,9 +1122,9 @@ export class ConversationComponent implements OnInit, OnDestroy {
           console.info('stopRecording', recordingInfo);
           this.recordingsByMediaId.set(recordingInfo.mediaId, new RecordingInfoDecorator(recordingInfo, false));
         })
-        .catch((err: any) => {
-          console.error('stopRecording', err);
-          this.recordingError = err;
+        .catch((error: any) => {
+          console.error('stopRecording', error);
+          this.recordingError = error;
         });
     }
   }
@@ -1162,8 +1163,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
         // Send file link message to the chat
         this.doSendMessage('New file uploaded: <a href="' + cloudMediaInfo.url + '" target="_blank"><b>OPEN FILE</b></a>');
       })
-      .catch((err) => {
-        console.log('File uploading error :', err);
+      .catch((error: any) => {
+        console.log('File uploading error :', error);
       });
   }
 
@@ -1204,9 +1205,9 @@ export class ConversationComponent implements OnInit, OnDestroy {
           this.localStreamHolder.setStream(stream);
 
           resolve(stream);
-        }).catch((err: any) => {
-          console.error('createStream error', err);
-          reject(err);
+        }).catch((error: any) => {
+          console.error('createStream error', error);
+          reject(error);
         });
     });
   }
@@ -1239,8 +1240,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
       };
       this.conversation.subscribeToStream(event.streamHolder.getId(), subscribeOptions).then((stream: any) => {
         console.log('subscribeToStream success', stream);
-      }).catch((err: any) => {
-        console.error('subscribeToStream error', err);
+      }).catch((error: any) => {
+        console.error('subscribeToStream error', error);
       });
     } else {
       this.conversation.unsubscribeToStream(event.streamHolder.getId());
@@ -1263,8 +1264,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
       console.log("publishStream() published", stream);
       this.localStreamHolder.setPublished(true);
       this.publishInPrgs = false;
-    }).catch((err: any) => {
-      console.error('publish error', err);
+    }).catch((error: any) => {
+      console.error('publish error', error);
       this.publishInPrgs = false;
     });
   }
@@ -1300,8 +1301,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
           this.videoStreamHolder.setStream(stream);
           console.info('createVideoStream()::createStreamFromMediaStream', stream);
         })
-        .catch((err: any) => {
-          console.error('createVideoStream()::createStreamFromMediaStream', err);
+        .catch((error: any) => {
+          console.error('createVideoStream()::createStreamFromMediaStream', error);
         });
       // free memory
       URL.revokeObjectURL(videoElement.src);
@@ -1325,8 +1326,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
     } else {
       this.conversation.publish(this.videoStreamHolder.getStream()).then((stream: any) => {
         this.videoStreamHolder.setPublished(true);
-      }).catch(err => {
-        console.error('togglePublishVideoStream()::publish', err);
+      }).catch((error: any) => {
+        console.error('togglePublishVideoStream()::publish', error);
       });
     }
   }
@@ -1381,12 +1382,12 @@ export class ConversationComponent implements OnInit, OnDestroy {
           this.conversation.publish(this.screenSharingStreamHolder.getStream()).then((l_stream: any) => {
             console.log("toggleScreenSharing() published", l_stream);
             this.screenSharingStreamHolder.setPublished(true);
-          }).catch((err: any) => {
-            console.error('toggleScreenSharing()::publish', err);
+          }).catch((error: any) => {
+            console.error('toggleScreenSharing()::publish', error);
           });
         })
-        .catch(function (err: any) {
-          console.error('Could not create screensharing stream :', err);
+        .catch(function (error: any) {
+          console.error('Could not create screensharing stream :', error);
         });
     } else {
       this.unpublishScreenSharingStream();
