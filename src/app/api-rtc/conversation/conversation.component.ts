@@ -56,6 +56,9 @@ export class ConversationComponent implements OnInit, OnDestroy {
   //apiKeyFc: FormControl = new FormControl('myDemoApiKey');
   // TODO : REMOVETHIS remove my apiKey
   apiKeyFc: FormControl = new FormControl('9669e2ae3eb32307853499850770b0c3');
+  // TODO : REMOVETHIS remove the valid2.apirtc.com kevin_moyse@yahoo.fr	aab29a8fb8423d7ccd3a3fcb7fd2b3db
+  cloudUrl: string | undefined = undefined;//"https://valid2.apirtc.com";
+  //apiKeyFc: FormControl = new FormControl('aab29a8fb8423d7ccd3a3fcb7fd2b3db');
 
   // TODO : REMOVETHIS Remove default
   //usernameFc: FormControl = new FormControl('kevin_moyse@yahoo.fr', [Validators.required]);
@@ -93,9 +96,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   // Conversation urls
   //
-  conversationBaseUrl: string;
-  conversationUrl: string;
-  conversationUrlWithApiKey: string;
+  baseUrl: string;
+  fullUrl: string;
 
   // apiRTC objects
   userAgent: any = null;
@@ -108,7 +110,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
   waitingForModeratorAcceptance = false;
 
   // Local Streams
-  localStreamHolder: StreamDecorator;
+  localCameraStreamsById: Map<string, StreamDecorator> = new Map();
   screenSharingStreamHolder: StreamDecorator = null;
   videoStreamHolder: StreamDecorator = null;
 
@@ -206,26 +208,26 @@ export class ConversationComponent implements OnInit, OnDestroy {
       // remove last element which is the conversationName
       path.pop();
       // and recreate base url
-      this.conversationBaseUrl = `${this.window.location.origin}` + path.join('/');
+      this.baseUrl = `${this.window.location.origin}` + path.join('/');
     } else {
       // When no conversationName is provided then location.href is the expected url
       // Note : This is important to NOT try using this.convBaseUrl = `${this.window.location.protocol}//${this.window.location.host}/conversation`;
       // because 1. route can change and 2. this does not work if application is hosted under a path.
       // Hence use location.href :
-      this.conversationBaseUrl = `${this.window.location.href}`;
+      this.baseUrl = `${this.window.location.href}`;
     }
 
     // Build conversation links
     //
-    this.buildConversationUrls();
+    this.buildUrl();
 
     // Rebuild conversation links when inputs change
     //
     this.conversationNameFc.valueChanges.subscribe(value => {
-      this.buildConversationUrls();
+      this.buildUrl();
     });
     this.apiKeyFc.valueChanges.subscribe(value => {
-      this.buildConversationUrls();
+      this.buildUrl();
     });
 
     // Handle query parameters
@@ -254,21 +256,20 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
   set isPrivate(value: boolean) {
     this._isPrivate = value;
-    this.buildConversationUrls();
+    this.buildUrl();
   }
 
-  private buildConversationUrls() {
-    this.conversationUrl = `${this.conversationBaseUrl}/${this.conversationNameFc.value}`;
-    this.conversationUrlWithApiKey = `${this.conversationBaseUrl}/${this.conversationNameFc.value}?apiKey=${this.apiKeyFc.value}&private=${this.isPrivate}`;
+  private buildUrl() {
+    this.fullUrl = `${this.baseUrl}/${this.conversationNameFc.value}?apiKey=${this.apiKeyFc.value}&private=${this.isPrivate}`;
   }
 
   private doDestroy(): void {
-    if (this.localStreamHolder) {
-      if (this.localStreamHolder.isPublished()) {
-        this.unpublishStream();
+    this.localCameraStreamsById.forEach((streamHolder: StreamDecorator, key: string) => {
+      if (streamHolder.isPublished()) {
+        this.unpublishStream(streamHolder);
       }
-      this.releaseStream();
-    }
+      this.releaseStream(streamHolder);
+    });
     if (this.screenSharingStreamHolder) {
       if (this.screenSharingStreamHolder.isPublished()) {
         this.unpublishScreenSharingStream();
@@ -296,6 +297,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
       uri: 'apzkey:' + this.apiKeyFc.value
     });
 
+    console.log('this.userAgent', this.userAgent);
+
     this.userAgentCreationType = UserAgentCreationType.Key;
 
     this.doUserAgentBindings();
@@ -306,6 +309,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
       // format is like 'apizee:<USERNAME>'
       uri: 'apizee:' + this.usernameFc.value
     });
+
+    console.log('this.userAgent', this.userAgent);
 
     this.userAgentCreationType = UserAgentCreationType.Username;
 
@@ -377,11 +382,10 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.registrationError = null;
     this.registerInPrgs = true;
 
-    //const options = { cloudUrl: "https://valid2.apizee.com" }
-    //const options = { ccs: "valid2-ccs.apizee.com" }
-    //console.log('options', options);
-    //this.userAgent.register(options).then((session: any) => {
-    this.userAgent.register().then((session: any) => {
+    const options = this.cloudUrl ? { cloudUrl: this.cloudUrl } : {};
+    console.log('registerWithoutAuth options', options);
+    this.userAgent.register(options).then((session: any) => {
+      //this.userAgent.register().then((session: any) => {
       this.session = session;
       console.log("Session:", session);
 
@@ -418,18 +422,22 @@ export class ConversationComponent implements OnInit, OnDestroy {
     // Authenticate to get a JWT
     this.authServerService.loginJWToken(credentials.username, credentials.password).subscribe(
       json => {
-        this.token = json.token;
         console.log("loginJWToken:", json);
+
+        const userId = json.userId;
+        const token = json.token;
+
+        // store for display purpose only
+        this.token = token;
 
         this.userAgentAuthType = UserAgentAuthType.JWT;
 
         this.doRegisterWithRegisterInformation({
           // The id here MUST be the same value as the one provided in JSONWebToken's payload to identify the user
-          id: json.userId,
-          token: this.token
+          id: userId,
+          token: token
         });
-        //this.registerInPrgs = false;
-        this.registrationError = null;
+        // registerInPrgs will be set back to false in doRegisterWithRegisterInformation
       },
       error => {
         console.error('ConversationComponent::registerWithJWTAuth', error);
@@ -456,18 +464,22 @@ export class ConversationComponent implements OnInit, OnDestroy {
     // Authenticate to get a token
     this.authServerService.loginToken(credentials.username, credentials.password).subscribe(
       json => {
-        this.token = json.token;
-        console.log("do3rdPartyAuth, token:", json.token);
+        console.log("do3rdPartyAuth", json);
+
+        const userId = json.userId;
+        const token = json.token;
+
+        // store for display purpose only
+        this.token = token;
 
         this.userAgentAuthType = UserAgentAuthType.ThirdParty;
 
         this.doRegisterWithRegisterInformation({
           // The id here will be used as 'userId' uri parameter in the request made to the auth server
-          id: json.userId,
-          token: this.token
+          id: userId,
+          token: token
         });
-        //this.registerInPrgs = false;
-        this.registrationError = null;
+        // registerInPrgs will be set back to false in doRegisterWithRegisterInformation
       },
       error => {
         console.error('ConversationComponent::registerWith3rdPartyAuth', error);
@@ -491,10 +503,13 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.registrationError = null;
     this.registerInPrgs = true;
 
+    if (this.cloudUrl) {
+      registerInformation['cloudUrl'] = this.cloudUrl;
+    }
+
     this.userAgent.register(registerInformation).then((session: any) => {
-      this.registerInPrgs = false;
+      console.log("userAgent.register", session, this.userAgent);
       this.session = session;
-      console.log("Session:", session);
 
       if (session.getUserData().get(PROPERTY_NICKNAME) !== null) {
         console.log("A nickname is already set", session.getUserData().get(PROPERTY_NICKNAME));
@@ -507,6 +522,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
       }
 
       this.doListenSessionEvents();
+
+      this.registerInPrgs = false;
       this.registrationError = null;
     }).catch((error: any) => {
       console.log("Registration error", error);
@@ -582,19 +599,19 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.videoDevices = Object.values(mediaDevices.videoinput);
   }
 
-  changeLocalStream(): void {
+  changeLocalStream(streamDecorator: StreamDecorator): void {
 
-    const published = this.localStreamHolder.isPublished();
-    const audioMuted = this.localStreamHolder.getStream().isAudioMuted();
+    const published = streamDecorator.isPublished();
+    const audioMuted = streamDecorator.getStream().isAudioMuted();
 
     // first, unpublish and release current local stream
     if (published) {
-      this.conversation.unpublish(this.localStreamHolder.getStream());
+      this.conversation.unpublish(streamDecorator.getStream());
     }
-    this.localStreamHolder.getStream().release();
+    streamDecorator.getStream().release();
 
-    // Set localStreamHolder to null in order to destroy the associated component
-    this.localStreamHolder = null;
+    // Set stream to null in order to destroy the associated component
+    streamDecorator.setStream(null);
 
     // get selected devices
     const options = {};
@@ -639,18 +656,19 @@ export class ConversationComponent implements OnInit, OnDestroy {
     }
 
     // and recreate a new stream
-    this.createStream(options)
+    this.doCreateStream(options)
       .then((stream) => {
+        streamDecorator.setStream(stream);
         // if local stream was published consider we should publish changed one
         if (published) {
-          this.publishStream();
+          this.publishStream(streamDecorator);
         }
       })
-      .catch((error: any) => { console.error('createStream error', error); });
+      .catch((error: any) => { console.error('doCreateStream error', error); });
   }
 
-  setCapabilitiesOfLocalStream() {
-    this.localStreamHolder.getStream().setCapabilities().then(() => {
+  setCapabilitiesOfLocalStream(streamDecorator: StreamDecorator) {
+    streamDecorator.getStream().setCapabilities().then(() => {
       // if local stream was published consider we should publish changed one
     }).catch((error: any) => { console.error('createStream error', error); });
   }
@@ -684,9 +702,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
       this.conversation = this.session.getOrCreateConversation(this.conversationNameFc.value);
     }
 
-
     // force Urls build
-    this.buildConversationUrls();
+    this.buildUrl();
 
     this.doListenToConversationEvents();
   }
@@ -919,10 +936,11 @@ export class ConversationComponent implements OnInit, OnDestroy {
         });
       }
       else if (callStats.stats.videoSent || callStats.stats.audioSent) {
+
         // "sent" media is from local stream(s) (to peers)
-        if (this.localStreamHolder && streamId === this.localStreamHolder.getId()) {
-          console.log("setQosStat on localStreamHolder", streamId);
-          this.localStreamHolder.setQosStat({
+        if (this.localCameraStreamsById.get(streamId)) {
+          console.log("setQosStat on local stream", streamId);
+          this.localCameraStreamsById.get(streamId).setQosStat({
             video: callStats.stats.videoSent,
             audio: callStats.stats.audioSent
           });
@@ -949,13 +967,14 @@ export class ConversationComponent implements OnInit, OnDestroy {
     // For speaker detection
     //
     this.conversation.on('audioAmplitude', (amplitudeInfo: any) => {
-      console.log("on:audioAmplitude", amplitudeInfo, this.localStreamHolder);
+      console.log("on:audioAmplitude", amplitudeInfo);
 
       const streamId: string = String(amplitudeInfo.streamId);
-
-      if (this.localStreamHolder && this.localStreamHolder.id === streamId) {
-        this.localStreamHolder.setSpeaking(amplitudeInfo.descriptor.isSpeaking);
+      if (this.localCameraStreamsById.get(streamId)) {
+        // the event streamId is one of the local published streams
+        this.localCameraStreamsById.get(streamId).setSpeaking(amplitudeInfo.descriptor.isSpeaking);
       } else {
+        // the event streamId is one of the remote streams
         const streamHolder: StreamDecorator = this.streamHoldersById.get(streamId);
         if (streamHolder) {
           streamHolder.setSpeaking(amplitudeInfo.descriptor.isSpeaking);
@@ -1171,9 +1190,22 @@ export class ConversationComponent implements OnInit, OnDestroy {
   // --------------------------------------------------------------------------
   // Streams
 
+  createCameraStream() {
+    this.doCreateStream()
+      .then((stream) => {
+        const streamId = String(stream.getId());
+        const streamInfo = { streamId: streamId, isRemote: false, type: 'regular' };
+        // build fake streamInfo object to build a local stream.
+        // TODO : enhance this in apiRTC
+        const streamDecorator = StreamDecorator.build(streamInfo);
+        streamDecorator.setStream(stream);
+        this.localCameraStreamsById.set(streamId, streamDecorator);
+      })
+      .catch((error: any) => { console.error('doCreateStream error', error); });
+  }
 
   // if options are specified, this is because a specific device was selected
-  createStream(options?: any): Promise<Object> {
+  doCreateStream(options?: any): Promise<any> {
     console.log("createStream() with options", options);
     return new Promise((resolve, reject) => {
 
@@ -1197,13 +1229,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
       this.userAgent.createStream(options ? options : default_createStreamOptions)
         .then((stream: any) => {
           console.log('createStream :', stream);
-
-          // build fake streamInfo object to build a local stream.
-          // TODO : enhance this in apiRTC
-          const streamInfo = { streamId: String(stream.getId()), isRemote: false, type: 'regular' };
-          this.localStreamHolder = StreamDecorator.build(streamInfo);
-          this.localStreamHolder.setStream(stream);
-
           resolve(stream);
         }).catch((error: any) => {
           console.error('createStream error', error);
@@ -1212,18 +1237,32 @@ export class ConversationComponent implements OnInit, OnDestroy {
     });
   }
 
-  toggleAudioMute() {
-    if (this.localStreamHolder.getStream().isAudioMuted()) {
-      this.localStreamHolder.getStream().unmuteAudio();
-    }
-    else { this.localStreamHolder.getStream().muteAudio(); }
+  // TODO : move to top, clarify methods names
+
+  activeIndex = 0;
+
+  prev() {
+    this.activeIndex = ((this.activeIndex === 0 ? this.localCameraStreamsById.size : this.activeIndex) - 1) % this.localCameraStreamsById.size;
+  }
+  next() {
+    this.activeIndex = (this.activeIndex + 1) % this.localCameraStreamsById.size;
+  }
+  navTo(index: number) {
+    this.activeIndex = index;
   }
 
-  toggleVideoMute() {
-    if (this.localStreamHolder.getStream().isVideoMuted()) {
-      this.localStreamHolder.getStream().unmuteVideo();
+  toggleAudioMute(streamDecorator: StreamDecorator) {
+    if (streamDecorator.getStream().isAudioMuted()) {
+      streamDecorator.getStream().unmuteAudio();
     }
-    else { this.localStreamHolder.getStream().muteVideo(); }
+    else { streamDecorator.getStream().muteAudio(); }
+  }
+
+  toggleVideoMute(streamDecorator: StreamDecorator) {
+    if (streamDecorator.getStream().isVideoMuted()) {
+      streamDecorator.getStream().unmuteVideo();
+    }
+    else { streamDecorator.getStream().muteVideo(); }
   }
 
   subscribeOrUnsubscribeToStream(event: StreamSubscribeEvent) {
@@ -1248,13 +1287,14 @@ export class ConversationComponent implements OnInit, OnDestroy {
     }
   }
 
-  releaseStream() {
-    this.localStreamHolder.getStream().release();
-    this.localStreamHolder = null;
+  releaseStream(streamDecorator: StreamDecorator) {
+    streamDecorator.getStream().release();
+    //streamDecorator = null;
+    this.localCameraStreamsById.delete(streamDecorator.getId());
   }
 
-  publishStream(): void {
-    const localStream = this.localStreamHolder.getStream();
+  publishStream(streamDecorator: StreamDecorator): void {
+    const localStream = streamDecorator.getStream();
 
     console.log("publishStream()", localStream);
 
@@ -1262,7 +1302,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.publishInPrgs = true;
     this.conversation.publish(localStream).then((stream: any) => {
       console.log("publishStream() published", stream);
-      this.localStreamHolder.setPublished(true);
+      streamDecorator.setPublished(true);
       this.publishInPrgs = false;
     }).catch((error: any) => {
       console.error('publish error', error);
@@ -1270,13 +1310,11 @@ export class ConversationComponent implements OnInit, OnDestroy {
     });
   }
 
-  unpublishStream(): void {
-    const stream = this.localStreamHolder.getStream();
-
+  unpublishStream(streamDecorator: StreamDecorator): void {
+    const stream = streamDecorator.getStream();
     console.log("unpublishStream()", stream);
-
-    this.conversation.unpublish(this.localStreamHolder.getStream());
-    this.localStreamHolder.setPublished(false);
+    this.conversation.unpublish(streamDecorator.getStream());
+    streamDecorator.setPublished(false);
   }
 
   // --------------------------------------------------------------------------
@@ -1413,7 +1451,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
   bluetoothError = null;
 
   searchBluetooth() {
-
     const navigatorObject: any = window.navigator;
     if (navigatorObject && navigatorObject.bluetooth) {
       console.log("navigatorObject.bluetooth found");
@@ -1427,7 +1464,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
       console.log("navigatorObject.bluetooth NOT found");
       this.bluetoothError = "navigator.bluetooth NOT found, maybe your browser does not support bluetooth : please verify compatibility at https://developer.mozilla.org/en-US/docs/Web/API/Bluetooth"
     }
-
   }
 
 }

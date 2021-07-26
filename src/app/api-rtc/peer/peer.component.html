@@ -7,6 +7,9 @@
     <p *ngIf="withModeration">
         <button *ngIf="withModeration" mat-raised-button color="accent" (click)="emitEject()">Eject</button>
     </p>
+    <p *ngIf="streamHoldersById.size === 0" class="alert alert-secondary" role="alert">
+        No streams published yet !
+    </p>
     <div id="{{_contactHolder.id}}-streams" class="carousel slide" data-ride="carousel">
         <ol class="carousel-indicators">
             <li [attr.data-target]="'#'+_contactHolder.id+'-streams'" [attr.data-slide-to]="i" [ngClass]="{'active': i === activeIndex}" *ngFor="let kv of streamHoldersById | keyvalue; index as i" (click)="navTo(i)">

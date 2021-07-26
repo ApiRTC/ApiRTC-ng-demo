@@ -20,3 +20,11 @@
     align-items: center;
     justify-content: center;
 }
+
+.carousel-control-prev {
+    z-index: 3;
+}
+
+.carousel-control-next {
+    z-index: 3;
+}

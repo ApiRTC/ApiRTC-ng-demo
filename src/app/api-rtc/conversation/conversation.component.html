@@ -69,16 +69,30 @@
                 <h1>2. Register UserAgent</h1>
                 <p>Register a <code>UserAgent</code> to get a <code>Session</code>. Several authentications are possible :
                 </p>
+                <p *ngIf="registerInPrgs" class="text-center">
+                    <mat-icon>
+                        <mat-spinner [diameter]="16"></mat-spinner>
+                    </mat-icon>
+                </p>
             </div>
         </div>
         <div class="row">
 
             <div class="col-md-12 col-lg-9 with-divider">
                 <div class="row">
+                    <div class="col">
+                        <br>
+                        <p class="alert alert-warning" role="alert">You need to configure authentication at
+                            <a href="https://cloud.apirtc.com/enterprise/users-authentication" target="_blank" rel="noopener">https://cloud.apirtc.com/enterprise/users-authentication</a> according to the one you want to use.
+                        </p>
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col with-divider">
                         <p>Registering as guest is simple but less secured.</p>
                         <button mat-raised-button color="primary" (click)="registerWithoutAuth()" [disabled]="!userAgent||registerInPrgs||session||userAgentCreationType === userAgentCreationTypeEnum.Username" title="Register as guest">Register as
-                            Guest&nbsp;<em class="bi bi-box-arrow-in-right"></em></button>
+                            Guest&nbsp;<em class="bi bi-box-arrow-in-right"></em>
+                        </button>
                     </div>
                     <div class="col with-divider">
                         <p>Using your own authentication server that provides a <strong>Json Web Token</strong> allows to register the <code>UserAgent</code> with <strong>ApiRTC</strong>'s servers in a more secure way.</p>
@@ -92,14 +106,7 @@
                         </app-login>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col">
-                        <br>
-                        <p class="alert alert-warning" role="alert">You need to configure authentication at
-                            <a href="https://cloud.apirtc.com/enterprise/users-authentication" target="_blank" rel="noopener">https://cloud.apirtc.com/enterprise/users-authentication</a> according to the one you want to use.
-                        </p>
-                    </div>
-                </div>
+
             </div>
 
             <div class="col">
@@ -147,7 +154,7 @@
     <div class="container">
         <div class="row">
             <div class="col">
-                <h1>3. Get or Create, and Join Conversation</h1>
+                <h1>3. Get or Create, and Join Conversation or Conference</h1>
             </div>
         </div>
         <div class="row">
@@ -157,7 +164,7 @@
                     <form [formGroup]="conversationFormGroup" (ngSubmit)="getOrcreateConversation()">
                         <mat-form-field>
                             <mat-label>Nom de la conversation</mat-label>
-                            <span matPrefix>{{conversationBaseUrl}}/</span>
+                            <span matPrefix>{{baseUrl}}/</span>
                             <input type="text" matInput placeholder="abcd" formControlName="name">
                         </mat-form-field>&nbsp;
                         <button mat-raised-button color="primary" type="submit" [disabled]="!conversationFormGroup.valid||!session||conversation" title="Get Or Create Conversation">GetOrCreateConversation&nbsp;<em
@@ -197,9 +204,9 @@
                     <p class="clearfix">Got <code>Conversation</code> with <code>name</code>
                         <span>&lt;<strong>{{conversationNameFc.value}}</strong>&gt;</span>.
                         <br>Others can join at url
-                        <a href="{{conversationUrlWithApiKey}}" target="_blank" rel="noopener">{{conversationUrl}}</a>
-                        <span class="float-right"><button mat-raised-button color="primary"
-                                [cdkCopyToClipboard]="conversationUrlWithApiKey" title="Copy to clipboard">Copy
+                        <a href="{{fullUrl}}" target="_blank" rel="noopener">{{fullUrl}}</a>
+                        <span class="float-right"><button mat-raised-button color="primary" [cdkCopyToClipboard]="fullUrl"
+                                title="Copy to clipboard">Copy
                                 link&nbsp;<em class="bi bi-clipboard"></em></button></span>
                     </p>
                     <p class="clearfix"><span class="float-right">
@@ -326,13 +333,9 @@
         </div>
         <div class="row">
             <div class="col-sm-12 col-md-4 text-center">
-                <button mat-raised-button color="{{localStreamHolder?'accent':'primary'}}" (click)="!localStreamHolder?createStream():releaseStream()" [disabled]="!userAgent||localStreamHolder?.published">{{!localStreamHolder?'Create
-                    Stream':'Release
-                    Stream'}}</button>
-                <button mat-raised-button color="{{localStreamHolder?.published?'accent':'primary'}}" (click)="!localStreamHolder?.published?publishStream():unpublishStream()" [disabled]="!localStreamHolder||!joined||publishInPrgs">{{!localStreamHolder?.published?'Publish
-                    Stream':'Unpublish
-                    Stream'}}
-                    <span *ngIf="publishInPrgs" class="spinner-border text-light" role="status"></span></button>
+                <button mat-raised-button color="primary" (click)="createCameraStream()" [disabled]="!userAgent"><em
+                        class="bi bi-file-plus"></em> Create Camera
+                    Stream</button>
             </div>
             <div class="col-sm-12 col-md-4 text-center">
                 <button mat-raised-button color="{{screenSharingStreamHolder?'accent':'primary'}}" (click)="toggleScreenSharing()" [disabled]="!joined">{{screenSharingStreamHolder?'Unshare':'Share'}}
@@ -349,14 +352,49 @@
     </div>
 
     <div class="row">
-        <div class="col-sm-12 col-md-4" *ngIf="localStreamHolder">
+
+        <div class="col-sm-12 col-md-4">
+            <div id="local-streams" class="carousel slide" data-ride="carousel">
+                <ol class="carousel-indicators">
+                    <li [attr.data-target]="'#local-streams'" [attr.data-slide-to]="i" [ngClass]="{'active': i === activeIndex}" *ngFor="let kv of localCameraStreamsById | keyvalue; index as i" (click)="navTo(i)">
+                    </li>
+                </ol>
+                <div class="carousel-inner">
+                    <div class="carousel-item" [ngClass]="{'active': i === activeIndex}" *ngFor="let kv of localCameraStreamsById | keyvalue; index as i; first as isFirst">
+                        <p class="text-center">
+                            <button mat-raised-button color="{{kv.value.published?'accent':'primary'}}" (click)="!kv.value.published?publishStream(kv.value):unpublishStream(kv.value)" [disabled]="!kv.value||!joined||publishInPrgs">{{!kv.value.published?'Publish
+                                Stream':'Unpublish Stream'}}
+                                <span *ngIf="publishInPrgs" class="spinner-border text-light" role="status"></span></button>
+                            <button mat-raised-button color="accent" (click)="releaseStream(kv.value)" [disabled]="!userAgent||kv.value.published">Release Stream</button>
+                        </p>
+                        <div class="d-block w-100 h-100">
+                            <app-stream [streamHolder]="kv.value" [withSubscription]="false" [withDevicesControl]="true" [audioMuted]="false" [videoMuted]="false" [audioInDevices]="audioInDevices" [videoDevices]="videoDevices" (onAudioMute)="toggleAudioMute(kv.value)" (onVideoMute)="toggleVideoMute(kv.value)"
+                                (onAudioInSelected)="selectedAudioInDevice=$event;changeLocalStream(kv.value)" (onVideoSelected)="selectedVideoDevice=$event;changeLocalStream(kv.value)" [background]="currentBackground" (onBackgroundSelected)="currentBackground=$event;changeLocalStream(kv.value)"
+                                (onVideoQualitySelected)="selectedVideoQuality=$event;changeLocalStream(kv.value)">
+                            </app-stream>
+                        </div>
+                    </div>
+                </div>
+                <a class="carousel-control-prev" role="button" data-slide="prev" (click)="prev()">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" role="button" data-slide="next" (click)="next()">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- <div class="col-sm-12 col-md-4" *ngIf="localStreamHolder">
             <div class="alert alert-success clearfix">
                 <app-stream [streamHolder]="localStreamHolder" [withSubscription]="false" [withDevicesControl]="true" [audioMuted]="false" [videoMuted]="false" [audioInDevices]="audioInDevices" [videoDevices]="videoDevices" (onAudioMute)="toggleAudioMute()" (onVideoMute)="toggleVideoMute()"
                     (onAudioInSelected)="selectedAudioInDevice=$event;changeLocalStream()" (onVideoSelected)="selectedVideoDevice=$event;changeLocalStream()" [background]="currentBackground" (onBackgroundSelected)="currentBackground=$event;changeLocalStream()"
                     (onVideoQualitySelected)="selectedVideoQuality=$event;changeLocalStream()">
                 </app-stream>
             </div>
-        </div>
+        </div> -->
+
         <div class="col-sm-12 col-md-4" *ngIf="screenSharingStreamHolder">
             <div class="alert alert-success clearfix">
                 <app-stream [streamHolder]="screenSharingStreamHolder" [withSubscription]="false" [withDevicesControl]="false">
