@@ -1200,6 +1200,9 @@ export class ConversationComponent implements OnInit, OnDestroy {
         const streamDecorator = StreamDecorator.build(streamInfo);
         streamDecorator.setStream(stream);
         this.localCameraStreamsById.set(streamId, streamDecorator);
+
+        setTimeout(() => { this.next(); }, 1000);
+
       })
       .catch((error: any) => { console.error('doCreateStream error', error); });
   }
@@ -1245,7 +1248,11 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.activeIndex = ((this.activeIndex === 0 ? this.localCameraStreamsById.size : this.activeIndex) - 1) % this.localCameraStreamsById.size;
   }
   next() {
-    this.activeIndex = (this.activeIndex + 1) % this.localCameraStreamsById.size;
+    if (this.localCameraStreamsById.size) {
+      this.activeIndex = 0;
+    } else {
+      this.activeIndex = (this.activeIndex + 1) % this.localCameraStreamsById.size;
+    }
   }
   navTo(index: number) {
     this.activeIndex = index;

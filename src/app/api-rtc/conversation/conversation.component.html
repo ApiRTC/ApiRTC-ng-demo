@@ -352,7 +352,6 @@
     </div>
 
     <div class="row">
-
         <div class="col-sm-12 col-md-4">
             <div id="local-streams" class="carousel slide" data-ride="carousel">
                 <ol class="carousel-indicators">
@@ -365,7 +364,7 @@
                             <button mat-raised-button color="{{kv.value.published?'accent':'primary'}}" (click)="!kv.value.published?publishStream(kv.value):unpublishStream(kv.value)" [disabled]="!kv.value||!joined||publishInPrgs">{{!kv.value.published?'Publish
                                 Stream':'Unpublish Stream'}}
                                 <span *ngIf="publishInPrgs" class="spinner-border text-light" role="status"></span></button>
-                            <button mat-raised-button color="accent" (click)="releaseStream(kv.value)" [disabled]="!userAgent||kv.value.published">Release Stream</button>
+                            <button mat-raised-button color="accent" (click)="releaseStream(kv.value);next()" [disabled]="!userAgent||kv.value.published">Release Stream</button>
                         </p>
                         <div class="d-block w-100 h-100">
                             <app-stream [streamHolder]="kv.value" [withSubscription]="false" [withDevicesControl]="true" [audioMuted]="false" [videoMuted]="false" [audioInDevices]="audioInDevices" [videoDevices]="videoDevices" (onAudioMute)="toggleAudioMute(kv.value)" (onVideoMute)="toggleVideoMute(kv.value)"
@@ -385,15 +384,6 @@
                 </a>
             </div>
         </div>
-
-        <!-- <div class="col-sm-12 col-md-4" *ngIf="localStreamHolder">
-            <div class="alert alert-success clearfix">
-                <app-stream [streamHolder]="localStreamHolder" [withSubscription]="false" [withDevicesControl]="true" [audioMuted]="false" [videoMuted]="false" [audioInDevices]="audioInDevices" [videoDevices]="videoDevices" (onAudioMute)="toggleAudioMute()" (onVideoMute)="toggleVideoMute()"
-                    (onAudioInSelected)="selectedAudioInDevice=$event;changeLocalStream()" (onVideoSelected)="selectedVideoDevice=$event;changeLocalStream()" [background]="currentBackground" (onBackgroundSelected)="currentBackground=$event;changeLocalStream()"
-                    (onVideoQualitySelected)="selectedVideoQuality=$event;changeLocalStream()">
-                </app-stream>
-            </div>
-        </div> -->
 
         <div class="col-sm-12 col-md-4" *ngIf="screenSharingStreamHolder">
             <div class="alert alert-success clearfix">
