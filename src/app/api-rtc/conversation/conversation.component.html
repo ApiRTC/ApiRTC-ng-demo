@@ -67,13 +67,35 @@
         <div class="row">
             <div class="col">
                 <h1>2. Register UserAgent</h1>
-                <p>Register a <code>UserAgent</code> to get a <code>Session</code>. Several authentications are possible :
-                </p>
+                <p>Register a <code>UserAgent</code> to get a <code>Session</code>.</p>
+                <br>
+                <p>Several authentications are possible :</p>
                 <p *ngIf="registerInPrgs" class="text-center">
                     <mat-icon>
                         <mat-spinner [diameter]="16"></mat-spinner>
                     </mat-icon>
                 </p>
+            </div>
+            <div class="col">
+                <div class="accordion accordion-flush" id="accordionExample">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                Advanced options
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <mat-form-field [style.width.%]="100">
+                                    <mat-label>Optional cloudUrl</mat-label>
+                                    <input matInput placeholder="https://cloud.apirtc.com" [formControl]="cloudUrlFc">
+                                    <mat-icon matSuffix>dns</mat-icon>
+                                    <mat-hint>Optional : Specify cloudUrl (default goes to https://cloud.apirtc.com)</mat-hint>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="row">

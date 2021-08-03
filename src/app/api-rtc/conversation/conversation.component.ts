@@ -56,9 +56,12 @@ export class ConversationComponent implements OnInit, OnDestroy {
   //apiKeyFc: FormControl = new FormControl('myDemoApiKey');
   // TODO : REMOVETHIS remove my apiKey
   apiKeyFc: FormControl = new FormControl('9669e2ae3eb32307853499850770b0c3');
-  // TODO : REMOVETHIS remove the valid2.apirtc.com kevin_moyse@yahoo.fr	aab29a8fb8423d7ccd3a3fcb7fd2b3db
-  cloudUrl: string | undefined = undefined;//"https://valid2.apirtc.com";
+
   //apiKeyFc: FormControl = new FormControl('aab29a8fb8423d7ccd3a3fcb7fd2b3db');
+
+  // TODO : REMOVETHIS remove the valid2.apirtc.com kevin_moyse@yahoo.fr	aab29a8fb8423d7ccd3a3fcb7fd2b3db
+  //cloudUrl: string | undefined = undefined;//"https://valid2.apirtc.com";
+  cloudUrlFc: FormControl = new FormControl(undefined);
 
   // TODO : REMOVETHIS Remove default
   //usernameFc: FormControl = new FormControl('kevin_moyse@yahoo.fr', [Validators.required]);
@@ -113,6 +116,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
   localCameraStreamsById: Map<string, StreamDecorator> = new Map();
   screenSharingStreamHolder: StreamDecorator = null;
   videoStreamHolder: StreamDecorator = null;
+
+  activeIndex = 0;
 
   // Template helper attributes
   recording = false;
@@ -382,7 +387,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.registrationError = null;
     this.registerInPrgs = true;
 
-    const options = this.cloudUrl ? { cloudUrl: this.cloudUrl } : {};
+    const options = this.cloudUrlFc.value ? { cloudUrl: this.cloudUrlFc.value } : {};
     console.log('registerWithoutAuth options', options);
     this.userAgent.register(options).then((session: any) => {
       //this.userAgent.register().then((session: any) => {
@@ -503,8 +508,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.registrationError = null;
     this.registerInPrgs = true;
 
-    if (this.cloudUrl) {
-      registerInformation['cloudUrl'] = this.cloudUrl;
+    if (this.cloudUrlFc.value) {
+      registerInformation['cloudUrl'] = this.cloudUrlFc.value;
     }
 
     this.userAgent.register(registerInformation).then((session: any) => {
@@ -698,8 +703,10 @@ export class ConversationComponent implements OnInit, OnDestroy {
       // and the following too :
       // this.conversation = this.session.getOrCreateConversation('Private:' + this.conversationNameFc.value);
       // but this is not very cool...
+      console.log('Conference', this.conversation);
     } else {
       this.conversation = this.session.getOrCreateConversation(this.conversationNameFc.value);
+      console.log('Conversation', this.conversation);
     }
 
     // force Urls build
@@ -722,13 +729,15 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
     this.createConferenceInPrgs = true;
 
-    //PrivateConferenceCreationOptions
+    // PrivateConferenceCreationOptions
     const options = {
       // TODO : check what it does because this does not seem to set the Conversation.name
       // doc says : friendlyName 	string optional: friendly name for this conference to display in Apizee cloud
-      friendlyName: this.conversationNameFc.value
+      friendlyName: this.conversationNameFc.value + '_friendlyName',
+      // WARNING : name became required since 4.5.1 ? but PrivateConferenceCreationOptions.name is not documented in api/reference ?!!!
+      name: this.conversationNameFc.value
     }
-
+    //
     enterprise.createPrivateConference(options).then((conference: any) => {
 
       console.log("Conference", conference);
@@ -750,10 +759,12 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
       this.doListenToConversationEvents();
 
-      // on top of typical Session Events, listen to moderation events too :
-
+      // On top of typical Conversation events, listen to moderation events too :
+      //
       this.session.on('conversationJoinRequest', (request: any) => {
         console.log('on:conversationJoinRequest', request);
+        // TODO : there is a problem here, all Conferences created by users connected with same entreprise will receive this event from all users trying to jon any Conference, 
+        // meaning that we shoul filter here, but how ? id ? name ?
         this.joinRequestsById.set(request.getId(), request);
       });
     }).catch((error: any) => {
@@ -1155,7 +1166,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
     const message = this.messageFc.value;
     this.messageFc.setValue('');
     this.doSendMessage(message);
-
   }
 
   doSendMessage(messageContent: string) {
@@ -1201,8 +1211,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
         streamDecorator.setStream(stream);
         this.localCameraStreamsById.set(streamId, streamDecorator);
 
+        // force next asynchronously to let display happen fine
         setTimeout(() => { this.next(); }, 1000);
-
       })
       .catch((error: any) => { console.error('doCreateStream error', error); });
   }
@@ -1238,24 +1248,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
           reject(error);
         });
     });
-  }
-
-  // TODO : move to top, clarify methods names
-
-  activeIndex = 0;
-
-  prev() {
-    this.activeIndex = ((this.activeIndex === 0 ? this.localCameraStreamsById.size : this.activeIndex) - 1) % this.localCameraStreamsById.size;
-  }
-  next() {
-    if (this.localCameraStreamsById.size) {
-      this.activeIndex = 0;
-    } else {
-      this.activeIndex = (this.activeIndex + 1) % this.localCameraStreamsById.size;
-    }
-  }
-  navTo(index: number) {
-    this.activeIndex = index;
   }
 
   toggleAudioMute(streamDecorator: StreamDecorator) {
@@ -1324,9 +1316,24 @@ export class ConversationComponent implements OnInit, OnDestroy {
     streamDecorator.setPublished(false);
   }
 
-  // --------------------------------------------------------------------------
-  // Stream from video file
+  // Local Camera Streams Carousel handling
+  //
+  prev() {
+    this.activeIndex = ((this.activeIndex === 0 ? this.localCameraStreamsById.size : this.activeIndex) - 1) % this.localCameraStreamsById.size;
+  }
+  next() {
+    if (this.localCameraStreamsById.size) {
+      this.activeIndex = 0;
+    } else {
+      this.activeIndex = (this.activeIndex + 1) % this.localCameraStreamsById.size;
+    }
+  }
+  navTo(index: number) {
+    this.activeIndex = index;
+  }
 
+  // Stream from video file
+  //
   createVideoStream(event: any) {
     // To create a MediaStream from a video file, go through a 'video' DOM element
     //
@@ -1387,9 +1394,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.videoStreamHolder = null;
   }
 
-  // --------------------------------------------------------------------------
-  // Screen sharing
-
+  // Screen sharing Stream
+  //
   toggleScreenSharing(): void {
 
     if (this.screenSharingStreamHolder === null) {
