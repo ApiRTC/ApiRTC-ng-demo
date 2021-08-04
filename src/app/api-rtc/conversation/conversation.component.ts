@@ -61,7 +61,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   // TODO : REMOVETHIS remove the valid2.apirtc.com kevin_moyse@yahoo.fr	aab29a8fb8423d7ccd3a3fcb7fd2b3db
   //cloudUrl: string | undefined = undefined;//"https://valid2.apirtc.com";
-  cloudUrlFc: FormControl = new FormControl(undefined);
+  cloudUrlFc: FormControl = new FormControl('https://cloud.apirtc.com');
 
   // TODO : REMOVETHIS Remove default
   //usernameFc: FormControl = new FormControl('kevin_moyse@yahoo.fr', [Validators.required]);
@@ -735,7 +735,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
       // doc says : friendlyName 	string optional: friendly name for this conference to display in Apizee cloud
       friendlyName: this.conversationNameFc.value + '_friendlyName',
       // WARNING : name became required since 4.5.1 ? but PrivateConferenceCreationOptions.name is not documented in api/reference ?!!!
-      name: this.conversationNameFc.value
+      //name: this.conversationNameFc.value
     }
     //
     enterprise.createPrivateConference(options).then((conference: any) => {

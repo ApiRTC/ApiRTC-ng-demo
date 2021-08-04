@@ -17,7 +17,7 @@
                         <mat-label>apiKey</mat-label>
                         <input matInput placeholder="apiKey" [formControl]="apiKeyFc">
                         <mat-icon matSuffix>fingerprint</mat-icon>
-                        <mat-hint>Get your own apiKey from <a href="https://cloud.apirtc.com/register#account" target="_blank" rel="noopener">https://cloud.apirtc.com/register</a>
+                        <mat-hint>Get your own apiKey from <a href="{{cloudUrlFc.value}}/register#account" target="_blank" rel="noopener">{{cloudUrlFc.value}}/register</a>
                         </mat-hint>
                     </mat-form-field>
                     &nbsp;
@@ -25,14 +25,14 @@
                 </div>
             </div>
             <div class="col">
-                <p>Create <code>UserAgent</code> with the <code>username</code> of a user created within your enterprise account on <a href="https://cloud.apirtc.com/users" target="_blank" rel="noopener">https://cloud.apirtc.com/users</a> :
+                <p>Create <code>UserAgent</code> with the <code>username</code> of a user created within your enterprise account on <a href="{{cloudUrlFc.value}}/users" target="_blank" rel="noopener">{{cloudUrlFc.value}}/users</a> :
                 </p>
                 <div class="text-center">
                     <mat-form-field [style.width.%]="50">
                         <mat-label>username</mat-label>
                         <input matInput placeholder="username" [formControl]="usernameFc">
                         <mat-icon matSuffix>verified_user</mat-icon>
-                        <mat-hint>Enter username of a user created on cloud.apirtc.com
+                        <mat-hint>Enter username of a user created on {{cloudUrlFc.value}}
                         </mat-hint>
                         <mat-error *ngIf="usernameFc.hasError('required')">
                             username is <strong>required</strong>
@@ -70,11 +70,6 @@
                 <p>Register a <code>UserAgent</code> to get a <code>Session</code>.</p>
                 <br>
                 <p>Several authentications are possible :</p>
-                <p *ngIf="registerInPrgs" class="text-center">
-                    <mat-icon>
-                        <mat-spinner [diameter]="16"></mat-spinner>
-                    </mat-icon>
-                </p>
             </div>
             <div class="col">
                 <div class="accordion accordion-flush" id="accordionExample">
@@ -88,9 +83,9 @@
                             <div class="accordion-body">
                                 <mat-form-field [style.width.%]="100">
                                     <mat-label>Optional cloudUrl</mat-label>
-                                    <input matInput placeholder="https://cloud.apirtc.com" [formControl]="cloudUrlFc">
+                                    <input matInput placeholder="{{cloudUrlFc.value}}" [formControl]="cloudUrlFc">
                                     <mat-icon matSuffix>dns</mat-icon>
-                                    <mat-hint>Optional : Specify cloudUrl (default goes to https://cloud.apirtc.com)</mat-hint>
+                                    <mat-hint>Optional : Specify cloudUrl (default goes to {{cloudUrlFc.value}})</mat-hint>
                                 </mat-form-field>
                             </div>
                         </div>
@@ -105,7 +100,7 @@
                     <div class="col">
                         <br>
                         <p class="alert alert-warning" role="alert">You need to configure authentication at
-                            <a href="https://cloud.apirtc.com/enterprise/users-authentication" target="_blank" rel="noopener">https://cloud.apirtc.com/enterprise/users-authentication</a> according to the one you want to use.
+                            <a href="{{cloudUrlFc.value}}/enterprise/users-authentication" target="_blank" rel="noopener">{{cloudUrlFc.value}}/enterprise/users-authentication</a> according to the one you want to use.
                         </p>
                     </div>
                 </div>
@@ -134,8 +129,8 @@
             <div class="col">
                 <div class="row">
                     <div class="col">
-                        <p>Authentication with <strong>cloud.ApiRTC</strong> user management.</p>
-                        <app-login [btnText]="'Register with ApiRTC.com'" [username]="usernameFc.value" [enable]="!registerInPrgs&&!session&&(userAgentCreationType === userAgentCreationTypeEnum.Username)" (credentials)="registerWithApizeeUserManagement($event)">
+                        <p>Authentication with <strong>ApiRTC</strong> user management.</p>
+                        <app-login [btnText]="'Register with '+cloudUrlFc.value" [username]="usernameFc.value" [enable]="!registerInPrgs&&!session&&(userAgentCreationType === userAgentCreationTypeEnum.Username)" (credentials)="registerWithApizeeUserManagement($event)">
                         </app-login>
                     </div>
                 </div>
@@ -150,12 +145,26 @@
             </div>
 
         </div>
+
+        <div class="row" *ngIf="registerInPrgs">
+            <div class="col">
+                <br>
+                <p class="text-center">
+                    <mat-icon>
+                        <mat-spinner [diameter]="16"></mat-spinner>
+                    </mat-icon>
+                </p>
+            </div>
+        </div>
+
         <br>
+
         <div class="row">
             <div class="col">
                 <p *ngIf="session" class="alert alert-success clearfix" role="alert">Got <code>Session</code> with
                     <code>id</code>
-                    <span>&lt;<strong>{{session.getId()}}</strong>&gt;</span><span *ngIf="token">&nbsp;with
+                    <span>&lt;<strong>{{session.getId()}}</strong>&gt;</span><span>&nbsp;from
+                        {{cloudUrlFc.value}}&nbsp;</span><span *ngIf="token">&nbsp;with
                         <code>token</code>
                         <span class="wrap">&lt;<button type="button" class="btn btn-sm btn-info"
                                 (click)="showToken=!showToken">hide/show</button><strong
@@ -185,7 +194,7 @@
                 <div class="text-center">
                     <form [formGroup]="conversationFormGroup" (ngSubmit)="getOrcreateConversation()">
                         <mat-form-field>
-                            <mat-label>Nom de la conversation</mat-label>
+                            <mat-label>Conversation name</mat-label>
                             <span matPrefix>{{baseUrl}}/</span>
                             <input type="text" matInput placeholder="abcd" formControlName="name">
                         </mat-form-field>&nbsp;
@@ -375,13 +384,13 @@
 
     <div class="row">
         <div class="col-sm-12 col-md-4">
-            <div id="local-streams" class="carousel slide" data-ride="carousel">
-                <ol class="carousel-indicators">
-                    <li [attr.data-target]="'#local-streams'" [attr.data-slide-to]="i" [ngClass]="{'active': i === activeIndex}" *ngFor="let kv of localCameraStreamsById | keyvalue; index as i" (click)="navTo(i)">
-                    </li>
-                </ol>
+            <div *ngIf="localCameraStreamsById.size > 0" id="local-streams" class="carousel slide" data-bs-ride="carousel">
+                <!-- <div class="carousel-indicators">
+                    <button type="button" data-bs-target="#local-streams" [attr.data-bs-slide-to]="i" [ngClass]="{'active': i === activeIndex}" [attr.aria-current]="i === activeIndex" *ngFor="let kv of localCameraStreamsById | keyvalue; index as i" (click)="navTo(i)"></button>
+                </div> -->
                 <div class="carousel-inner">
                     <div class="carousel-item" [ngClass]="{'active': i === activeIndex}" *ngFor="let kv of localCameraStreamsById | keyvalue; index as i; first as isFirst">
+                        <br>
                         <p class="text-center">
                             <button mat-raised-button color="{{kv.value.published?'accent':'primary'}}" (click)="!kv.value.published?publishStream(kv.value):unpublishStream(kv.value)" [disabled]="!kv.value||!joined||publishInPrgs">{{!kv.value.published?'Publish
                                 Stream':'Unpublish Stream'}}
@@ -396,14 +405,14 @@
                         </div>
                     </div>
                 </div>
-                <a class="carousel-control-prev" role="button" data-slide="prev" (click)="prev()">
+                <button class="carousel-control-prev" type="button" data-bs-target="#local-streams" data-bs-slide="prev" (click)="prev()">
                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="sr-only">Previous</span>
-                </a>
-                <a class="carousel-control-next" role="button" data-slide="next" (click)="next()">
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#local-streams" data-bs-slide="next" (click)="next()">
                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="sr-only">Next</span>
-                </a>
+                    <span class="visually-hidden">Next</span>
+                </button>
             </div>
         </div>
 
@@ -475,7 +484,7 @@
                     </div>
                 </div>
                 <p class="alert alert-info" role="alert" *ngIf="recordingsByMediaId.size===0">
-                    Recorded conversations can be managed on <a href="https://cloud.apirtc.com/media-manager" target="_blank" rel="noopener"><strong>ApiRTC</strong> Media Manager</a></p>
+                    Recorded conversations can be managed on <a href="{{cloudUrlFc.value}}/media-manager" target="_blank" rel="noopener"><strong>ApiRTC</strong> Media Manager</a></p>
             </div>
         </div>
     </div>

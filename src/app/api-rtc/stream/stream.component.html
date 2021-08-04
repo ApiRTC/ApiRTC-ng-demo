@@ -1,7 +1,12 @@
+<p>
+    <span class="badge bg-info">streamId:{{streamHolder.id}}</span>
+    <button *ngIf="withSubscription" mat-raised-button color="primary" (click)="toggleSubscribe()">{{streamHolder.stream?'Unsubscribe':'Subscribe'}}</button>
+</p>
 <div class="mycard">
     <div id="{{streamHolder.id}}" class="embed-responsive embed-responsive-4by3">
         <app-stream-video *ngIf="streamHolder.stream" [stream]="streamHolder.stream" [mirror]="mirrorVideoFc.value">
         </app-stream-video>
+        <!-- <span *ngIf="!streamHolder.stream">no stream</span> -->
     </div>
     <div class="mycard-text" *ngIf="streamHolder.stream">
         <div *ngIf="withDevicesControl">
@@ -73,13 +78,9 @@
         <app-audio-stats [stats]="streamHolder.qosStat?.audio"></app-audio-stats>
         <app-video-stats [stats]="streamHolder.qosStat?.video"></app-video-stats>
     </div>
-    <div class="mycard-over">
-        <p>
-            <span class="badge badge-info">streamId:{{streamHolder.id}}</span>
-            <button *ngIf="withSubscription" mat-raised-button color="primary" (click)="toggleSubscribe()">{{streamHolder.stream?'Unsubscribe':'Subscribe'}}</button>
-        </p>
+    <div class="mycard-over" *ngIf="streamHolder.stream">
         <p *ngIf="streamHolder.isSpeaking">
-            <span class="badge badge-success">
+            <span class="badge bg-success">
                 <mat-icon matSuffix>record_voice_over
                 </mat-icon>
             </span>
