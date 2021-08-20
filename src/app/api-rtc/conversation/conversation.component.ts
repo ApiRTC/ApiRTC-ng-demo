@@ -216,10 +216,12 @@ export class ConversationComponent implements OnInit, OnDestroy {
       this.baseUrl = `${this.window.location.origin}` + path.join('/');
     } else {
       // When no conversationName is provided then location.href is the expected url
-      // Note : This is important to NOT try using this.convBaseUrl = `${this.window.location.protocol}//${this.window.location.host}/conversation`;
+      // Note : This is important to NOT try using this.baseUrl = `${this.window.location.protocol}//${this.window.location.host}/conversation`;
       // because 1. route can change and 2. this does not work if application is hosted under a path.
-      // Hence use location.href :
-      this.baseUrl = `${this.window.location.href}`;
+      // Note2:  using this.baseUrl = `${this.window.location.href}`;
+      // does not work well, because href may contain url paramaters like ?private=true for example.
+      //
+      this.baseUrl = `${this.window.location.origin}${this.window.location.pathname}`;
     }
 
     // Build conversation links
@@ -758,15 +760,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
       this.createConferenceInPrgs = false;
 
       this.doListenToConversationEvents();
-
-      // On top of typical Conversation events, listen to moderation events too :
-      //
-      this.session.on('conversationJoinRequest', (request: any) => {
-        console.log('on:conversationJoinRequest', request);
-        // TODO : there is a problem here, all Conferences created by users connected with same entreprise will receive this event from all users trying to jon any Conference, 
-        // meaning that we shoul filter here, but how ? id ? name ?
-        this.joinRequestsById.set(request.getId(), request);
-      });
     }).catch((error: any) => {
       console.error('createPrivateConference', error);
       this.createConferenceInPrgs = false;
@@ -811,7 +804,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
             this.conversation = null;
             this.joinRequestsById.clear();
           })
-          .catch(err => { console.error('Conversation leave error', err); });
+          .catch((error: any) => { console.error('Conversation leave error', error); });
       }
       else {
         this.conversation.destroy();
@@ -1014,6 +1007,12 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
 
   doListenToModerationEvents() {
+    this.session.on('conversationJoinRequest', (request: any) => {
+      console.log('on:conversationJoinRequest', request);
+      // TODO : there is a problem here, all Conferences created by users connected with same entreprise will receive this event from all users trying to jon any Conference, 
+      // meaning that we shoul filter here, but how ? id ? name ?
+      this.joinRequestsById.set(request.getId(), request);
+    });
     this.conversation.on('waitingForModeratorAcceptance', (moderator: any) => {
       console.log("on:waitingForModeratorAcceptance", moderator);
       this.moderator = moderator;

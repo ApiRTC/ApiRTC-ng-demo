@@ -185,7 +185,7 @@
     <div class="container">
         <div class="row">
             <div class="col">
-                <h1>3. Get or Create, and Join Conversation or Conference</h1>
+                <h1>3. Get or Create, and Join <span *ngIf="!isPrivate">Conversation or</span> Conference</h1>
             </div>
         </div>
         <div class="row">
@@ -195,7 +195,7 @@
                     <form [formGroup]="conversationFormGroup" (ngSubmit)="getOrcreateConversation()">
                         <mat-form-field>
                             <mat-label>Conversation name</mat-label>
-                            <span matPrefix>{{baseUrl}}/</span>
+                            <!-- <span matPrefix>{{baseUrl}}/</span> -->
                             <input type="text" matInput placeholder="abcd" formControlName="name">
                         </mat-form-field>&nbsp;
                         <button mat-raised-button color="primary" type="submit" [disabled]="!conversationFormGroup.valid||!session||conversation" title="Get Or Create Conversation">GetOrCreateConversation&nbsp;<em
