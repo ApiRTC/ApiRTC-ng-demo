@@ -60,6 +60,10 @@ export class StreamDecorator {
     public setStream(stream: any) {
         this.stream = stream;
 
+        if (stream === null) {
+            return;
+        }
+
         // getCapabilities only supported by Chrome ?
         if ((apiRTC.browser !== 'Firefox') && (apiRTC.browser !== 'IE')) {
             this.capabilities = stream.getCapabilities();

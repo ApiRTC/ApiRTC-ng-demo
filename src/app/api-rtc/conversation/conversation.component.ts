@@ -78,8 +78,9 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   nicknameFc: FormControl = new FormControl({ value: DEFAULT_NICKNAME, disabled: true });
 
-  userAgentFormGroup = this.fb.group({
-    meshRoomMode: this.fb.control(false)
+  conversationAdvancedOptionsFormGroup = this.fb.group({
+    meshMode: this.fb.control({ value: false, disabled: false }),
+    meshOnly: this.fb.control({ value: false, disabled: false })
   });
   conversationFormGroup = this.fb.group({
     name: this.fb.control('', [Validators.required])
@@ -165,14 +166,15 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   // Convenient FormControl getters
   //
-  get meshRoomModeFc(): FormControl {
-    return this.userAgentFormGroup.get('meshRoomMode') as FormControl;
+  get meshModeFc(): FormControl {
+    return this.conversationAdvancedOptionsFormGroup.get('meshMode') as FormControl;
   }
-
+  get meshOnlyFc(): FormControl {
+    return this.conversationAdvancedOptionsFormGroup.get('meshOnly') as FormControl;
+  }
   get conversationNameFc(): FormControl {
     return this.conversationFormGroup.get('name') as FormControl;
   }
-
   get messageFc(): FormControl {
     return this.messageFormGroup.get('message') as FormControl;
   }
@@ -355,18 +357,19 @@ export class ConversationComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.meshRoomModeFc.valueChanges.subscribe(value => {
-      console.log("enableMeshRoomMode", value);
-      this.userAgent.enableMeshRoomMode(value);
-      // TODO :
-      // Thomas L. : pour passer de mesh à SFU 
-      // (note : que les ressources API sont nommées *MCU*)
-      // console :
-      // apiCC.session.apiCCWebRTCClient.webRTCClient.MCUClient.sessionMCUs
-      // apiCC.session.apiCCWebRTCClient.webRTCClient.MCUClient.enforceMCU()
-      // TO BE TESTED
-      // from firefox/chrome, url about:webrtc pour voir les activités webrtc, ICE stats Remote Candidate check IP 94.23.45.109 is one of our SFU
-    });
+    // this.meshModeFc.valueChanges.subscribe(value => {
+    //   console.log("enableMeshRoomMode", value);
+    //   this.userAgent.enableMeshRoomMode(value);
+    //   // TODO :
+    //   // Thomas L. : pour passer de mesh à SFU 
+    //   // (note : que les ressources API sont nommées *MCU*)
+    //   // console :
+    //   // apiCC.session.apiCCWebRTCClient.webRTCClient.MCUClient.sessionMCUs
+    //   // apiCC.session.apiCCWebRTCClient.webRTCClient.MCUClient.enforceMCU()
+    //   // TO BE TESTED
+    //   // from firefox/chrome, url about:webrtc pour voir les activités webrtc, ICE stats Remote Candidate check IP 94.23.45.109 is one of our SFU
+    // });
+    // => Commented out to use session.getOrCreateConversation with options.meshModeEnabled
   }
 
   nullifyUserAgent() {
@@ -688,6 +691,11 @@ export class ConversationComponent implements OnInit, OnDestroy {
     // Create the conversation
     //
 
+    const options = {
+      meshModeEnabled: this.meshModeFc.value,
+      meshOnlyEnabled: this.meshOnlyFc.value
+    }
+
     // TODO: Raise a Bug here : we should not have to make a different call to getOrCreateConversation depending
     // on the fact it is private or not, because in case we are a 'get' we shall not know wether the conversation
     // is private (a conference).
@@ -700,15 +708,14 @@ export class ConversationComponent implements OnInit, OnDestroy {
       // Not really because :
       // this.conversation = this.session.getOrCreateConversation(this.conversationNameFc.value);
       // does not work, it actually creates another conversation.
-      // the following works :
-      this.conversation = this.session.getConference(this.conversationNameFc.value);
-      // and the following too :
-      // this.conversation = this.session.getOrCreateConversation('Private:' + this.conversationNameFc.value);
-      // but this is not very cool...
-      console.log('Conference', this.conversation);
+      // the following works (but deprecated, and does not support options - not implemented):
+      //this.conversation = this.session.getConference(this.conversationNameFc.value, options);
+      // so use the following :
+      this.conversation = this.session.getOrCreateConversation('Private:' + this.conversationNameFc.value, options);
+      console.log('Conference', this.conversation, options);
     } else {
-      this.conversation = this.session.getOrCreateConversation(this.conversationNameFc.value);
-      console.log('Conversation', this.conversation);
+      this.conversation = this.session.getOrCreateConversation(this.conversationNameFc.value, options);
+      console.log('Conversation', this.conversation, options);
     }
 
     // force Urls build
@@ -942,9 +949,9 @@ export class ConversationComponent implements OnInit, OnDestroy {
       else if (callStats.stats.videoSent || callStats.stats.audioSent) {
 
         // "sent" media is from local stream(s) (to peers)
-        if (this.localCameraStreamsById.get(streamId)) {
+        if (this.streamHoldersById.get(streamId)) {
           console.log("setQosStat on local stream", streamId);
-          this.localCameraStreamsById.get(streamId).setQosStat({
+          this.streamHoldersById.get(streamId).setQosStat({
             video: callStats.stats.videoSent,
             audio: callStats.stats.audioSent
           });
@@ -974,9 +981,9 @@ export class ConversationComponent implements OnInit, OnDestroy {
       console.log("on:audioAmplitude", amplitudeInfo);
 
       const streamId: string = String(amplitudeInfo.streamId);
-      if (this.localCameraStreamsById.get(streamId)) {
+      if (this.streamHoldersById.get(streamId)) {
         // the event streamId is one of the local published streams
-        this.localCameraStreamsById.get(streamId).setSpeaking(amplitudeInfo.descriptor.isSpeaking);
+        this.streamHoldersById.get(streamId).setSpeaking(amplitudeInfo.descriptor.isSpeaking);
       } else {
         // the event streamId is one of the remote streams
         const streamHolder: StreamDecorator = this.streamHoldersById.get(streamId);
@@ -1209,6 +1216,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
         const streamDecorator = StreamDecorator.build(streamInfo);
         streamDecorator.setStream(stream);
         this.localCameraStreamsById.set(streamId, streamDecorator);
+        this.streamHoldersById.set(streamId, streamDecorator);
 
         // force next asynchronously to let display happen fine
         setTimeout(() => { this.next(); }, 1000);
@@ -1288,7 +1296,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
   releaseStream(streamDecorator: StreamDecorator) {
     streamDecorator.getStream().release();
     //streamDecorator = null;
-    this.localCameraStreamsById.delete(streamDecorator.getId());
+    this.streamHoldersById.delete(streamDecorator.getId());
   }
 
   publishStream(streamDecorator: StreamDecorator): void {
