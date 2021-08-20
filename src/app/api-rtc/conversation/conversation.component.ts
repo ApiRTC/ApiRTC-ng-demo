@@ -250,6 +250,19 @@ export class ConversationComponent implements OnInit, OnDestroy {
         this.isPrivate = true;
       }
     });
+
+    this.meshModeFc.valueChanges.subscribe(value => {
+      // if meshMode is false, meshOnly cannot be true
+      if (value === false) {
+        this.meshOnlyFc.setValue(false);
+      }
+    });
+    this.meshOnlyFc.valueChanges.subscribe(value => {
+      // if meshOnly is true, meshMode must be true too
+      if (value === true) {
+        this.meshModeFc.setValue(true);
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -691,32 +704,37 @@ export class ConversationComponent implements OnInit, OnDestroy {
     // Create the conversation
     //
 
-    const options = {
-      meshModeEnabled: this.meshModeFc.value,
-      meshOnlyEnabled: this.meshOnlyFc.value
-    }
-
     // TODO: Raise a Bug here : we should not have to make a different call to getOrCreateConversation depending
     // on the fact it is private or not, because in case we are a 'get' we shall not know wether the conversation
     // is private (a conference).
     // TODO: handle differently the isPrivate from request parameters and the one set by choice locally. Because in the end
     // we should not need to know this information from the url, we should not know this information at all...
     // I was forced to implement this trick (passing the private=true in url) because ApiRTC api forces to call getOrcreateConversation differently
-    if (this.isPrivate) {
-      // WARN getConference is deprecated ! shall I finally be able to have same function for both getOrcreateConversation and createConference ?
-      // just making the name different ?
-      // Not really because :
-      // this.conversation = this.session.getOrCreateConversation(this.conversationNameFc.value);
-      // does not work, it actually creates another conversation.
-      // the following works (but deprecated, and does not support options - not implemented):
-      //this.conversation = this.session.getConference(this.conversationNameFc.value, options);
-      // so use the following :
-      this.conversation = this.session.getOrCreateConversation('Private:' + this.conversationNameFc.value, options);
-      console.log('Conference', this.conversation, options);
-    } else {
-      this.conversation = this.session.getOrCreateConversation(this.conversationNameFc.value, options);
-      console.log('Conversation', this.conversation, options);
+    //if (this.isPrivate) {
+    // WARN getConference is deprecated ! shall I finally be able to have same function for both getOrcreateConversation and createConference ?
+    // just making the name different ?
+    // Not really because :
+    // this.conversation = this.session.getOrCreateConversation(this.conversationNameFc.value);
+    // does not work, it actually creates another conversation.
+    // the following works (but deprecated, and does not support options - not implemented):
+    //this.conversation = this.session.getConference(this.conversationNameFc.value, options);
+    // so use the following :
+    //  this.conversation = this.session.getOrCreateConversation('Private:' + this.conversationNameFc.value, options);
+    //  console.log('Conference', this.conversation, options);
+    //} else {
+    //  this.conversation = this.session.getOrCreateConversation(this.conversationNameFc.value, options);
+    //  console.log('Conversation', this.conversation, options);
+    //}
+
+    const options = {
+      meshModeEnabled: this.meshModeFc.value,
+      meshOnlyEnabled: this.meshOnlyFc.value
     }
+    this.conversation = this.session.getOrCreateConversation(this.isPrivate ? 'Private:' + this.conversationNameFc.value : this.conversationNameFc.value, options);
+    console.log('Conversation', this.conversation, options);
+
+    this.meshModeFc.disable();
+    this.meshOnlyFc.disable();
 
     // force Urls build
     this.buildUrl();
@@ -743,8 +761,10 @@ export class ConversationComponent implements OnInit, OnDestroy {
       // TODO : check what it does because this does not seem to set the Conversation.name
       // doc says : friendlyName 	string optional: friendly name for this conference to display in Apizee cloud
       friendlyName: this.conversationNameFc.value + '_friendlyName',
-      // WARNING : name became required since 4.5.1 ? but PrivateConferenceCreationOptions.name is not documented in api/reference ?!!!
-      //name: this.conversationNameFc.value
+
+      // TODO : I don't think theses are taken into account as of apirtc@4.5.3 (the version in which theses were added for a getOrCreateConversation)
+      meshModeEnabled: this.meshModeFc.value,
+      meshOnlyEnabled: this.meshOnlyFc.value
     }
     //
     enterprise.createPrivateConference(options).then((conference: any) => {
@@ -758,6 +778,9 @@ export class ConversationComponent implements OnInit, OnDestroy {
       //
       this.conversation = conference;
       this.isPrivate = true;
+
+      this.meshModeFc.disable();
+      this.meshOnlyFc.disable();
 
       // When creating a Conference, the UserAgent is automatically joint
       this.joined = true;
@@ -809,6 +832,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
             this.joined = false;
             this.conversation.destroy();
             this.conversation = null;
+            this.meshModeFc.enable();
+            this.meshOnlyFc.enable();
             this.joinRequestsById.clear();
           })
           .catch((error: any) => { console.error('Conversation leave error', error); });
@@ -816,6 +841,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
       else {
         this.conversation.destroy();
         this.conversation = null;
+        this.meshModeFc.enable();
+        this.meshOnlyFc.enable();
         this.joinRequestsById.clear();
       }
     }
