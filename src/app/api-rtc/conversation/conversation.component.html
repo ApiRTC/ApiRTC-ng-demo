@@ -59,7 +59,7 @@
     <div class="container">
         <div class="row">
             <div class="col">
-                <h1>2. Register UserAgent</h1>
+                <h1>2. Get Session</h1>
                 <p>Register a <code>UserAgent</code> to get a <code>Session</code>.</p>
                 <br>
                 <p>Several authentications are possible :</p>
@@ -171,6 +171,16 @@
                 </p>
             </div>
         </div>
+
+        <div class="row" *ngIf="session">
+            <div class="col">
+                <p *ngFor="let kv of contactsByGroup | keyvalue" class="alert alert-info clearfix" role="alert">Group
+                    <strong>{{kv.key}}</strong> has users :
+                    <span *ngFor="let contact of kv.value">{{contact.userData.username}}:{{contact.userData.nickname}},</span>
+                </p>
+            </div>
+        </div>
+
     </div>
 
     <hr>
@@ -296,8 +306,8 @@
                 </p>
                 <div class="alert alert-success clearfix" *ngIf="joined">
                     <h3>List of <code>Contact</code>s in this conversation :</h3>
-                    <ul *ngIf="contactHoldersById.size > 0; else elseBlock_Alone">
-                        <li *ngFor="let kv of contactHoldersById | keyvalue">
+                    <ul *ngIf="conversationContactHoldersById.size > 0; else elseBlock_Alone">
+                        <li *ngFor="let kv of conversationContactHoldersById | keyvalue">
                             Peer <code>UserAgent</code> with <code>username</code>
                             <span>&lt;<strong>{{kv.value.username}}</strong>&gt;</span> has joined. This is
                             <code>Contact</code> with <code>id</code>
@@ -451,14 +461,14 @@
                 <h1>6. Display Streams from peers</h1>
                 <p>Display <code>Stream</code>(s) received from peers.
                 </p>
-                <p class="alert alert-info" role="alert" *ngIf="contactHoldersById.size===0">
+                <p class="alert alert-info" role="alert" *ngIf="conversationContactHoldersById.size===0">
                     Open this webapp in another tab, using link at <strong>3.</strong>, to simulate a peer.
                 </p>
             </div>
         </div>
     </div>
     <div class="row">
-        <div *ngFor="let kv of contactHoldersById | keyvalue" class="col-sm-12 col-md-4">
+        <div *ngFor="let kv of conversationContactHoldersById | keyvalue" class="col-sm-12 col-md-4">
             <app-peer [contactHolder]="kv.value" [withModeration]="_isPrivate&&(role===roleEnum.Moderator)" (onStreamSubscription)="subscribeOrUnsubscribeToStream($event)" (onEject)="eject(kv.value)">
             </app-peer>
         </div>

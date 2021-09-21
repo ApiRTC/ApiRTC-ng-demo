@@ -78,6 +78,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   nicknameFc: FormControl = new FormControl({ value: DEFAULT_NICKNAME, disabled: true });
 
+  contactsByGroup: Map<string, Array<any>> = new Map();
+
   conversationAdvancedOptionsFormGroup = this.fb.group({
     meshMode: this.fb.control({ value: false, disabled: false }),
     meshOnly: this.fb.control({ value: false, disabled: false })
@@ -136,7 +138,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   // Peer Contacts
   // Keep here only contacts that joined the conversation
-  contactHoldersById: Map<string, ContactDecorator> = new Map();
+  conversationContactHoldersById: Map<string, ContactDecorator> = new Map();
 
   // Peer Streams
   streamHoldersById: Map<string, StreamDecorator> = new Map();
@@ -315,7 +317,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   createUserAgent() {
     this.userAgent = new apiRTC.UserAgent({
-      // format is like 'apzKey:<APIKEY>'  
+      // format is like 'apzKey:<APIKEY>'
       uri: 'apzkey:' + this.apiKeyFc.value
     });
 
@@ -575,25 +577,44 @@ export class ConversationComponent implements OnInit, OnDestroy {
    */
   getOrCreateContactHolder(contact: any): ContactDecorator {
     const contactId = String(contact.getId());
-    if (this.contactHoldersById.has(contactId)) {
-      return this.contactHoldersById.get(contactId);
+    if (this.conversationContactHoldersById.has(contactId)) {
+      return this.conversationContactHoldersById.get(contactId);
     } else {
       const contactHolder: ContactDecorator = ContactDecorator.build(contact);
-      this.contactHoldersById.set(contactHolder.getId(), contactHolder);
+      this.conversationContactHoldersById.set(contactHolder.getId(), contactHolder);
       return contactHolder;
     }
   }
 
   doListenSessionEvents(): void {
-    this.session.on('contactListUpdate', updatedContacts => { //display a list of connected users
-      console.log("MAIN - contactListUpdate", updatedContacts);
+    this.session.on('contactListUpdate', (updatedContacts: any) => { //display a list of connected users
+      console.log("Session.contactListUpdate", updatedContacts);
       // TODO: should we also prefer this list update rather than contactJoined/Left to handle list of contacts 
       // like we do for streams with streamListChanged ?
       // if (this.conversation !== null) {
       //   let contactList = this.conversation.getContacts();
       //   console.info("contactList  conversation.getContacts() :", contactList);
 
-      for (var contact of updatedContacts.userDataChanged) {
+      // Maintain Map of Contacts per Group
+      //
+      for (const group of Object.keys(updatedContacts.joinedGroup)) {
+        if (!this.contactsByGroup.has(group)) {
+          this.contactsByGroup.set(group, new Array());
+        }
+        for (const contact of updatedContacts.joinedGroup[group]) {
+          this.contactsByGroup.get(group).push(contact);
+        }
+      }
+      for (const group of Object.keys(updatedContacts.leftGroup)) {
+        if (!this.contactsByGroup.has(group)) {
+          this.contactsByGroup.set(group, new Array());
+        }
+        for (const contact of updatedContacts.leftGroup[group]) {
+          this.contactsByGroup.get(group).push(contact);
+        }
+      }
+
+      for (const contact of updatedContacts.userDataChanged) {
         const contactId = String(contact.getId());
 
         //const contactHolder: ContactDecorator = this.contactHoldersById.get(contactId); // Fails because 'contactListUpdate' is also fired first when a new contact comes in the Session
@@ -604,7 +625,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
         // Finally, just check if we have created this contact already (because it has joined the conversation) and update it. Otherwise just ignore it
         // TODO : Note that we may consider this as a security hole : all client application get notified of users connected with same apiKey
         // but not necessarily having joined the same conversation...
-        const contactHolder: ContactDecorator = this.contactHoldersById.get(contactId);
+        const contactHolder: ContactDecorator = this.conversationContactHoldersById.get(contactId);
         if (contactHolder) {
           contactHolder.update(contact);
         }
@@ -887,7 +908,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
           this.conversation.unsubscribeToStream(streamId);
 
           this.streamHoldersById.delete(streamId);
-          const contactHolder = this.contactHoldersById.get(contactId);
+          const contactHolder = this.conversationContactHoldersById.get(contactId);
           contactHolder.removeStream(streamId);
         }
       }
@@ -937,7 +958,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
       this.getOrCreateContactHolder(contact);
     }).on('contactLeft', (contact: any) => {
       console.log("on:contactLeft:", contact);
-      this.contactHoldersById.delete(contact.getId());
+      this.conversationContactHoldersById.delete(contact.getId());
     });
   }
 
@@ -1438,8 +1459,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
         video: {
           cursor: "always"
         },
-        // TODO : is audio relevant here ?
-        audio: {
+        audio: //false
+        { // https://w3c.github.io/mediacapture-screen-share/#displaymediastreamconstraints
           echoCancellation: true,
           noiseSuppression: true,
           sampleRate: 44100
