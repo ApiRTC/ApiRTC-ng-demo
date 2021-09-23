@@ -398,8 +398,8 @@
             <div class="col-sm-12 col-md-4 text-center">
                 <form [formGroup]="videoFileFormGroup">
                     <input type="file" formControlName="file" (change)="createVideoStream($event)" />
-                    <button mat-raised-button color="accent" (click)="releaseVideoStream()" [disabled]="!videoStreamHolder||videoStreamHolder?.published" title="Release Stream">Release</button>
                     <button mat-raised-button color="{{videoStreamHolder?.published?'accent':'primary'}}" (click)="togglePublishVideoStream()" [disabled]="!joined||!videoStreamHolder" title="{{videoStreamHolder?.published?'Unpublish':'Publish'}} Video File">{{videoStreamHolder?.published?'Unpublish':'Publish'}}</button>
+                    <button mat-raised-button color="accent" (click)="releaseVideoStream()" [disabled]="!videoStreamHolder||videoStreamHolder?.published" title="Release Stream">Release</button>
                 </form>
             </div>
         </div>
@@ -413,19 +413,18 @@
                 </div> -->
                 <div class="carousel-inner">
                     <div class="carousel-item" [ngClass]="{'active': i === activeIndex}" *ngFor="let kv of localCameraStreamsById | keyvalue; index as i; first as isFirst">
-                        <br>
-                        <p class="text-center">
-                            <button mat-raised-button color="{{kv.value.published?'accent':'primary'}}" (click)="!kv.value.published?publishStream(kv.value):unpublishStream(kv.value)" [disabled]="!kv.value||!joined||publishInPrgs">{{!kv.value.published?'Publish
-                                Stream':'Unpublish Stream'}}
-                                <span *ngIf="publishInPrgs" class="spinner-border text-light" role="status"></span></button>
-                            <button mat-raised-button color="accent" (click)="releaseStream(kv.value);next()" [disabled]="!userAgent||kv.value.published">Release Stream</button>
-                        </p>
-                        <div class="d-block w-100 h-100">
+                        <div class="mt-3 d-block w-100 h-100">
                             <app-stream [streamHolder]="kv.value" [withSubscription]="false" [withDevicesControl]="true" [audioMuted]="false" [videoMuted]="false" [audioInDevices]="audioInDevices" [videoDevices]="videoDevices" (onAudioMute)="toggleAudioMute(kv.value)" (onVideoMute)="toggleVideoMute(kv.value)"
                                 (onAudioInSelected)="selectedAudioInDevice=$event;changeLocalStream(kv.value)" (onVideoSelected)="selectedVideoDevice=$event;changeLocalStream(kv.value)" [background]="currentBackground" (onBackgroundSelected)="currentBackground=$event;changeLocalStream(kv.value)"
                                 (onVideoQualitySelected)="selectedVideoQuality=$event;changeLocalStream(kv.value)">
                             </app-stream>
                         </div>
+                        <p class="text-center">
+                            <button mat-raised-button color="{{kv.value.published?'accent':'primary'}}" (click)="!kv.value.published?publishStream(kv.value):unpublishStream(kv.value)" [disabled]="!kv.value||!joined||publishInPrgs">{{!kv.value.published?'Publish
+                                Stream':'Unpublish Stream'}}
+                                <span *ngIf="publishInPrgs" class="spinner-border text-light" role="status"></span></button>
+                            <button mat-raised-button color="accent" (click)="releaseLocalStream(kv.value);next()" [disabled]="!userAgent||kv.value.published">Release Stream</button>
+                        </p>
                     </div>
                 </div>
                 <button class="carousel-control-prev" type="button" data-bs-target="#local-streams" data-bs-slide="prev" (click)="prev()">

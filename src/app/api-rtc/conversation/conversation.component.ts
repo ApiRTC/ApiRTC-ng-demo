@@ -292,7 +292,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
       if (streamHolder.isPublished()) {
         this.unpublishStream(streamHolder);
       }
-      this.releaseStream(streamHolder);
+      this.releaseLocalStream(streamHolder);
     });
     if (this.screenSharingStreamHolder) {
       if (this.screenSharingStreamHolder.isPublished()) {
@@ -1341,10 +1341,10 @@ export class ConversationComponent implements OnInit, OnDestroy {
     }
   }
 
-  releaseStream(streamDecorator: StreamDecorator) {
+  releaseLocalStream(streamDecorator: StreamDecorator) {
+    console.log("releaseLocalStream", streamDecorator);
     streamDecorator.getStream().release();
-    //streamDecorator = null;
-    this.streamHoldersById.delete(streamDecorator.getId());
+    this.localCameraStreamsById.delete(streamDecorator.getId());
   }
 
   publishStream(streamDecorator: StreamDecorator): void {
