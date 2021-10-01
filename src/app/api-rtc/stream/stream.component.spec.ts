@@ -21,8 +21,8 @@ describe('StreamComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(StreamComponent);
     component = fixture.componentInstance;
-    const streamInfo = { streamId: 'a-stream-id', isRemote: false, type: 'regular' };
-    component.streamHolder = StreamDecorator.build(streamInfo);
+    //const streamInfo = { streamId: 'a-stream-id', isRemote: false, type: 'regular' };
+    component.streamHolder = StreamDecorator.buildFromId('a-stream-id');
     fixture.detectChanges();
   });
 

@@ -8,8 +8,6 @@ export class StreamDecorator {
 
     public readonly id: string;
 
-    public readonly streamInfo: any;
-
     public stream: any;
     public capabilities: any;
     public constraints: any;
@@ -25,22 +23,29 @@ export class StreamDecorator {
 
     private listeners: Object = {};
 
-    constructor(streamInfo: any, qosStat?: any) {
-        this.streamInfo = streamInfo;
-
-        // console.log("StreamDecorator: typeof streamInfo.streamId :", typeof streamInfo.streamId) => number
-        this.id = String(streamInfo.streamId);
-
-        this.qosStat = qosStat ? qosStat : undefined;
+    constructor(streamId: string, stream?: any) {
+        this.id = streamId;
+        this.stream = stream;
     }
 
     /**
      * 
-     * @param streamInfo 
+     * @param streamId 
+     * @param qosStat 
      * @returns 
      */
-    public static build(streamInfo: any, qosStat?: any): StreamDecorator {
-        return new StreamDecorator(streamInfo, qosStat);
+    public static buildFromId(streamId: string): StreamDecorator {
+        return new StreamDecorator(streamId);
+    }
+
+    /**
+     * 
+     * @param streamId 
+     * @param qosStat 
+     * @returns 
+     */
+    public static build(stream: any): StreamDecorator {
+        return new StreamDecorator(String(stream.getId()), stream);
     }
 
     // Events handling (Listener Design Pattern implementation)

@@ -11,6 +11,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
@@ -34,7 +35,7 @@ describe('ConversationComponent', () => {
         [{ path: 'conversation/:name', component: ConversationComponent }
         ]),
         BrowserAnimationsModule,
-        MatFormFieldModule, MatInputModule, MatChipsModule, MatProgressBarModule, MatProgressSpinnerModule,
+        MatFormFieldModule, MatInputModule, MatChipsModule, MatCheckboxModule, MatProgressBarModule, MatProgressSpinnerModule,
         ReactiveFormsModule, HttpClientModule, HttpClientTestingModule],
       declarations: [ConversationComponent, LoginComponent],
       providers: [{ provide: WINDOW, useValue: mockWindow }]

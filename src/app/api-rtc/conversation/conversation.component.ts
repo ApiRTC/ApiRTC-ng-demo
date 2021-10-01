@@ -57,8 +57,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
   // TODO : REMOVETHIS remove my apiKey
   apiKeyFc: FormControl = new FormControl('9669e2ae3eb32307853499850770b0c3');
 
-  //apiKeyFc: FormControl = new FormControl('aab29a8fb8423d7ccd3a3fcb7fd2b3db');
-
   // TODO : REMOVETHIS remove the valid2.apirtc.com kevin_moyse@yahoo.fr	aab29a8fb8423d7ccd3a3fcb7fd2b3db
   //cloudUrl: string | undefined = undefined;//"https://valid2.apirtc.com";
   cloudUrlFc: FormControl = new FormControl('https://cloud.apirtc.com');
@@ -655,7 +653,10 @@ export class ConversationComponent implements OnInit, OnDestroy {
     streamDecorator.getStream().release();
 
     // Set stream to null in order to destroy the associated component
-    streamDecorator.setStream(null);
+    //streamDecorator.setStream(null);
+    // actually even remove from the list
+    this.localCameraStreamsById.delete(streamDecorator.id);
+    this.streamHoldersById.delete(streamDecorator.id);
 
     // get selected devices
     const options = {};
@@ -700,12 +701,11 @@ export class ConversationComponent implements OnInit, OnDestroy {
     }
 
     // and recreate a new stream
-    this.doCreateStream(options)
-      .then((stream) => {
-        streamDecorator.setStream(stream);
+    this.doCreateCameraStream(options)
+      .then((streamDecorator) => {
         // if local stream was published consider we should publish changed one
         if (published) {
-          this.publishStream(streamDecorator);
+          this.doPublishStream(streamDecorator);
         }
       })
       .catch((error: any) => { console.error('doCreateStream error', error); });
@@ -892,7 +892,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
         if (streamInfo.listEventType === 'added') {
           console.log('new remote stream', streamId);
 
-          const streamHolder: StreamDecorator = StreamDecorator.build(streamInfo);
+          const streamHolder: StreamDecorator = StreamDecorator.buildFromId(streamId);
           console.log(streamHolder.getId() + "->", streamHolder);
           this.streamHoldersById.set(streamHolder.getId(), streamHolder);
           const contactHolder: ContactDecorator = this.getOrCreateContactHolder(streamInfo.contact);
@@ -1255,25 +1255,16 @@ export class ConversationComponent implements OnInit, OnDestroy {
   // Streams
 
   createCameraStream() {
-    this.doCreateStream()
-      .then((stream) => {
-        const streamId = String(stream.getId());
-        const streamInfo = { streamId: streamId, isRemote: false, type: 'regular' };
-        // build fake streamInfo object to build a local stream.
-        // TODO : enhance this in apiRTC
-        const streamDecorator = StreamDecorator.build(streamInfo);
-        streamDecorator.setStream(stream);
-        this.localCameraStreamsById.set(streamId, streamDecorator);
-        this.streamHoldersById.set(streamId, streamDecorator);
-
+    this.doCreateCameraStream()
+      .then((streamDecorator) => {
         // force next asynchronously to let display happen fine
         setTimeout(() => { this.next(); }, 1000);
       })
-      .catch((error: any) => { console.error('doCreateStream error', error); });
+      .catch((error: any) => { console.error('doCreateCameraStream error', error); });
   }
 
   // if options are specified, this is because a specific device was selected
-  doCreateStream(options?: any): Promise<any> {
+  doCreateCameraStream(options?: any): Promise<StreamDecorator | any> {
     console.log("createStream() with options", options);
     return new Promise((resolve, reject) => {
 
@@ -1294,10 +1285,19 @@ export class ConversationComponent implements OnInit, OnDestroy {
         options.constraints = default_createStreamOptions.constraints;
       }
 
+      // options is of type MediaStreamConstraints (https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamConstraints) :
+      // {
+      //   audio : boolean | MediaTrackConstraints (https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints)
+      //   video : boolean | MediaTrackConstraints
+      // }
+
       this.userAgent.createStream(options ? options : default_createStreamOptions)
         .then((stream: any) => {
           console.log('createStream :', stream);
-          resolve(stream);
+          const streamDecorator = StreamDecorator.build(stream);
+          this.localCameraStreamsById.set(streamDecorator.getId(), streamDecorator);
+          this.streamHoldersById.set(streamDecorator.getId(), streamDecorator);
+          resolve(streamDecorator);
         }).catch((error: any) => {
           console.error('createStream error', error);
           reject(error);
@@ -1347,15 +1347,27 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.localCameraStreamsById.delete(streamDecorator.getId());
   }
 
-  publishStream(streamDecorator: StreamDecorator): void {
+  publishStream(streamDecorator: StreamDecorator) {
+    // https://dev.apirtc.com/reference/global.html#PublishOptions
+    const options = {
+      qos: {
+        videoMinQuality: "medium",
+        videoStartQuality: "good"
+      }
+    };
+    console.log("PublishOptions", options);
+    this.doPublishStream(streamDecorator, options);
+  }
+
+  doPublishStream(streamDecorator: StreamDecorator, options?: Object): void {
     const localStream = streamDecorator.getStream();
 
-    console.log("publishStream()", localStream);
+    console.log("doPublishStream()", localStream);
 
     // Publish your own stream to the conversation
     this.publishInPrgs = true;
-    this.conversation.publish(localStream).then((stream: any) => {
-      console.log("publishStream() published", stream);
+    this.conversation.publish(localStream, options).then((stream: any) => {
+      console.log("conversation.publish published", stream);
       streamDecorator.setPublished(true);
       this.publishInPrgs = false;
     }).catch((error: any) => {
@@ -1403,9 +1415,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
       const mediaStream = (apiRTC.browser === 'Firefox') ? videoElement.mozCaptureStream() : videoElement.captureStream();
       apiRTC.Stream.createStreamFromMediaStream(mediaStream)
         .then((stream: any) => {
-          const streamInfo = { streamId: String(stream.getId()), isRemote: false, type: 'regular' };
-          this.videoStreamHolder = StreamDecorator.build(streamInfo);
-          this.videoStreamHolder.setStream(stream);
+          this.videoStreamHolder = StreamDecorator.build(stream);
           console.info('createVideoStream()::createStreamFromMediaStream', stream);
         })
         .catch((error: any) => {
@@ -1478,11 +1488,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
             this.releaseScreenSharingStream();
           });
 
-          // build fake streamInfo object to build a local stream.
-          // TODO : enhance this in apiRTC
-          const streamInfo = { streamId: String(stream.getId()), isRemote: false, type: 'regular' };
-          this.screenSharingStreamHolder = StreamDecorator.build(streamInfo);
-          this.screenSharingStreamHolder.setStream(stream);
+          this.screenSharingStreamHolder = StreamDecorator.build(stream);
+
           // and publish it
           console.log("toggleScreenSharing()::publish", stream);
           this.conversation.publish(this.screenSharingStreamHolder.getStream()).then((l_stream: any) => {
