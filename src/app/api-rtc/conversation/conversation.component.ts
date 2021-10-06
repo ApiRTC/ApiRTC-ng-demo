@@ -886,23 +886,20 @@ export class ConversationComponent implements OnInit, OnDestroy {
       // and who the streams belongs to (streamInfo.contact).
 
       const streamId = String(streamInfo.streamId);
+      console.log("typeof streamInfo.contact.getId()", typeof streamInfo.contact.getId());
       const contactId = String(streamInfo.contact.getId());
 
       if (streamInfo.isRemote === true) {
         if (streamInfo.listEventType === 'added') {
           console.log('new remote stream', streamId);
-
           const streamHolder: StreamDecorator = StreamDecorator.buildFromId(streamId);
           console.log(streamHolder.getId() + "->", streamHolder);
           this.streamHoldersById.set(streamHolder.getId(), streamHolder);
           const contactHolder: ContactDecorator = this.getOrCreateContactHolder(streamInfo.contact);
-          console.log("typeof streamInfo.contact.getId()", typeof streamInfo.contact.getId());
           contactHolder.addStream(streamHolder);
-
         } else if (streamInfo.listEventType === 'removed') {
           console.log('remote stream removed', streamId);
 
-          // TODO : is that mandatory ?
           // this sounds a better reflection to 'added' case but may not be required
           console.log('unsubscribeToStream', streamId);
           this.conversation.unsubscribeToStream(streamId);
@@ -919,9 +916,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
   doListenToStreamEvents() {
     this.conversation.on('streamAdded', (stream: any) => {
       console.log('on:streamAdded:', stream);
-      // 'streamAdded' actually means that a stream is published by a peer and thus is ready to be displayed.
+      // 'streamAdded' means that a stream published by a peer was subscribed to and media is ready to be displayed.
       // The event comes with a Stream object that can be attached to DOM
-      // TODO : rename this event ?
       //
       // Get our decorator object
       const streamHolder: StreamDecorator = this.streamHoldersById.get(String(stream.getId()));
@@ -933,7 +929,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
       // - peer left,
       // - or peer decided to unpublish this stream,
       // - or we decided to unsubscribe to this stream. (in which case we won't receive a 'streamListChanged' with listEventType==='removed' event)
-      // TODO : rename this event ?
+      // - a thechnical issue happened and the media is not available
       //
       // Get our object representing to notion of a peer stream and just set its apiRTC stream to null : the
       // component will remove the video tag from the DOM.
@@ -945,10 +941,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
       if (streamHolder) {
         streamHolder.setStream(null);
       }
-
-      // REMOVETHIS :
-      // for debug only (this function getAvailableStreamList shall be hidden in apiRTC public api)
-      console.log("getAvailableStreamList:", this.conversation.getAvailableStreamList());
     })
   }
 
@@ -1031,12 +1023,12 @@ export class ConversationComponent implements OnInit, OnDestroy {
       const streamId: string = String(amplitudeInfo.streamId);
       if (this.streamHoldersById.get(streamId)) {
         // the event streamId is one of the local published streams
-        this.streamHoldersById.get(streamId).setSpeaking(amplitudeInfo.descriptor.isSpeaking);
+        this.streamHoldersById.get(streamId).setSpeaking(amplitudeInfo.isSpeaking);
       } else {
         // the event streamId is one of the remote streams
         const streamHolder: StreamDecorator = this.streamHoldersById.get(streamId);
         if (streamHolder) {
-          streamHolder.setSpeaking(amplitudeInfo.descriptor.isSpeaking);
+          streamHolder.setSpeaking(amplitudeInfo.isSpeaking);
         }
       }
     });
@@ -1353,7 +1345,9 @@ export class ConversationComponent implements OnInit, OnDestroy {
       qos: {
         videoMinQuality: "medium",
         videoStartQuality: "good"
-      }
+      },
+      audioOnly: false,
+      videoOnly: false
     };
     console.log("PublishOptions", options);
     this.doPublishStream(streamDecorator, options);
