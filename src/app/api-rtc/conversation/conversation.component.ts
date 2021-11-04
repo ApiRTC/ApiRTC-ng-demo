@@ -53,17 +53,11 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   // FormControl/Group objects
   //
-  //apiKeyFc: FormControl = new FormControl('myDemoApiKey');
-  // TODO : REMOVETHIS remove my apiKey
-  apiKeyFc: FormControl = new FormControl('9669e2ae3eb32307853499850770b0c3');
+  apiKeyFc: FormControl = new FormControl('myDemoApiKey');
 
-  // TODO : REMOVETHIS remove the valid2.apirtc.com kevin_moyse@yahoo.fr	aab29a8fb8423d7ccd3a3fcb7fd2b3db
-  //cloudUrl: string | undefined = undefined;//"https://valid2.apirtc.com";
   cloudUrlFc: FormControl = new FormControl('https://cloud.apirtc.com');
 
-  // TODO : REMOVETHIS Remove default
-  //usernameFc: FormControl = new FormControl('kevin_moyse@yahoo.fr', [Validators.required]);
-  usernameFc: FormControl = new FormControl('kevin.moyse@apizee.com', [Validators.required]);
+  usernameFc: FormControl = new FormControl(null, [Validators.required]);
 
   userAgentCreationType: UserAgentCreationType;
   userAgentAuthType: UserAgentAuthType;
@@ -369,20 +363,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
         this.userAgent.getUserData().setToSession();
       }
     });
-
-    // this.meshModeFc.valueChanges.subscribe(value => {
-    //   console.log("enableMeshRoomMode", value);
-    //   this.userAgent.enableMeshRoomMode(value);
-    //   // TODO :
-    //   // Thomas L. : pour passer de mesh à SFU 
-    //   // (note : que les ressources API sont nommées *MCU*)
-    //   // console :
-    //   // apiCC.session.apiCCWebRTCClient.webRTCClient.MCUClient.sessionMCUs
-    //   // apiCC.session.apiCCWebRTCClient.webRTCClient.MCUClient.enforceMCU()
-    //   // TO BE TESTED
-    //   // from firefox/chrome, url about:webrtc pour voir les activités webrtc, ICE stats Remote Candidate check IP 94.23.45.109 is one of our SFU
-    // });
-    // => Commented out to use session.getOrCreateConversation with options.meshModeEnabled
   }
 
   nullifyUserAgent() {
@@ -818,32 +798,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   }
 
-  //TODO : REMOVETHIS : DOES NOT WORK, subsequent join fails
-  // 2021-05-17T12:29:57.318Z][ERROR]apiRTC(Conversation) checkAccess() - cannot check access
-  // https://cloud.apizee.com/api/v2/conferences/7a3dc7993234907508525829e02f2388:glop/checkAccess
-  // {"code":10,"message":"The selected room_name field is invalid.","details":"Parameter room_name"}
-  createConference_test_DOESNOTWORK() {
-    const enterprise = this.userAgent.getEnterprise();
-    console.log("Enterprise apiKey", enterprise.getApiKey());
-
-    // use the apiKeyFc to store the apiKey (will be used to create the conversation url)
-    this.apiKeyFc.setValue(enterprise.getApiKey());
-
-    console.log("createConference2", 'Private:' + this.conversationNameFc.value);
-    this.conversation = this.session.getOrCreateConversation('Private:' + this.conversationNameFc.value);
-
-    this.role = Role.Moderator;
-
-    this.isPrivate = true;
-
-    this.doListenToConversationEvents();
-
-    this.session.on('conversationJoinRequest', (request: any) => {
-      console.log('on:conversationJoinRequest', request);
-      this.joinRequestsById.set(request.getId(), request);
-    });
-  }
-
   destroyConversation(): void {
     console.info('Destroy conversation');
     if (this.conversation) {
@@ -1057,7 +1011,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.session.on('conversationJoinRequest', (request: any) => {
       console.log('on:conversationJoinRequest', request);
       // TODO : there is a problem here, all Conferences created by users connected with same entreprise will receive this event from all users trying to jon any Conference, 
-      // meaning that we shoul filter here, but how ? id ? name ?
+      // meaning that we should filter here, but how ? id ? name ?
       this.joinRequestsById.set(request.getId(), request);
     });
     this.conversation.on('waitingForModeratorAcceptance', (moderator: any) => {
@@ -1074,7 +1028,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
       } else if (this.role === Role.Moderator) {
         // Nothing to do here ?, the application on Default Role side shall leave and destroy conversation
         if (data.contact) {
-          // TODO
           // Remove Eject button for the user
           //
           //this.contactHoldersById.delete(data.contact.getId());
