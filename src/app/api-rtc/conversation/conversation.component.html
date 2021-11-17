@@ -7,7 +7,9 @@
         <div class="row mt-5">
             <div class="col fs-5">
                 <p>Welcome to <strong>ApiRTC</strong> demonstration client application!</p>
-                <p>This <a href="https://github.com/ApiRTC/ApiRTC-ng-demo" target="_blank" rel="noopener"><strong>open-source</strong></a> application implements most available features of
+                <p>This <a href="https://github.com/ApiRTC/ApiRTC-ng-demo" target="_blank"
+                        rel="noopener"><strong>open-source</strong></a> application implements most available features
+                    of
                     <strong>ApiRTC</strong> javascript library.
                 </p>
             </div>
@@ -31,16 +33,20 @@
                         <mat-label>apiKey</mat-label>
                         <input matInput placeholder="apiKey" [formControl]="apiKeyFc">
                         <mat-icon matSuffix>fingerprint</mat-icon>
-                        <mat-hint>Get your own apiKey from <a href="{{cloudUrlFc.value}}/register#account" target="_blank" rel="noopener">{{cloudUrlFc.value}}/register</a>
+                        <mat-hint>Get your own apiKey from <a href="{{cloudUrlFc.value}}/register#account"
+                                target="_blank" rel="noopener">{{cloudUrlFc.value}}/register</a>
                         </mat-hint>
                     </mat-form-field>
                     &nbsp;
-                    <button mat-raised-button color="primary" (click)="createUserAgent()" [disabled]="userAgent" title="Create UserAgent">new UserAgent&nbsp;<em class="bi bi-file-earmark-plus"></em></button>
+                    <button mat-raised-button color="primary" (click)="createUserAgent()" [disabled]="userAgent"
+                        title="Create UserAgent">new UserAgent&nbsp;<em class="bi bi-file-earmark-plus"></em></button>
                 </div>
             </div>
             <div class="col">
                 <h3 class="text-center"><strong>ApiRTC</strong> user management</h3>
-                <p>Create <code>UserAgent</code> with the <code>username</code> of a user created within your enterprise account on <a href="{{cloudUrlFc.value}}/users" target="_blank" rel="noopener">{{cloudUrlFc.value}}/users</a> :
+                <p>Create <code>UserAgent</code> with the <code>username</code> of a user created within your enterprise
+                    account on <a href="{{cloudUrlFc.value}}/users" target="_blank"
+                        rel="noopener">{{cloudUrlFc.value}}/users</a> :
                 </p>
                 <div class="text-center">
                     <mat-form-field [style.width.%]="50">
@@ -54,7 +60,9 @@
                         </mat-error>
                     </mat-form-field>
                     &nbsp;
-                    <button mat-raised-button color="primary" (click)="createUserAgentWithUsername()" [disabled]="userAgent" title="Create UserAgent">new UserAgent&nbsp;<em class="bi bi-file-earmark-plus"></em></button>
+                    <button mat-raised-button color="primary" (click)="createUserAgentWithUsername()"
+                        [disabled]="userAgent" title="Create UserAgent">new UserAgent&nbsp;<em
+                            class="bi bi-file-earmark-plus"></em></button>
                 </div>
             </div>
         </div>
@@ -62,7 +70,8 @@
             <div class="col">
                 <div *ngIf="userAgent" class="alert alert-success clearfix" role="alert"><code>UserAgent</code> created.
                     <span class="float-right"><button mat-raised-button color="warn" (click)="nullifyUserAgent()"
-                            [disabled]="session" title="Set to null"><em class="bi bi-trash"></em>&nbsp;Trash</button></span>
+                            [disabled]="session" title="Set to null"><em
+                                class="bi bi-trash"></em>&nbsp;Trash</button></span>
                 </div>
             </div>
         </div>
@@ -80,17 +89,21 @@
                 <div class="accordion accordion-flush" id="register-options">
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="headingOne">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-register-options" aria-expanded="true" aria-controls="collapse-register-options">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapse-register-options" aria-expanded="true"
+                                aria-controls="collapse-register-options">
                                 Advanced options
                             </button>
                         </h2>
-                        <div id="collapse-register-options" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#register-options">
+                        <div id="collapse-register-options" class="accordion-collapse collapse"
+                            aria-labelledby="headingOne" data-bs-parent="#register-options">
                             <div class="accordion-body">
                                 <mat-form-field [style.width.%]="100">
                                     <mat-label>Optional cloudUrl</mat-label>
                                     <input matInput placeholder="{{cloudUrlFc.value}}" [formControl]="cloudUrlFc">
                                     <mat-icon matSuffix>dns</mat-icon>
-                                    <mat-hint>Optional : Specify cloudUrl (default goes to {{cloudUrlFc.value}})</mat-hint>
+                                    <mat-hint>Optional : Specify cloudUrl (default goes to {{cloudUrlFc.value}})
+                                    </mat-hint>
                                 </mat-form-field>
                             </div>
                         </div>
@@ -110,26 +123,36 @@
                     <div class="col">
                         <h3 class="text-center">Guest or external user management</h3>
                         <p class="alert alert-warning" role="alert">You need to configure authentication at
-                            <a href="{{cloudUrlFc.value}}/enterprise/users-authentication" target="_blank" rel="noopener">{{cloudUrlFc.value}}/enterprise/users-authentication</a> according to the one you want to use.
+                            <a href="{{cloudUrlFc.value}}/enterprise/users-authentication" target="_blank"
+                                rel="noopener">{{cloudUrlFc.value}}/enterprise/users-authentication</a> according to the
+                            one you want to use.
                         </p>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col with-divider">
                         <p>Registering as guest is simple but less secured.</p>
-                        <button mat-raised-button color="primary" (click)="registerWithoutAuth()" [disabled]="!userAgent||registerInPrgs||session||userAgentCreationType === userAgentCreationTypeEnum.Username" title="Register as guest">Register as
+                        <button mat-raised-button color="primary" (click)="registerWithoutAuth()"
+                            [disabled]="!userAgent||registerInPrgs||session||userAgentCreationType === userAgentCreationTypeEnum.Username"
+                            title="Register as guest">Register as
                             Guest&nbsp;<em class="bi bi-box-arrow-in-right"></em>
                         </button>
                     </div>
                     <div class="col with-divider">
-                        <p>Using your own authentication server that provides a <strong>Json Web Token</strong> allows to register the <code>UserAgent</code> with <strong>ApiRTC</strong>'s servers in a more secure way.</p>
-                        <app-login [btnText]="'Register with JWT'" [enable]="!registerInPrgs&&!session&&(userAgentCreationType === userAgentCreationTypeEnum.Key)" (credentials)="registerWithJWTAuth($event)"></app-login>
+                        <p>Using your own authentication server that provides a <strong>Json Web Token</strong> allows
+                            to register the <code>UserAgent</code> with <strong>ApiRTC</strong>'s servers in a more
+                            secure way.</p>
+                        <app-login [btnText]="'Register with JWT'"
+                            [enable]="!registerInPrgs&&!session&&(userAgentCreationType === userAgentCreationTypeEnum.Key)"
+                            (credentials)="registerWithJWTAuth($event)"></app-login>
                     </div>
                     <div class="col">
                         <p>Authentication with third party server that generates a <strong>token</strong> and that
                             <strong>ApiRTC</strong>'s servers will query with this token during registration.
                         </p>
-                        <app-login [btnText]="'Register with 3rdP auth server'" [enable]="!registerInPrgs&&!session&&(userAgentCreationType === userAgentCreationTypeEnum.Key)" (credentials)="registerWith3rdPartyAuth($event)">
+                        <app-login [btnText]="'Register with 3rdP auth server'"
+                            [enable]="!registerInPrgs&&!session&&(userAgentCreationType === userAgentCreationTypeEnum.Key)"
+                            (credentials)="registerWith3rdPartyAuth($event)">
                         </app-login>
                     </div>
                 </div>
@@ -138,7 +161,9 @@
                 <div class="row">
                     <div class="col">
                         <h3 class="text-center"><strong>ApiRTC</strong> user management</h3>
-                        <app-login [btnText]="'Register with '+cloudUrlFc.value" [username]="usernameFc.value" [enable]="!registerInPrgs&&!session&&(userAgentCreationType === userAgentCreationTypeEnum.Username)" (credentials)="registerWithApizeeUserManagement($event)">
+                        <app-login [btnText]="'Register with '+cloudUrlFc.value" [username]="usernameFc.value"
+                            [enable]="!registerInPrgs&&!session&&(userAgentCreationType === userAgentCreationTypeEnum.Username)"
+                            (credentials)="registerWithApizeeUserManagement($event)">
                         </app-login>
                     </div>
                 </div>
@@ -186,135 +211,9 @@
 
         <div class="row">
             <div class="col">
-                <h2 class="mt-3">User presence</h2>
-                <p><strong>ApiRTC</strong>&nbsp;<strong>presence</strong> feature let's your client application know who is connected.
-                </p>
-            </div>
-        </div>
-
-        <div class="row" *ngIf="session">
-            <div class="col">
-                <p *ngFor="let kv of contactsByGroup | keyvalue" class="alert alert-info clearfix" role="alert">Group
-                    <strong>{{kv.key}}</strong> has users :
-                    <span *ngFor="let contact of kv.value">{{contact.userData.username}}:{{contact.userData.nickname}},</span>
-                </p>
-            </div>
-        </div>
-
-    </div>
-
-    <hr>
-
-    <div class="container">
-        <div class="row">
-            <div class="col">
-                <h1>3. Get or Create, and Join <span *ngIf="!isPrivate">Conversation or</span> Conference</h1>
-            </div>
-            <div class="col">
-                <div class="accordion accordion-flush" id="conversation-options">
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingOne">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-conversation-options" aria-expanded="true" aria-controls="collapse-conversation-options">
-                                Advanced options
-                            </button>
-                        </h2>
-                        <div id="collapse-conversation-options" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#conversation-options">
-                            <div class="accordion-body">
-                                <form [formGroup]="conversationAdvancedOptionsFormGroup">
-                                    <mat-checkbox formControlName="meshMode">meshMode</mat-checkbox>
-                                    <br>
-                                    <mat-checkbox formControlName="meshOnly">meshOnly</mat-checkbox>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-12 col-md-8 with-divider">
-                <p>From a <code>Session</code>, get or create a <code>Conversation</code> :</p>
-                <div class="text-center">
-                    <form [formGroup]="conversationFormGroup" (ngSubmit)="getOrcreateConversation()">
-                        <mat-form-field>
-                            <mat-label>Conversation name</mat-label>
-                            <!-- <span matPrefix>{{baseUrl}}/</span> -->
-                            <input type="text" matInput placeholder="abcd" formControlName="name">
-                        </mat-form-field>&nbsp;
-                        <button mat-raised-button color="primary" type="submit" [disabled]="!conversationFormGroup.valid||!session||conversation" title="Get Or Create Conversation">GetOrCreateConversation&nbsp;<em
-                                class="bi bi-telephone-forward-fill"></em></button>
-                    </form>
-                </div>
-            </div>
-            <div class="col">
-                <div class="row">
-                    <div class="col">
-                        <p>Or create a <code>Conference</code> (a private conversation, with moderation capabilities)
-                        </p>
-                        <div class="text-center">
-                            <button mat-raised-button color="primary" type="button" (click)="createConference()" [disabled]="!session||createConferenceInPrgs||conversation||(userAgentAuthType !== userAgentAuthTypeEnum.CloudApiRTC)" title="Create Conference">CreateConference&nbsp;<em class="bi bi-telephone-forward-fill"></em>
-                                <mat-icon *ngIf="createConferenceInPrgs">
-                                    <mat-spinner [diameter]="16"></mat-spinner>
-                                </mat-icon>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <br>
-                        <p class="alert alert-warning" role="alert">This is only available when
-                            <code>UserAgent</code> is authenticated with <strong>cloud.ApiRTC</strong>.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row" *ngIf="conversation">
-            <div class="col">
-                <br>
-                <div class="alert alert-success" role="alert">
-                    <p class="clearfix">Got <code>Conversation</code> with <code>name</code>
-                        <span>&lt;<strong>{{conversationNameFc.value}}</strong>&gt;</span>.
-                        <br>Others can join at url
-                        <a href="{{fullUrl}}" target="_blank" rel="noopener">{{fullUrl}}</a>
-                        <span class="float-right"><button mat-raised-button color="primary" [cdkCopyToClipboard]="fullUrl"
-                                title="Copy to clipboard">Copy
-                                link&nbsp;<em class="bi bi-clipboard"></em></button></span>
-                    </p>
-                    <p class="clearfix"><span class="float-right">
-                            <button mat-raised-button color="warn" (click)="destroyConversation()"
-                                title="Destroy Conversation">Destroy Conversation</button></span>
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <br>
-                <p>
-                    Calling <code>Conversation.join</code> makes the <code>UserAgent</code> that created the
-                    <code>Session</code> take part of the <strong>conversation</strong> :
-                </p>
-                <p class="text-center">
-                    <button mat-raised-button color="{{joined?'accent':'primary'}}" (click)="!joined?join():leave()" [disabled]="!conversation||joinInPrgs" title="{{!joined?'Join':'Leave'}} Conversation">{{!joined?'Join':'Leave'}}&nbsp;<em
-                            class="bi bi-chat-quote"></em>
-                        <mat-icon *ngIf="joinInPrgs">
-                            <mat-spinner [diameter]="16"></mat-spinner>
-                        </mat-icon>
-                    </button>
-                </p>
-                <p *ngIf="waitingForModeratorAcceptance" class="alert alert-warning" role="alert">Waiting for moderator {{moderator | json}} acceptance</p>
-                <p *ngIf="joinError" class="alert alert-danger" role="alert">{{joinError | json}}
-                </p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <br>
-                <p>Setting <code>UserAgent.getUserData()</code> property <code>nickname</code> is useful to get identified by other people (
-                    <code>Contact</code>s) in the conversation :
+                <h2 class="mt-3">User data</h2>
+                <p>Setting <code>UserAgent.getUserData()</code> property <code>nickname</code> is useful to get
+                    identified by other people (<code>Contact</code>s) in the <strong>conversation</strong>:
                 </p>
                 <p class="text-center">
                     <mat-form-field appearance="outline">
@@ -339,14 +238,126 @@
                 </div>
             </div>
         </div>
+
         <div class="row">
             <div class="col">
-                <p class="alert alert-info" role="alert" *ngFor="let kv of joinRequestsById | keyvalue">
-                    <button mat-raised-button color="primary" (click)="acceptJoinRequest(kv.value)" title="Accept">{{kv.value.id}}-{{kv.value.sender.getUsername()}}&nbsp;<em
-                            class="bi bi-person-check"></em></button>
-                    <button mat-raised-button color="warn" (click)="declineJoinRequest(kv.value)" title="Decline"><em
-                            class="bi bi-person-x"></em></button>
+                <h2 class="mt-3">User presence</h2>
+                <p><strong>ApiRTC</strong>&nbsp;<strong>presence</strong> feature let's your client application know who
+                    is connected.
                 </p>
+            </div>
+        </div>
+
+        <div class="row" *ngIf="session">
+            <div class="col">
+                <p *ngFor="let kv of contactsByGroup | keyvalue" class="alert alert-info clearfix" role="alert">Group
+                    <strong>{{kv.key}}</strong> has users :
+                    <span
+                        *ngFor="let contact of kv.value">{{contact.userData.username}}:{{contact.userData.nickname}},</span>
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <hr>
+
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1>3. Get or Create, and Join Conversation</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <p>From a <code>Session</code>, get or create a <code>Conversation</code>:</p>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <form class="text-start" [formGroup]="conversationAdvancedOptionsFormGroup">
+                    <mat-checkbox formControlName="meshMode">meshModeEnabled</mat-checkbox>
+                    <br>
+                    <mat-checkbox formControlName="meshOnly">meshOnlyEnabled</mat-checkbox>
+                    <br>
+                    <mat-checkbox formControlName="moderation">moderationEnabled</mat-checkbox>
+                    <br>
+                    <mat-checkbox formControlName="moderator">moderator</mat-checkbox>
+                </form>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <form [formGroup]="conversationFormGroup" (ngSubmit)="getOrcreateConversation()">
+                    <mat-form-field>
+                        <mat-label>Conversation name</mat-label>
+                        <!-- <span matPrefix>{{baseUrl}}/</span> -->
+                        <input type="text" matInput placeholder="abcd" formControlName="name">
+                    </mat-form-field>&nbsp;
+                    <button mat-raised-button color="primary" type="submit"
+                        [disabled]="!conversationFormGroup.valid||!session||conversation"
+                        title="Get Or Create Conversation">GetOrCreateConversation&nbsp;<em
+                            class="bi bi-telephone-forward-fill"></em></button>
+                </form>
+            </div>
+        </div>
+
+        <div class="row" *ngIf="conversation">
+            <div class="col">
+                <br>
+                <div class="alert alert-success" role="alert">
+                    <p class="clearfix">Got <code>Conversation</code> with <code>name</code>
+                        <span>&lt;<strong>{{conversationNameFc.value}}</strong>&gt;</span>.
+                        <br>Others can join at url
+                        <a href="{{fullUrl}}" target="_blank" rel="noopener">{{fullUrl}}</a>
+                        &nbsp;
+                        <span class="float-right"><button mat-raised-button color="primary"
+                                [cdkCopyToClipboard]="fullUrl" title="Copy to clipboard">Copy
+                                link&nbsp;<em class="bi bi-clipboard"></em></button></span>
+                    </p>
+                    <p class="clearfix"><span class="float-right">
+                            <button mat-raised-button color="warn" (click)="destroyConversation()"
+                                title="Destroy Conversation">Destroy Conversation</button></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <br>
+                <p>
+                    Calling <code>Conversation.join</code> makes the <code>UserAgent</code> that created the
+                    <code>Session</code> take part of the <strong>conversation</strong>:
+                </p>
+                <p class="text-center">
+                    <button mat-raised-button color="{{joined?'accent':'primary'}}" (click)="!joined?join():leave()"
+                        [disabled]="!conversation||joinInPrgs"
+                        title="{{!joined?'Join':'Leave'}} Conversation">{{!joined?'Join':'Leave'}}&nbsp;<em
+                            class="bi bi-chat-quote"></em>
+                        <mat-icon *ngIf="joinInPrgs">
+                            <mat-spinner [diameter]="16"></mat-spinner>
+                        </mat-icon>
+                    </button>
+                </p>
+                <p *ngIf="joinError" class="alert alert-danger" role="alert">{{joinError | json}}
+                </p>
+            </div>
+        </div>
+        <div class="row" *ngIf="joined&&moderatorFc.value===true">
+            <div class="col">
+                <div class="alert alert-info" role="alert">
+                    <h2>Waiting Room</h2>
+                    <ul *ngIf="candidatesById.size > 0; else elseBlock_NoCandidates">
+                        <li *ngFor="let kv of candidatesById | keyvalue">
+                            <button mat-raised-button color="primary" (click)="allowCandidate(kv.value)"
+                                title="Accept">{{kv.value.id}}-{{kv.value.username}}-{{kv.value.nickname}}&nbsp;<em
+                                    class="bi bi-person-check"></em></button>
+                            <button mat-raised-button color="warn" (click)="denyCandidate(kv.value)" title="Decline"><em
+                                    class="bi bi-person-x"></em></button>
+                        </li>
+                    </ul>
+                    <ng-template #elseBlock_NoCandidates>No candidates.</ng-template>
+                </div>
             </div>
         </div>
     </div>
@@ -366,7 +377,9 @@
                         <mat-label>Message</mat-label>
                         <input type="text" matInput placeholder="abcd" formControlName="message">
                     </mat-form-field>&nbsp;
-                    <button mat-raised-button color="primary" type="submit" [disabled]="!messageFormGroup.valid||!joined" title="Send Message">Send&nbsp;<em class="bi bi-chat-left"></em></button>
+                    <button mat-raised-button color="primary" type="submit"
+                        [disabled]="!messageFormGroup.valid||!joined" title="Send Message">Send&nbsp;<em
+                            class="bi bi-chat-left"></em></button>
                 </form>
             </div>
             <div class="col">
@@ -375,7 +388,8 @@
                 <hr>
                 <form [formGroup]="fileFormGroup" (ngSubmit)="sendFile()">
                     <input type="file" formControlName="file" (change)="selectFile($event)" /> &nbsp;
-                    <button mat-raised-button color="primary" type="submit" [disabled]="!fileFormGroup.valid||!joined||!selectedFile" title="Send File">Upload
+                    <button mat-raised-button color="primary" type="submit"
+                        [disabled]="!fileFormGroup.valid||!joined||!selectedFile" title="Send File">Upload
                         file&nbsp;<em class="bi bi-upload"></em></button>
                 </form>
             </div>
@@ -412,14 +426,19 @@
                     Stream</button>
             </div>
             <div class="col-sm-12 col-md-4 text-center">
-                <button mat-raised-button color="{{screenSharingStreamHolder?'accent':'primary'}}" (click)="toggleScreenSharing()" [disabled]="!joined">{{screenSharingStreamHolder?'Unshare':'Share'}}
+                <button mat-raised-button color="{{screenSharingStreamHolder?'accent':'primary'}}"
+                    (click)="toggleScreenSharing()" [disabled]="!joined">{{screenSharingStreamHolder?'Unshare':'Share'}}
                     Screen</button>
             </div>
             <div class="col-sm-12 col-md-4 text-center">
                 <form [formGroup]="videoFileFormGroup">
                     <input type="file" formControlName="file" (change)="createVideoStream($event)" />
-                    <button mat-raised-button color="{{videoStreamHolder?.published?'accent':'primary'}}" (click)="togglePublishVideoStream()" [disabled]="!joined||!videoStreamHolder" title="{{videoStreamHolder?.published?'Unpublish':'Publish'}} Video File">{{videoStreamHolder?.published?'Unpublish':'Publish'}}</button>
-                    <button mat-raised-button color="accent" (click)="releaseVideoStream()" [disabled]="!videoStreamHolder||videoStreamHolder?.published" title="Release Stream">Release</button>
+                    <button mat-raised-button color="{{videoStreamHolder?.published?'accent':'primary'}}"
+                        (click)="togglePublishVideoStream()" [disabled]="!joined||!videoStreamHolder"
+                        title="{{videoStreamHolder?.published?'Unpublish':'Publish'}} Video File">{{videoStreamHolder?.published?'Unpublish':'Publish'}}</button>
+                    <button mat-raised-button color="accent" (click)="releaseVideoStream()"
+                        [disabled]="!videoStreamHolder||videoStreamHolder?.published"
+                        title="Release Stream">Release</button>
                 </form>
             </div>
         </div>
@@ -427,31 +446,45 @@
 
     <div class="row">
         <div class="col-sm-12 col-md-4">
-            <div *ngIf="localCameraStreamsById.size > 0" id="local-streams" class="carousel slide" data-bs-ride="carousel">
+            <div *ngIf="localCameraStreamsById.size > 0" id="local-streams" class="carousel slide"
+                data-bs-ride="carousel">
                 <!-- <div class="carousel-indicators">
                     <button type="button" data-bs-target="#local-streams" [attr.data-bs-slide-to]="i" [ngClass]="{'active': i === activeIndex}" [attr.aria-current]="i === activeIndex" *ngFor="let kv of localCameraStreamsById | keyvalue; index as i" (click)="navTo(i)"></button>
                 </div> -->
                 <div class="carousel-inner">
-                    <div class="carousel-item" [ngClass]="{'active': i === activeIndex}" *ngFor="let kv of localCameraStreamsById | keyvalue; index as i; first as isFirst">
+                    <div class="carousel-item" [ngClass]="{'active': i === activeIndex}"
+                        *ngFor="let kv of localCameraStreamsById | keyvalue; index as i; first as isFirst">
                         <div class="mt-3 d-block w-100 h-100">
-                            <app-stream [streamHolder]="kv.value" [withSubscription]="false" [withDevicesControl]="true" [audioMuted]="false" [videoMuted]="false" [audioInDevices]="audioInDevices" [videoDevices]="videoDevices" (onAudioMute)="toggleAudioMute(kv.value)" (onVideoMute)="toggleVideoMute(kv.value)"
-                                (onAudioInSelected)="selectedAudioInDevice=$event;changeLocalStream(kv.value)" (onVideoSelected)="selectedVideoDevice=$event;changeLocalStream(kv.value)" [background]="currentBackground" (onBackgroundSelected)="currentBackground=$event;changeLocalStream(kv.value)"
+                            <app-stream [streamHolder]="kv.value" [withSubscription]="false" [withDevicesControl]="true"
+                                [audioMuted]="false" [videoMuted]="false" [audioInDevices]="audioInDevices"
+                                [videoDevices]="videoDevices" (onAudioMute)="toggleAudioMute(kv.value)"
+                                (onVideoMute)="toggleVideoMute(kv.value)"
+                                (onAudioInSelected)="selectedAudioInDevice=$event;changeLocalStream(kv.value)"
+                                (onVideoSelected)="selectedVideoDevice=$event;changeLocalStream(kv.value)"
+                                [background]="currentBackground"
+                                (onBackgroundSelected)="currentBackground=$event;changeLocalStream(kv.value)"
                                 (onVideoQualitySelected)="selectedVideoQuality=$event;changeLocalStream(kv.value)">
                             </app-stream>
                         </div>
                         <p class="text-center">
-                            <button mat-raised-button color="{{kv.value.published?'accent':'primary'}}" (click)="!kv.value.published?publishStream(kv.value):unpublishStream(kv.value)" [disabled]="!kv.value||!joined||publishInPrgs">{{!kv.value.published?'Publish
+                            <button mat-raised-button color="{{kv.value.published?'accent':'primary'}}"
+                                (click)="!kv.value.published?publishStream(kv.value):unpublishStream(kv.value)"
+                                [disabled]="!kv.value||!joined||publishInPrgs">{{!kv.value.published?'Publish
                                 Stream':'Unpublish Stream'}}
-                                <span *ngIf="publishInPrgs" class="spinner-border text-light" role="status"></span></button>
-                            <button mat-raised-button color="accent" (click)="releaseLocalStream(kv.value);next()" [disabled]="!userAgent||kv.value.published">Release Stream</button>
+                                <span *ngIf="publishInPrgs" class="spinner-border text-light"
+                                    role="status"></span></button>
+                            <button mat-raised-button color="accent" (click)="releaseLocalStream(kv.value);next()"
+                                [disabled]="!userAgent||kv.value.published">Release Stream</button>
                         </p>
                     </div>
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#local-streams" data-bs-slide="prev" (click)="prev()">
+                <button class="carousel-control-prev" type="button" data-bs-target="#local-streams" data-bs-slide="prev"
+                    (click)="prev()">
                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Previous</span>
                 </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#local-streams" data-bs-slide="next" (click)="next()">
+                <button class="carousel-control-next" type="button" data-bs-target="#local-streams" data-bs-slide="next"
+                    (click)="next()">
                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Next</span>
                 </button>
@@ -460,7 +493,8 @@
 
         <div class="col-sm-12 col-md-4" *ngIf="screenSharingStreamHolder">
             <div class="alert alert-success clearfix">
-                <app-stream [streamHolder]="screenSharingStreamHolder" [withSubscription]="false" [withDevicesControl]="false">
+                <app-stream [streamHolder]="screenSharingStreamHolder" [withSubscription]="false"
+                    [withDevicesControl]="false">
                 </app-stream>
             </div>
         </div>
@@ -488,7 +522,9 @@
     </div>
     <div class="row">
         <div *ngFor="let kv of conversationContactHoldersById | keyvalue" class="col-sm-12 col-md-4">
-            <app-peer [contactHolder]="kv.value" [withModeration]="_isPrivate&&(role===roleEnum.Moderator)" (onStreamSubscription)="subscribeOrUnsubscribeToStream($event)" (onEject)="eject(kv.value)">
+            <app-peer [contactHolder]="kv.value"
+                [withModeration]="(moderationFc.value===true)&&(moderatorFc.value===true)"
+                (onStreamSubscription)="subscribeOrUnsubscribeToStream($event)" (onEject)="eject(kv.value)">
             </app-peer>
         </div>
     </div>
@@ -503,30 +539,35 @@
                 </p>
                 <div class="text-center">
                     <p>
-                        <button mat-stroked-button color="warn" (click)="toggleRecording()" [disabled]="!joined" title="{{!recording?'Record':'Stop Recording'}} Conversation">{{!recording?'Record':'Stop
+                        <button mat-stroked-button color="warn" (click)="toggleRecording()" [disabled]="!joined"
+                            title="{{!recording?'Record':'Stop Recording'}} Conversation">{{!recording?'Record':'Stop
                             Recording'}}&nbsp;<em class="bi bi-record-circle"></em>
                             <mat-icon *ngIf="recording">
                                 <mat-spinner [diameter]="16"></mat-spinner>
                             </mat-icon>
                         </button>
                     </p>
-                    <p *ngIf="recordingError" class="alert alert-danger" role="alert">code:{{recordingError.code}}, message:{{recordingError.error.message}}
+                    <p *ngIf="recordingError" class="alert alert-danger" role="alert">code:{{recordingError.code}},
+                        message:{{recordingError.error.message}}
                     </p>
                     <div class="alert alert-success clearfix text-center" *ngIf="recordingsByMediaId.size>0">
                         <mat-chip-list aria-label="record selection">
-                            <mat-chip *ngFor="let kv of recordingsByMediaId | keyvalue"><a href="{{kv.value.recordingInfo.mediaURL}}" target="_blank" rel="noopener">{{kv.value.recordingInfo.recordedFileName}}</a>
+                            <mat-chip *ngFor="let kv of recordingsByMediaId | keyvalue"><a
+                                    href="{{kv.value.recordingInfo.mediaURL}}" target="_blank"
+                                    rel="noopener">{{kv.value.recordingInfo.recordedFileName}}</a>
                                 <span>&nbsp;<span *ngIf="kv.value.available; else elseBlockUnavalable"><em
                                             class="bi bi-cloud-download"></em></span>
-                                <ng-template #elseBlockUnavalable>
-                                    <mat-spinner [diameter]="16"></mat-spinner>
-                                </ng-template>
+                                    <ng-template #elseBlockUnavalable>
+                                        <mat-spinner [diameter]="16"></mat-spinner>
+                                    </ng-template>
                                 </span>
                             </mat-chip>
                         </mat-chip-list>
                     </div>
                 </div>
                 <p class="alert alert-info" role="alert" *ngIf="recordingsByMediaId.size>0">
-                    Recorded conversations can be managed on <a href="{{cloudUrlFc.value}}/media-manager" target="_blank" rel="noopener"><strong>ApiRTC</strong> Media Manager</a></p>
+                    Recorded conversations can be managed on <a href="{{cloudUrlFc.value}}/media-manager"
+                        target="_blank" rel="noopener"><strong>ApiRTC</strong> Media Manager</a></p>
             </div>
         </div>
     </div>
@@ -541,7 +582,8 @@
                 </p>
                 <div class="text-center">
                     <p>
-                        <button mat-stroked-button color="primary" (click)="searchBluetooth()" title="Bluetooth">Bluetooth
+                        <button mat-stroked-button color="primary" (click)="searchBluetooth()"
+                            title="Bluetooth">Bluetooth
                         </button>
                     </p>
                     <p>bluetooth : {{bluetooth}}</p>
@@ -551,7 +593,5 @@
             </div>
         </div>
     </div>
-
-
 
 </div>

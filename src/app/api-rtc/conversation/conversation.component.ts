@@ -37,11 +37,6 @@ enum UserAgentAuthType {
   CloudApiRTC
 }
 
-enum Role {
-  Default,
-  Moderator
-}
-
 @Component({
   selector: 'app-conversation',
   templateUrl: './conversation.component.html',
@@ -55,18 +50,17 @@ export class ConversationComponent implements OnInit, OnDestroy {
   //
   apiKeyFc: FormControl = new FormControl('myDemoApiKey');
 
-  cloudUrlFc: FormControl = new FormControl('https://cloud.apirtc.com');
+  //cloudUrlFc: FormControl = new FormControl('https://cloud.apirtc.com');
+  cloudUrlFc: FormControl = new FormControl('https://valid2.apirtc.com');
 
   usernameFc: FormControl = new FormControl(null, [Validators.required]);
 
   userAgentCreationType: UserAgentCreationType;
   userAgentAuthType: UserAgentAuthType;
-  role: Role = Role.Default;
 
   // to be used from template
   userAgentCreationTypeEnum = UserAgentCreationType;
   userAgentAuthTypeEnum = UserAgentAuthType;
-  roleEnum = Role;
 
   nicknameFc: FormControl = new FormControl({ value: DEFAULT_NICKNAME, disabled: true });
 
@@ -74,7 +68,9 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   conversationAdvancedOptionsFormGroup = this.fb.group({
     meshMode: this.fb.control({ value: false, disabled: false }),
-    meshOnly: this.fb.control({ value: false, disabled: false })
+    meshOnly: this.fb.control({ value: false, disabled: false }),
+    moderation: this.fb.control({ value: false, disabled: false }),
+    moderator: this.fb.control({ value: false, disabled: false })
   });
   conversationFormGroup = this.fb.group({
     name: this.fb.control('', [Validators.required])
@@ -102,11 +98,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
   session: any = null;
   conversation: any = null;
 
-  // apiRTC data objects
-  joinRequestsById: Map<string, any> = new Map();
-  moderator: any = null;
-  waitingForModeratorAcceptance = false;
-
   // Local Streams
   localCameraStreamsById: Map<string, StreamDecorator> = new Map();
   screenSharingStreamHolder: StreamDecorator = null;
@@ -126,11 +117,12 @@ export class ConversationComponent implements OnInit, OnDestroy {
   joined = false;
 
   publishInPrgs = false;
-  createConferenceInPrgs = false;
 
   // Peer Contacts
   // Keep here only contacts that joined the conversation
   conversationContactHoldersById: Map<string, ContactDecorator> = new Map();
+
+  candidatesById: Map<string, ContactDecorator> = new Map();
 
   // Peer Streams
   streamHoldersById: Map<string, StreamDecorator> = new Map();
@@ -165,6 +157,12 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
   get meshOnlyFc(): FormControl {
     return this.conversationAdvancedOptionsFormGroup.get('meshOnly') as FormControl;
+  }
+  get moderationFc(): FormControl {
+    return this.conversationAdvancedOptionsFormGroup.get('moderation') as FormControl;
+  }
+  get moderatorFc(): FormControl {
+    return this.conversationAdvancedOptionsFormGroup.get('moderator') as FormControl;
   }
   get conversationNameFc(): FormControl {
     return this.conversationFormGroup.get('name') as FormControl;
@@ -215,7 +213,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
       // Note : This is important to NOT try using this.baseUrl = `${this.window.location.protocol}//${this.window.location.host}/conversation`;
       // because 1. route can change and 2. this does not work if application is hosted under a path.
       // Note2:  using this.baseUrl = `${this.window.location.href}`;
-      // does not work well, because href may contain url paramaters like ?private=true for example.
+      // does not work well, because href may contain url paramaters like ?moderation=true for example.
       //
       this.baseUrl = `${this.window.location.origin}${this.window.location.pathname}`;
     }
@@ -240,8 +238,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
       if (params['apiKey']) {
         this.apiKeyFc.setValue(params['apiKey']);
       }
-      if (params['private'] && params['private'] === 'true') {
-        this.isPrivate = true;
+      if (params['moderation'] && params['moderation'] === 'true') {
+        this.moderationFc.setValue(true);
       }
     });
 
@@ -257,6 +255,19 @@ export class ConversationComponent implements OnInit, OnDestroy {
         this.meshModeFc.setValue(true);
       }
     });
+
+    this.moderationFc.valueChanges.subscribe(value => {
+      // if moderatio is false, moderator shall not be true
+      if (value === false) {
+        this.moderatorFc.setValue(false);
+      }
+    });
+    this.moderatorFc.valueChanges.subscribe(value => {
+      // if moderator is true, moderation shall be true too
+      if (value === true) {
+        this.moderationFc.setValue(true);
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -264,19 +275,10 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
 
   // --------------------------------------------------------------------------
-  // 
-
-  _isPrivate: boolean = false;
-  get isPrivate(): boolean {
-    return this._isPrivate;
-  }
-  set isPrivate(value: boolean) {
-    this._isPrivate = value;
-    this.buildUrl();
-  }
+  //
 
   private buildUrl() {
-    this.fullUrl = `${this.baseUrl}/${this.conversationNameFc.value}?apiKey=${this.apiKeyFc.value}&private=${this.isPrivate}`;
+    this.fullUrl = `${this.baseUrl}/${this.conversationNameFc.value}?apiKey=${this.apiKeyFc.value}&moderation=${this.moderationFc.value}`;
   }
 
   private doDestroy(): void {
@@ -299,6 +301,24 @@ export class ConversationComponent implements OnInit, OnDestroy {
       this.releaseVideoStream()
     }
     this.destroyConversation();
+  }
+
+  private doUnpublishStreams(): void {
+    this.localCameraStreamsById.forEach((streamHolder: StreamDecorator, key: string) => {
+      if (streamHolder.isPublished()) {
+        this.unpublishStream(streamHolder);
+      }
+    });
+    if (this.screenSharingStreamHolder) {
+      if (this.screenSharingStreamHolder.isPublished()) {
+        this.unpublishScreenSharingStream();
+      }
+    }
+    if (this.videoStreamHolder) {
+      if (this.videoStreamHolder.isPublished()) {
+        this.unpublishVideoStream();
+      }
+    }
   }
 
   // --------------------------------------------------------------------------
@@ -698,104 +718,30 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
 
   // --------------------------------------------------------------------------
-  // Conversation & Conference
+  // Conversation
 
   getOrcreateConversation(): void {
 
     // Create the conversation
     //
-
-    // TODO: Raise a Bug here : we should not have to make a different call to getOrCreateConversation depending
-    // on the fact it is private or not, because in case we are a 'get' we shall not know wether the conversation
-    // is private (a conference).
-    // TODO: handle differently the isPrivate from request parameters and the one set by choice locally. Because in the end
-    // we should not need to know this information from the url, we should not know this information at all...
-    // I was forced to implement this trick (passing the private=true in url) because ApiRTC api forces to call getOrcreateConversation differently
-    //if (this.isPrivate) {
-    // WARN getConference is deprecated ! shall I finally be able to have same function for both getOrcreateConversation and createConference ?
-    // just making the name different ?
-    // Not really because :
-    // this.conversation = this.session.getOrCreateConversation(this.conversationNameFc.value);
-    // does not work, it actually creates another conversation.
-    // the following works (but deprecated, and does not support options - not implemented):
-    //this.conversation = this.session.getConference(this.conversationNameFc.value, options);
-    // so use the following :
-    //  this.conversation = this.session.getOrCreateConversation('Private:' + this.conversationNameFc.value, options);
-    //  console.log('Conference', this.conversation, options);
-    //} else {
-    //  this.conversation = this.session.getOrCreateConversation(this.conversationNameFc.value, options);
-    //  console.log('Conversation', this.conversation, options);
-    //}
-
     const options = {
       meshModeEnabled: this.meshModeFc.value,
-      meshOnlyEnabled: this.meshOnlyFc.value
+      meshOnlyEnabled: this.meshOnlyFc.value,
+      moderationEnabled: this.moderationFc.value,
+      moderator: this.moderatorFc.value
     }
-    this.conversation = this.session.getOrCreateConversation(this.isPrivate ? 'Private:' + this.conversationNameFc.value : this.conversationNameFc.value, options);
+    this.conversation = this.session.getOrCreateConversation(this.conversationNameFc.value, options);
     console.log('Conversation', this.conversation, options);
 
     this.meshModeFc.disable();
     this.meshOnlyFc.disable();
+    this.moderationFc.disable();
+    this.moderatorFc.disable();
 
     // force Urls build
     this.buildUrl();
 
     this.doListenToConversationEvents();
-  }
-
-  /*
-  * A Conference is a Conversation with moderation capabilities
-  */
-  createConference() {
-    const enterprise = this.userAgent.getEnterprise();
-
-    console.log("Enterprise", enterprise);
-    console.log("Enterprise apiKey", enterprise.getApiKey());
-
-    // use the apiKeyFc to store the apiKey (will be used to create the conversation url)
-    this.apiKeyFc.setValue(enterprise.getApiKey());
-
-    this.createConferenceInPrgs = true;
-
-    // PrivateConferenceCreationOptions
-    const options = {
-      // TODO : check what it does because this does not seem to set the Conversation.name
-      // doc says : friendlyName 	string optional: friendly name for this conference to display in Apizee cloud
-      friendlyName: this.conversationNameFc.value + '_friendlyName',
-
-      // TODO : I don't think theses are taken into account as of apirtc@4.5.3 (the version in which theses were added for a getOrCreateConversation)
-      meshModeEnabled: this.meshModeFc.value,
-      meshOnlyEnabled: this.meshOnlyFc.value
-    }
-    //
-    enterprise.createPrivateConference(options).then((conference: any) => {
-
-      console.log("Conference", conference);
-      console.log("Conference name", conference.getName());
-
-      this.conversationNameFc.setValue(conference.getName());
-
-      // A Conference is actually a Conversation but with moderation capabilities
-      //
-      this.conversation = conference;
-      this.isPrivate = true;
-
-      this.meshModeFc.disable();
-      this.meshOnlyFc.disable();
-
-      // When creating a Conference, the UserAgent is automatically joint
-      this.joined = true;
-      // When creating a Conference, the UserAgent is a moderator
-      this.role = Role.Moderator;
-
-      this.createConferenceInPrgs = false;
-
-      this.doListenToConversationEvents();
-    }).catch((error: any) => {
-      console.error('createPrivateConference', error);
-      this.createConferenceInPrgs = false;
-    });
-
   }
 
   destroyConversation(): void {
@@ -804,23 +750,27 @@ export class ConversationComponent implements OnInit, OnDestroy {
       if (this.joined) {
         this.conversation.leave()
           .then(() => {
-            this.joined = false;
-            this.conversation.destroy();
-            this.conversation = null;
-            this.meshModeFc.enable();
-            this.meshOnlyFc.enable();
-            this.joinRequestsById.clear();
+            this.doDestroyConversation();
           })
-          .catch((error: any) => { console.error('Conversation leave error', error); });
+          .catch((error: any) => {
+            console.error('Conversation leave error, force destroy anyways...', error);
+            this.doDestroyConversation();
+          });
       }
       else {
-        this.conversation.destroy();
-        this.conversation = null;
-        this.meshModeFc.enable();
-        this.meshOnlyFc.enable();
-        this.joinRequestsById.clear();
+        this.doDestroyConversation();
       }
     }
+  }
+
+  doDestroyConversation(): void {
+    this.conversation.destroy();
+    this.conversation = null;
+    this.joined = false;
+    this.meshModeFc.enable();
+    this.meshOnlyFc.enable();
+    this.moderationFc.enable();
+    this.moderatorFc.enable();
   }
 
   // --------------------------------------------------------------------------
@@ -859,8 +809,12 @@ export class ConversationComponent implements OnInit, OnDestroy {
           this.conversation.unsubscribeToStream(streamId);
 
           this.streamHoldersById.delete(streamId);
+
           const contactHolder = this.conversationContactHoldersById.get(contactId);
-          contactHolder.removeStream(streamId);
+          // can be not found if user was ejected...
+          if (contactHolder) {
+            contactHolder.removeStream(streamId);
+          }
         }
       }
     });
@@ -1008,30 +962,26 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
 
   doListenToModerationEvents() {
-    this.session.on('conversationJoinRequest', (request: any) => {
-      console.log('on:conversationJoinRequest', request);
-      // TODO : there is a problem here, all Conferences created by users connected with same entreprise will receive this event from all users trying to jon any Conference, 
-      // meaning that we should filter here, but how ? id ? name ?
-      this.joinRequestsById.set(request.getId(), request);
+    this.conversation.on('contactJoinedWaitingRoom', (contact: any) => {
+      console.log("on:contactJoinedWaitingRoom", contact);
+      // A candidate joined the waiting room.
+      const contactHolder: ContactDecorator = ContactDecorator.build(contact);
+      this.candidatesById.set(contactHolder.getId(), contactHolder);
+
+    }).on('contactLeftWaitingRoom', (contact: any) => {
+      console.log("on:contactLeftWaitingRoom", contact);
+      // A candidate left the waiting room.
+      const contactHolder: ContactDecorator = ContactDecorator.build(contact);
+      this.candidatesById.delete(contactHolder.getId());
     });
-    this.conversation.on('waitingForModeratorAcceptance', (moderator: any) => {
-      console.log("on:waitingForModeratorAcceptance", moderator);
-      this.moderator = moderator;
-      this.waitingForModeratorAcceptance = true;
-    }).on('participantEjected', (data: any) => {
+
+    this.conversation.on('participantEjected', (data: any) => {
       console.log('on:participantEjected', data);
-      if (this.role === Role.Default) {
-        if (data.self) {
-          console.log('User was ejected');
-          this.destroyConversation();
-        }
-      } else if (this.role === Role.Moderator) {
-        // Nothing to do here ?, the application on Default Role side shall leave and destroy conversation
-        if (data.contact) {
-          // Remove Eject button for the user
-          //
-          //this.contactHoldersById.delete(data.contact.getId());
-        }
+      if (data.self) {
+        console.log('Self participant was ejected');
+        this.conversationContactHoldersById.clear();
+        this.doUnpublishStreams();
+        this.doDestroyConversation();
       }
     });
   }
@@ -1054,7 +1004,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
     this.doListenToFileUpload();
 
-    if (this.isPrivate) {
+    if (this.moderationFc.value === true) {
       this.doListenToModerationEvents();
     }
   }
@@ -1096,33 +1046,21 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   eject(contactHolder: ContactDecorator): void {
     console.info('eject', contactHolder);
-    this.conversation.eject(contactHolder.getContact());
-  }
-
-  acceptJoinRequest(request: any) {
-    request.accept()
+    this.conversation.eject(contactHolder.getContact(), { reason: 'a reason' })
       .then(() => {
-        console.log('Join request accepted');
-        this.doRemoveJoinRequest(request);
-      })
-      .catch((error: any) => {
-        console.error('Request accept error', error);
+        console.error("ejected", contactHolder);
+        this.conversationContactHoldersById.delete(contactHolder.getId());
+      }).catch((error: any) => {
+        console.error("eject error", error);
       });
   }
 
-  declineJoinRequest(request: any) {
-    request.decline()
-      .then(() => {
-        console.log('Join request declined');
-        this.doRemoveJoinRequest(request);
-      })
-      .catch((error: any) => {
-        console.error('Request decline error', error);
-      });
+  allowCandidate(contactHolder: ContactDecorator): void {
+    this.conversation.allowEntry(contactHolder.getContact());
   }
 
-  doRemoveJoinRequest(request: any) {
-    this.joinRequestsById.delete(request.getId());
+  denyCandidate(contactHolder: ContactDecorator): void {
+    this.conversation.denyEntry(contactHolder.getContact());
   }
 
   // --------------------------------------------------------------------------
