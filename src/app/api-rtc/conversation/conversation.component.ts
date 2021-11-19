@@ -18,7 +18,7 @@ import { VideoQuality, QVGA, HD, FHD } from '../../consts';
 declare var apiRTC: any;
 
 // TODO FIXTHIS: generates build error :
-// import { UserAgent } from '@apizee/apirtc';
+// import { UserAgent, UserData } from '@apirtc/apirtc';
 // Error: node_modules/@apizee/apirtc/apirtc.d.ts:842:22 - error TS2709: Cannot use namespace 'apiRTC' as a type.
 // 842 declare var apiRTC2: apiRTC; // Added for retro compatibility
 
@@ -50,8 +50,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
   //
   apiKeyFc: FormControl = new FormControl('myDemoApiKey');
 
-  //cloudUrlFc: FormControl = new FormControl('https://cloud.apirtc.com');
-  cloudUrlFc: FormControl = new FormControl('https://valid2.apirtc.com');
+  cloudUrlFc: FormControl = new FormControl('https://cloud.apirtc.com');
 
   usernameFc: FormControl = new FormControl(null, [Validators.required]);
 
