@@ -34,14 +34,11 @@ ng serve --host 0.0.0.0 --ssl
 
 ## Deploy to 'docs' (for github pages deployment)
 
+```
 ng build --configuration production --output-path docs --base-href /ApiRTC-ng-demo/
-
 cp docs/index.html docs/404.html
-
 git add docs/*
-
 git status
-
 git commit -a -m "deploy"
-
 git push origin main
+```
