@@ -455,10 +455,11 @@
                     <div class="carousel-item" [ngClass]="{'active': i === activeIndex}"
                         *ngFor="let kv of localCameraStreamsById | keyvalue; index as i; first as isFirst">
                         <div class="mt-3 d-block w-100 h-100">
-                            <app-stream [streamHolder]="kv.value" [withSubscription]="false" [withDevicesControl]="true"
-                                [audioMuted]="false" [videoMuted]="false" [audioInDevices]="audioInDevices"
-                                [videoDevices]="videoDevices" (onAudioMute)="toggleAudioMute(kv.value)"
-                                (onVideoMute)="toggleVideoMute(kv.value)"
+                            <app-stream [streamHolder]="kv.value" [withSubscription]="false" [withMuteControl]="true"
+                                [withDevicesControl]="true" [audioMuted]="false" [videoMuted]="false"
+                                [audioInDevices]="audioInDevices" [videoDevices]="videoDevices"
+                                (onAudioMute)="handleAudioMute([kv.value, $event])"
+                                (onVideoMute)="handleVideoMute([kv.value, $event])"
                                 (onAudioInSelected)="selectedAudioInDevice=$event;changeLocalStream(kv.value)"
                                 (onVideoSelected)="selectedVideoDevice=$event;changeLocalStream(kv.value)"
                                 [background]="currentBackground"
@@ -524,7 +525,8 @@
         <div *ngFor="let kv of conversationContactHoldersById | keyvalue" class="col-sm-12 col-md-4">
             <app-peer [contactHolder]="kv.value"
                 [withModeration]="(moderationFc.value===true)&&(moderatorFc.value===true)"
-                (onStreamSubscription)="subscribeOrUnsubscribeToStream($event)" (onEject)="eject(kv.value)">
+                (onStreamSubscription)="subscribeOrUnsubscribeToStream($event)" (onEject)="eject(kv.value)"
+                (onAudioMute)="handleAudioMute($event)" (onVideoMute)="handleVideoMute($event)">
             </app-peer>
         </div>
     </div>

@@ -1187,14 +1187,25 @@ export class ConversationComponent implements OnInit, OnDestroy {
     });
   }
 
-  toggleAudioMute(streamDecorator: StreamDecorator) {
+  // methods to handle mute/unmute for remote streams
+  //
+  handleAudioMute(event: [StreamDecorator, boolean]) {
+    console.log("handleAudioMute", event);
+    this.doToggleAudioMute(event[0]);
+  }
+  handleVideoMute(event: [StreamDecorator, boolean]) {
+    console.log("handleVideoMute", event);
+    this.doToggleVideoMute(event[0]);
+  }
+
+  doToggleAudioMute(streamDecorator: StreamDecorator) {
     if (streamDecorator.getStream().isAudioMuted()) {
       streamDecorator.getStream().unmuteAudio();
     }
     else { streamDecorator.getStream().muteAudio(); }
   }
 
-  toggleVideoMute(streamDecorator: StreamDecorator) {
+  doToggleVideoMute(streamDecorator: StreamDecorator) {
     if (streamDecorator.getStream().isVideoMuted()) {
       streamDecorator.getStream().unmuteVideo();
     }

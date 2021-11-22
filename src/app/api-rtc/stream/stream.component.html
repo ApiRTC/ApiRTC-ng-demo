@@ -9,17 +9,13 @@
         <!-- <span *ngIf="!streamHolder.stream">no stream</span> -->
     </div>
     <div class="mycard-text" *ngIf="streamHolder.stream">
-        <div *ngIf="withDevicesControl">
+        <div *ngIf="withMuteControl">
             <form class="row row-cols-lg-auto g-3 align-items-center">
                 <div class="col-12">
                     <div class=row>
                         <div class="col">
                             <mat-slide-toggle [formControl]="muteVideoFc">
                                 Mute Video
-                            </mat-slide-toggle>
-                            <br>
-                            <mat-slide-toggle [formControl]="mirrorVideoFc">
-                                Mirror Video
                             </mat-slide-toggle>
                         </div>
                         <div class="col">
@@ -28,6 +24,12 @@
                             </mat-slide-toggle>
                         </div>
                     </div>
+                </div>
+            </form>
+        </div>
+        <div *ngIf="withDevicesControl">
+            <form class="row row-cols-lg-auto g-3 align-items-center">
+                <div class="col-12">
                     <div class=row>
                         <div class="col">
                             <mat-form-field appearance="fill">
@@ -38,6 +40,9 @@
                                     </mat-option>
                                 </mat-select>
                             </mat-form-field>
+                            <mat-slide-toggle [formControl]="mirrorVideoFc">
+                                Mirror Video
+                            </mat-slide-toggle>
                         </div>
                         <div class="col">
                             <mat-form-field appearance="fill">

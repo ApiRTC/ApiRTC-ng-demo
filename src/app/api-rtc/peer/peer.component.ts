@@ -26,8 +26,18 @@ export class PeerComponent {
 
   @Output() onStreamSubscription = new EventEmitter<StreamSubscribeEvent>();
 
+  @Output() onAudioMute = new EventEmitter<[StreamDecorator, boolean]>();
+  @Output() onVideoMute = new EventEmitter<[StreamDecorator, boolean]>();
+
   @Output() onEject = new EventEmitter<boolean>();
 
+  relayAudioMute(streamHolder: StreamDecorator, value: boolean) {
+    this.onAudioMute.emit([streamHolder, value]);
+  }
+
+  relayVideoMute(streamHolder: StreamDecorator, value: boolean) {
+    this.onVideoMute.emit([streamHolder, value]);
+  }
 
   emitStreamSubscription(event: StreamSubscribeEvent) {
     this.onStreamSubscription.emit(event);

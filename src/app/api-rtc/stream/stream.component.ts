@@ -31,7 +31,9 @@ export class StreamComponent implements OnInit, OnDestroy {
 
   @Input() streamHolder: StreamDecorator;
 
+  @Input() withMuteControl: boolean = false;
   @Input() withDevicesControl: boolean = false;
+  
   @Input() withSubscription: boolean = false;
 
   @Input() set audioMuted(audioMuted: boolean) {
