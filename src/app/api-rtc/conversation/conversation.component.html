@@ -5,10 +5,10 @@
 
     <div class="container">
         <div class="row mt-5">
-            <div class="col fs-5">
+            <div class="col fs-5 text-center">
                 <p>Welcome to <strong>ApiRTC</strong> demonstration client application!</p>
                 <p>This <a href="https://github.com/ApiRTC/ApiRTC-ng-demo" target="_blank"
-                        rel="noopener"><strong>open-source</strong></a> application implements most available features
+                        rel="noopener"><strong>open-source</strong></a> application implements most features
                     of
                     <strong>ApiRTC</strong> javascript library.
                 </p>
@@ -16,9 +16,8 @@
         </div>
     </div>
 
-    <hr>
-
     <div class="container">
+        <hr>
         <div class="row">
             <div class="col">
                 <h1>1. Create UserAgent</h1>
@@ -26,8 +25,8 @@
         </div>
         <div class="row">
             <div class="col-sm-12 col-md-6 with-divider">
-                <h3 class="text-center">Guest or external user management</h3>
-                <p>Create <code>UserAgent</code> with an apiKey :</p>
+                <h3 class="text-center"><span class="badge bg-secondary">Guest or external user management</span></h3>
+                <p>Create <code>UserAgent</code> with an apiKey:</p>
                 <div class="text-center">
                     <mat-form-field [style.width.%]="60">
                         <mat-label>apiKey</mat-label>
@@ -43,10 +42,11 @@
                 </div>
             </div>
             <div class="col">
-                <h3 class="text-center"><strong>ApiRTC</strong> user management</h3>
+                <h3 class="text-center"><span class="badge bg-secondary"><strong>ApiRTC</strong> user management</span>
+                </h3>
                 <p>Create <code>UserAgent</code> with the <code>username</code> of a user created within your enterprise
                     account on <a href="{{cloudUrlFc.value}}/users" target="_blank"
-                        rel="noopener">{{cloudUrlFc.value}}/users</a> :
+                        rel="noopener">{{cloudUrlFc.value}}/users</a>:
                 </p>
                 <div class="text-center">
                     <mat-form-field [style.width.%]="50">
@@ -69,7 +69,7 @@
         <div class="row mt-3">
             <div class="col">
                 <div *ngIf="userAgent" class="alert alert-success clearfix" role="alert"><code>UserAgent</code> created.
-                    <span class="float-right"><button mat-raised-button color="warn" (click)="nullifyUserAgent()"
+                    <span class="float-end"><button mat-raised-button color="warn" (click)="nullifyUserAgent()"
                             [disabled]="session" title="Set to null"><em
                                 class="bi bi-trash"></em>&nbsp;Trash</button></span>
                 </div>
@@ -77,9 +77,8 @@
         </div>
     </div>
 
-    <hr>
-
     <div class="container">
+        <hr>
         <div class="row">
             <div class="col">
                 <h1>2. Get Session</h1>
@@ -121,7 +120,8 @@
             <div class="col-md-12 col-lg-9 with-divider">
                 <div class="row">
                     <div class="col">
-                        <h3 class="text-center">Guest or external user management</h3>
+                        <h3 class="text-center"><span class="badge bg-secondary">Guest or external user
+                                management</span></h3>
                         <p class="alert alert-warning" role="alert">You need to configure authentication at
                             <a href="{{cloudUrlFc.value}}/enterprise/users-authentication" target="_blank"
                                 rel="noopener">{{cloudUrlFc.value}}/enterprise/users-authentication</a> according to the
@@ -160,7 +160,8 @@
             <div class="col">
                 <div class="row">
                     <div class="col">
-                        <h3 class="text-center"><strong>ApiRTC</strong> user management</h3>
+                        <h3 class="text-center"><span class="badge bg-secondary"><strong>ApiRTC</strong> user
+                                management</span></h3>
                         <app-login [btnText]="'Register with '+cloudUrlFc.value" [username]="usernameFc.value"
                             [enable]="!registerInPrgs&&!session&&(userAgentCreationType === userAgentCreationTypeEnum.Username)"
                             (credentials)="registerWithApizeeUserManagement($event)">
@@ -200,7 +201,7 @@
                                 (click)="showToken=!showToken">hide/show</button><strong
                                 *ngIf="showToken">{{token}}</strong>&gt;</span>
                     </span>
-                    <span class="float-right"><button mat-raised-button color="warn" (click)="unregister()"
+                    <span class="float-end"><button mat-raised-button color="warn" (click)="unregister()"
                             [disabled]="conversation" title="Unregister"><em
                                 class="bi bi-box-arrow-left"></em>&nbsp;Unregister</button></span>
                 </p>
@@ -260,9 +261,8 @@
 
     </div>
 
-    <hr>
-
     <div class="container">
+        <hr>
         <div class="row">
             <div class="col">
                 <h1>3. Get or Create, and Join Conversation</h1>
@@ -276,17 +276,22 @@
         <div class="row justify-content-center">
             <div class="col-lg-6">
                 <form class="text-start" [formGroup]="conversationAdvancedOptionsFormGroup">
-                    <mat-checkbox formControlName="meshMode">meshModeEnabled</mat-checkbox>
-                    <br>
-                    <mat-checkbox formControlName="meshOnly">meshOnlyEnabled</mat-checkbox>
-                    <br>
-                    <mat-checkbox formControlName="moderation">moderationEnabled</mat-checkbox>
-                    <br>
-                    <mat-checkbox formControlName="moderator">moderator</mat-checkbox>
+                    <div class="row">
+                        <div class="col">
+                            <mat-checkbox formControlName="meshMode">meshModeEnabled</mat-checkbox>
+                            <br>
+                            <mat-checkbox formControlName="meshOnly">meshOnlyEnabled</mat-checkbox>
+                        </div>
+                        <div class="col">
+                            <mat-checkbox formControlName="moderation">moderationEnabled</mat-checkbox>
+                            <br>
+                            <mat-checkbox formControlName="moderator">moderator</mat-checkbox>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
-        <div class="row justify-content-center">
+        <div class="row justify-content-center mt-3">
             <div class="col-lg-6">
                 <form [formGroup]="conversationFormGroup" (ngSubmit)="getOrcreateConversation()">
                     <mat-form-field>
@@ -302,29 +307,28 @@
             </div>
         </div>
 
-        <div class="row" *ngIf="conversation">
+        <div class="row mt-3" *ngIf="conversation">
             <div class="col">
-                <br>
                 <div class="alert alert-success" role="alert">
                     <p class="clearfix">Got <code>Conversation</code> with <code>name</code>
                         <span>&lt;<strong>{{conversationNameFc.value}}</strong>&gt;</span>.
                         <br>Others can join at url
-                        <a href="{{fullUrl}}" target="_blank" rel="noopener">{{fullUrl}}</a>
+                        <a href="{{fullUrl}}" target="_blank" rel="noopener">{{fullUrl}}&nbsp;<span
+                                class="material-icons align-middle fs-6">open_in_new</span></a>
                         &nbsp;
-                        <span class="float-right"><button mat-raised-button color="primary"
-                                [cdkCopyToClipboard]="fullUrl" title="Copy to clipboard">Copy
+                        <span class="float-end"><button mat-raised-button color="primary" [cdkCopyToClipboard]="fullUrl"
+                                title="Copy to clipboard">Copy
                                 link&nbsp;<em class="bi bi-clipboard"></em></button></span>
                     </p>
-                    <p class="clearfix"><span class="float-right">
+                    <p class="clearfix"><span class="float-end">
                             <button mat-raised-button color="warn" (click)="destroyConversation()"
                                 title="Destroy Conversation">Destroy Conversation</button></span>
                     </p>
                 </div>
             </div>
         </div>
-        <div class="row">
+        <div class="row mt-3">
             <div class="col">
-                <br>
                 <p>
                     Calling <code>Conversation.join</code> makes the <code>UserAgent</code> that created the
                     <code>Session</code> take part of the <strong>conversation</strong>:
@@ -362,8 +366,8 @@
         </div>
     </div>
 
-    <hr>
     <div class="container">
+        <hr>
         <div class="row">
             <div class="col">
                 <h1>4. Exchange text messages and files</h1>
@@ -399,7 +403,7 @@
             <div class="col">
                 <div class="alert alert-success clearfix">
                     <h3>List of <code>Message</code>s in this conversation :</h3>
-                    <div *ngFor="let message of messages" [ngClass]="{'float-right': !message.message}">
+                    <div *ngFor="let message of messages" [ngClass]="{'float-end': !message.message}">
                         <span><strong>{{message.nickname}}</strong>
                             : <span [innerHTML]="message.content"></span></span>
                     </div>
@@ -408,9 +412,8 @@
         </div>
     </div>
 
-    <hr>
-
     <div class="container">
+        <hr>
         <div class="row">
             <div class="col">
                 <h1>5. Create and Publish Streams</h1>
@@ -507,9 +510,8 @@
         </div>
     </div>
 
-    <hr>
-
     <div class="container">
+        <hr>
         <div class="row">
             <div class="col">
                 <h1>6. Display Streams from peers</h1>
@@ -531,9 +533,10 @@
         </div>
     </div>
 
-    <hr>
+
 
     <div class="container">
+        <hr>
         <div class="row">
             <div class="col">
                 <h1>7. Conversation features</h1>
@@ -574,7 +577,7 @@
         </div>
     </div>
 
-    <hr>
+    <!-- <hr>
 
     <div class="container">
         <div class="row">
@@ -594,6 +597,11 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
+
+    <!-- trailing space -->
+    <div class="row mt-5">
+        <div clas="col"></div>
+    </div>>
 
 </div>
