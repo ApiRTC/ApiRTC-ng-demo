@@ -13,7 +13,7 @@ const basicAuthToken = require('basic-auth-token');
 
 
 // Obtained from https://cloud.apirtc.com/enterprise/api
-const apiKey = '9669e2ae3eb32307853499850770b0c3';
+const apiKey = 'myDemoApiKey';
 // Obtained from https://cloud.apirtc.com/enterprise/users-authentication
 const secretKey = '0}ulE|m:[w;Do?@x2gfrux4(h4x"(2Aqm9%k>.I+k@}kn&D1';
 
