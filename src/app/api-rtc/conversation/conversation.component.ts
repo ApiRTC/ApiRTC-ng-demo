@@ -710,12 +710,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
       .catch((error: any) => { console.error('doCreateStream error', error); });
   }
 
-  setCapabilitiesOfLocalStream(streamDecorator: StreamDecorator) {
-    streamDecorator.getStream().setCapabilities().then(() => {
-      // if local stream was published consider we should publish changed one
-    }).catch((error: any) => { console.error('createStream error', error); });
-  }
-
   // --------------------------------------------------------------------------
   // Conversation
 
