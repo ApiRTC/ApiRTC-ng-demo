@@ -138,7 +138,8 @@
                             Guest&nbsp;<em class="bi bi-box-arrow-in-right"></em>
                         </button>
                     </div>
-                    <div class="col with-divider">
+                    <!-- with-divider -->
+                    <div class="col">
                         <p>Using your own authentication server that provides a <strong>Json Web Token</strong> allows
                             to register the <code>UserAgent</code> with <strong>ApiRTC</strong>'s servers in a more
                             secure way.</p>
@@ -146,7 +147,7 @@
                             [enable]="!registerInPrgs&&!session&&(userAgentCreationType === userAgentCreationTypeEnum.Key)"
                             (credentials)="registerWithJWTAuth($event)"></app-login>
                     </div>
-                    <div class="col">
+                    <!-- <div class="col">
                         <p>Authentication with third party server that generates a <strong>token</strong> and that
                             <strong>ApiRTC</strong>'s servers will query with this token during registration.
                         </p>
@@ -154,7 +155,7 @@
                             [enable]="!registerInPrgs&&!session&&(userAgentCreationType === userAgentCreationTypeEnum.Key)"
                             (credentials)="registerWith3rdPartyAuth($event)">
                         </app-login>
-                    </div>
+                    </div> -->
                 </div>
             </div>
             <div class="col">

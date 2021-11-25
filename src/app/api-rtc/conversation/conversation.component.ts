@@ -469,6 +469,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * @deprecated Prefer JWT authentication (registerWithJWTAuth)
+   * 
    * This method is called when user decides to a 3rd party authentication server.
    * A server request is made to an authentication server that has to provide an authentication token.
    * 
