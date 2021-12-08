@@ -798,6 +798,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
           contactHolder.addStream(streamHolder);
         } else if (streamInfo.listEventType === 'removed') {
           console.log('remote stream removed', streamId);
+          //coucou
 
           // this sounds a better reflection to 'added' case but may not be required
           console.log('unsubscribeToStream', streamId);
