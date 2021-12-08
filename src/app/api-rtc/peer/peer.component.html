@@ -10,13 +10,9 @@
     <p *ngIf="streamHoldersById.size === 0" class="alert alert-secondary" role="alert">
         No streams published yet !
     </p>
-    <div *ngIf="streamHoldersById.size > 0" id="{{_contactHolder.id}}-streams" class="carousel slide"
-        data-bs-ride="carousel">
-        <!-- <div class="carousel-indicators">
-            <button type="button" [attr.data-bs-target]="'#'+_contactHolder.id+'-streams'" [attr.data-bs-slide-to]="i" [ngClass]="{'active': i === activeIndex}" [attr.aria-current]="i === activeIndex" *ngFor="let kv of streamHoldersById | keyvalue; index as i" (click)="navTo(i)"></button>
-        </div> -->
-        <div class="carousel-inner">
-            <div class="carousel-item" [ngClass]="{'active': i === activeIndex}"
+    <div *ngIf="streamHoldersById.size > 0" id="{{_contactHolder.id}}-streams">
+        <div >
+            <div [ngClass]="{'active': i === activeIndex}"
                 *ngFor="let kv of streamHoldersById | keyvalue; index as i; first as isFirst">
                 <div class="d-block w-100 h-100">
                     <app-stream [streamHolder]="kv.value" [withSubscription]="true"
@@ -26,15 +22,5 @@
                 </div>
             </div>
         </div>
-        <button class="carousel-control-prev" type="button" [attr.data-bs-target]="'#'+_contactHolder.id+'-streams'"
-            data-bs-slide="prev" (click)="prev()">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" [attr.data-bs-target]="'#'+_contactHolder.id+'-streams'"
-            data-bs-slide="next" (click)="next()">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
     </div>
 </div>

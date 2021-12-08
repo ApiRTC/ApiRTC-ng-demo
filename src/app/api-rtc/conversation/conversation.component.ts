@@ -793,12 +793,12 @@ export class ConversationComponent implements OnInit, OnDestroy {
           console.log('new remote stream', streamId);
           const streamHolder: StreamDecorator = StreamDecorator.buildFromId(streamId);
           console.log(streamHolder.getId() + "->", streamHolder);
+          streamHolder.setIsRemote(true);
           this.streamHoldersById.set(streamHolder.getId(), streamHolder);
           const contactHolder: ContactDecorator = this.getOrCreateContactHolder(streamInfo.contact);
           contactHolder.addStream(streamHolder);
         } else if (streamInfo.listEventType === 'removed') {
           console.log('remote stream removed', streamId);
-          //coucou
 
           // this sounds a better reflection to 'added' case but may not be required
           console.log('unsubscribeToStream', streamId);

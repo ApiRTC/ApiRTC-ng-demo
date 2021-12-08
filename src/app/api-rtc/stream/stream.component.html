@@ -2,13 +2,13 @@
     <span class="badge bg-info">streamId:{{streamHolder.id}}</span>
     <button *ngIf="withSubscription" mat-raised-button color="primary" (click)="toggleSubscribe()">{{streamHolder.stream?'Unsubscribe':'Subscribe'}}</button>
 </p>
-<div class="mycard">
+<div>
     <div id="{{streamHolder.id}}" class="embed-responsive embed-responsive-4by3">
         <app-stream-video *ngIf="streamHolder.stream" [stream]="streamHolder.stream" [mirror]="mirrorVideoFc.value">
         </app-stream-video>
         <!-- <span *ngIf="!streamHolder.stream">no stream</span> -->
     </div>
-    <div class="mycard-text" *ngIf="streamHolder.stream">
+    <div *ngIf="streamHolder.stream">
         <div *ngIf="withMuteControl">
             <form class="row row-cols-lg-auto g-3 align-items-center">
                 <div class="col-12">
@@ -19,8 +19,13 @@
                             </mat-slide-toggle>
                         </div>
                         <div class="col">
-                            <mat-slide-toggle [formControl]="muteAudioFc">
+                            <mat-slide-toggle [formControl]="muteAudioFc" checked="true">
                                 Mute Audio
+                            </mat-slide-toggle>
+                        </div>
+                        <div class="col">
+                            <mat-slide-toggle [formControl]="mirrorVideoFc">
+                                Mirror Video
                             </mat-slide-toggle>
                         </div>
                     </div>
@@ -33,20 +38,17 @@
                     <div class=row>
                         <div class="col">
                             <mat-form-field appearance="fill">
-                                <mat-label>VideoIn</mat-label>
+                                <mat-label>Video Input</mat-label>
                                 <mat-select [formControl]="videoFc">
                                     <mat-option *ngFor="let device of _videoDevices" [value]="device">
                                         {{device.label}}
                                     </mat-option>
                                 </mat-select>
                             </mat-form-field>
-                            <mat-slide-toggle [formControl]="mirrorVideoFc">
-                                Mirror Video
-                            </mat-slide-toggle>
                         </div>
                         <div class="col">
                             <mat-form-field appearance="fill">
-                                <mat-label>AudioIn</mat-label>
+                                <mat-label>Audio Input</mat-label>
                                 <mat-select [formControl]="audioInFc">
                                     <mat-option *ngFor="let device of _audioInDevices" [value]="device">
                                         {{device.label}}
@@ -57,7 +59,7 @@
                     </div>
                     <div class=row>
                         <div class="col">
-                            <mat-form-field appearance="fill">
+                            <!-- <mat-form-field appearance="fill">
                                 <mat-label>Background</mat-label>
                                 <mat-select [formControl]="backgroundFc">
                                     <mat-option *ngFor="let background of backgrounds" [value]="background.value">
@@ -65,8 +67,7 @@
                                     </mat-option>
                                 </mat-select>
                             </mat-form-field>
-                            <input *ngIf="backgroundFc.value==='image'" type="file" (change)="chooseImage($event)" />
-                            <br>
+                            <input *ngIf="backgroundFc.value==='image'" type="file" (change)="chooseImage($event)" /> -->
                             <mat-form-field *ngIf="streamHolder.videoQualityOptions.length>0" appearance="fill">
                                 <mat-label>VideoQuality</mat-label>
                                 <mat-select [formControl]="videoQualityFc">
@@ -80,10 +81,104 @@
                 </div>
             </form>
         </div>
-        <app-audio-stats [stats]="streamHolder.qosStat?.audio"></app-audio-stats>
-        <app-video-stats [stats]="streamHolder.qosStat?.video"></app-video-stats>
+        <div>
+            <div class="accordion accordion-flush" [id]="'stream-capabilities-accordion'+streamHolder.id">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            [attr.data-bs-target]="'#collapse-stream-capabilities'+streamHolder.id" aria-expanded="true"
+                            [attr.aria-controls]="'collapse-stream-capabilities'+streamHolder.id">
+                            Stream capabilities
+                        </button>
+                    </h2>
+                    <div [id]="'collapse-stream-capabilities'+streamHolder.id" class="accordion-collapse collapse"
+                        aria-labelledby="headingOne" [attr.data-bs-parent]="'stream-capabilities-accordion'+streamHolder.id">
+                        <div class="accordion-body">
+                            <div class="d-flex justify-content-center">
+                              <button mat-raised-button color="primary" (click)="toggleRefreshCapabilities()">REFRESH</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Actual value</th>
+                                            <th scope="col">Possible values</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <div *ngIf="streamHolder.settings !== null && streamHolder.settings !== undefined">
+                                            <tr *ngFor="let set of objectKeys(streamHolder.settings)">
+                                                <th scope="row">{{set}}</th>
+                                                <td>{{streamHolder.settings[set]}}</td>
+                                                <td>{{jsonStringify(streamHolder.capabilities[set])}}</td>
+                                            </tr>
+                                        </div>
+                                    </tbody>
+                                  </table> 
+                            </div>
+                            <div>
+                                <p class="text-center">Applied constraints</p>
+                                <pre *ngIf="streamHolder.constraints !== null && streamHolder.constraints !== undefined && objectKeys(streamHolder.constraints).length > 0; else noConstraints">
+                                    <code>{{jsonStringify(streamHolder.constraints, null, 4)}}</code>
+                                </pre>
+                                <ng-template #noConstraints>
+                                    <p class="text-center">No constraints applied</p>
+                                </ng-template>
+                            </div>
+                            <div class="d-flex justify-content-center" *ngIf="!streamHolder.isRemote; else remoteStreamCap">
+                                <form>
+                                    <mat-form-field appearance="fill">
+                                      <mat-label>Capabilities to set as stringified JSON</mat-label>
+                                      <textarea matNativeControl #capabilitiesInput></textarea>
+                                    </mat-form-field>
+                                    <button mat-raised-button color="accent" (click)="toggleSetCapabilities(capabilitiesInput.value)">UPDATE</button>
+                                </form>
+                                    <!-- ICI FORM POUR SET CAPABILITY
+                                - enlever les capabilities du tableau à cause des advanced ? pas sur si on concatène les strings -->
+                            </div>
+                            <ng-template class="d-flex justify-content-center" #remoteStreamCap>
+                                <div *ngIf="!streamHolder.remoteCapabilitiesAccepted; else remoteStreamCapRefused">
+                                    <button mat-raised-button color="accent" (click)="askAuthorization()">ASK AUTHORIZATION TO REMOTE CONTROL</button>
+                                </div>
+                                <ng-template #remoteStreamCapRefused>
+                                    <form>
+                                        <mat-form-field appearance="fill">
+                                          <mat-label>Capabilities to set remotely as stringified JSON</mat-label>
+                                          <textarea matNativeControl #capabilitiesInput></textarea>
+                                        </mat-form-field>
+                                        <button mat-raised-button color="accent" (click)="toggleSetCapabilities(capabilitiesInput.value)">UPDATE</button>
+                                    </form>
+                                </ng-template>
+                            </ng-template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="streamHolder.qosStat">
+                <div class="accordion accordion-flush" [id]="'stream-qos-accordion'+streamHolder.id">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                [attr.data-bs-target]="'#collapse-stream-qos'+streamHolder.id" aria-expanded="true"
+                                [attr.aria-controls]="'collapse-stream-qos'+streamHolder.id">
+                                Audio and Video publish stats
+                            </button>
+                        </h2>
+                        <div [id]="'collapse-stream-qos'+streamHolder.id" class="accordion-collapse collapse"
+                            aria-labelledby="headingOne" [attr.data-bs-parent]="'stream-qos-accordion'+streamHolder.id">
+                            <div class="accordion-body">
+                                <app-audio-stats [stats]="streamHolder.qosStat?.audio"></app-audio-stats>
+                                <app-video-stats [stats]="streamHolder.qosStat?.video"></app-video-stats>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="mycard-over" *ngIf="streamHolder.stream">
+    <div *ngIf="streamHolder.stream">
         <p *ngIf="streamHolder.isSpeaking">
             <span class="badge bg-success">
                 <mat-icon matSuffix>record_voice_over

@@ -92,15 +92,20 @@ export class StreamComponent implements OnInit, OnDestroy {
   // Video quality selection
   videoQualityFc = new FormControl();
 
+  objectKeys = Object.keys;
+  jsonStringify = JSON.stringify;
+
   ngOnInit(): void {
     // Audio/Video muting
     //
     this.muteAudioFc.valueChanges.subscribe(value => {
       console.log("muteAudioFc#valueChanges", value);
+      this.streamHolder.setAudioMuted(value);
       this.onAudioMute.emit(value);
     });
     this.muteVideoFc.valueChanges.subscribe(value => {
       console.log("muteVideoFc#valueChanges", value);
+      this.streamHolder.setVideoMuted(value);
       this.onVideoMute.emit(value);
     });
 
@@ -130,6 +135,15 @@ export class StreamComponent implements OnInit, OnDestroy {
       console.log("videoQualityFc#valueChanges", value);
       this.onVideoQualitySelected.emit(value);
     });
+
+    if(this.streamHolder.isAudioMuted){
+      this.muteAudioFc.setValue(true);
+      this.streamHolder.stream.muteAudio();
+    }
+    if(this.streamHolder.isVideoMuted){
+      this.muteVideoFc.setValue(true);
+      this.streamHolder.stream.muteVideo();
+    }
   }
 
   chooseImage(event: any): void {
@@ -175,6 +189,30 @@ export class StreamComponent implements OnInit, OnDestroy {
   toggleSubscribe() {
     console.log("StreamComponent::toggleSubscribe");
     this.onSubscription.emit(new StreamSubscribeEvent(this.streamHolder, this.streamHolder.stream ? false : true));
+  }
+
+  toggleRefreshCapabilities() {
+    console.log("StreamComponent::toggleRefreshCapabilities");
+    this.streamHolder.stream.getCapabilities();
+    this.streamHolder.stream.getConstraints();
+    this.streamHolder.stream.getSettings();
+  }
+
+  toggleSetCapabilities(capabilities) {
+    console.log("StreamComponent::toggleRefreshCapabilities", capabilities);
+    try{
+      capabilities = JSON.parse(capabilities);
+    }catch(e){
+      console.error(e);
+      return;
+    }
+    this.streamHolder.stream.getLocalMediaStreamTrack().applyConstraints(capabilities).then(() => { //TODO : update this line with future apiRTC version
+      this.toggleRefreshCapabilities();
+    });
+  }
+  askAuthorization(){
+    console.log("StreamComponent::askAuthorization");
+    this.streamHolder.stream.askRemoteCapabilityAuthorization();
   }
 
 }

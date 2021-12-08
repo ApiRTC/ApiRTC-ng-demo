@@ -17,6 +17,11 @@ export class StreamDecorator {
 
     public isSpeaking = false;
 
+    public isAudioMuted: boolean = false;
+    public isVideoMuted: boolean = false;
+    public isRemote: boolean = false;
+    public remoteCapabilitiesAccepted: boolean = false;
+
     public published = false;
 
     public videoQualityOptions: Array<VideoQuality> = new Array();
@@ -26,6 +31,35 @@ export class StreamDecorator {
     constructor(streamId: string, stream?: any) {
         this.id = streamId;
         this.stream = stream;
+
+        if(stream!== undefined){
+            stream.on('streamCapabilities', capabilities => {
+                console.log('streamCapabilities', capabilities);
+                this.capabilities = capabilities;
+            });
+            stream.on('streamSettings', settings => {
+                console.log('streamSettings', settings);
+                this.settings = settings;
+            });
+            stream.on('streamConstraints', constraints => {
+                console.log('streamConstraints', constraints);
+                this.constraints = constraints;
+            });
+            stream.on('remoteCapabilityRequest', (data) => {
+                console.log('remoteCapabilityRequest', data);
+                if(window.confirm('Autoriser ' + data.requestor.getUsername() + ' à controller à distance ?')){
+                    console.log('accepted :', data.requestor.getId(), data.roomName);
+                    stream.acceptRemoteCapabilityRequest(data.requestor.getId(), data.roomName, data.streamId);
+                }else{
+                    console.log('refused :', data.requestor.getId(), data.roomName);
+                    stream.refuseRemoteCapabilityRequest(data.requestor.getId(), data.roomName, data.streamId);
+                }
+            });
+            
+            stream.getCapabilities();
+            stream.getConstraints();
+            stream.getSettings();
+        }
     }
 
     /**
@@ -69,26 +103,9 @@ export class StreamDecorator {
             return;
         }
 
-        // getCapabilities only supported by Chrome ?
-        if ((apiRTC.browser !== 'Firefox') && (apiRTC.browser !== 'IE')) {
-            this.capabilities = stream.getCapabilities();
-            console.log('stream capabilities :', this.capabilities);
-            // Exemple on Chrome :
-            // { 
-            //     "aspectRatio": { "max": 1280, "min": 0.001388888888888889 },
-            //     "brightness": { "max": 64, "min": -64, "step": 1 },
-            //     "colorTemperature": { "max": 6500, "min": 2800, "step": 1 },
-            //     "contrast": { "max": 64, "min": 0, "step": 1 },
-            //     "exposureMode": ["manual", "continuous"],
-            //     "exposureTime": { "max": 10000, "min": 39, "step": 1 },
-            //     "frameRate": { "max": 30, "min": 0 },
-            //     "height": { "max": 720, "min": 1 },
-            //     "resizeMode": ["none", "crop-and-scale"],
-            //     "saturation": { "max": 128, "min": 0, "step": 1 },
-            //     "sharpness": { "max": 5, "min": 0, "step": 1 },
-            //     "whiteBalanceMode": ["manual", "continuous"],
-            //     "width": { "max": 1280, "min": 1 }
-            // }
+        stream.on('streamCapabilities', capabilities => {
+            console.log('streamCapabilities', capabilities);
+            this.capabilities = capabilities;
             if (this.capabilities.width && this.capabilities.height) {
                 for (const quality of VideoQualities) {
                     console.log("Quality", quality)
@@ -97,10 +114,27 @@ export class StreamDecorator {
                     }
                 }
             }
-            this.constraints = stream.getConstraints();
-
-            this.settings = stream.getSettings();
-        }
+        });
+        stream.on('streamSettings', settings => {
+            console.log('streamSettings', settings);
+            this.settings = settings;
+        });
+        stream.on('streamConstraints', constraints => {
+            console.log('streamConstraints', constraints);
+            this.constraints = constraints;
+        });
+        stream.on('remoteCapabilityRequestAccepted', () => {
+            console.log('remoteCapabilityRequestAccepted');
+            this.remoteCapabilitiesAccepted = true;
+        });
+        stream.on('remoteCapabilityRequestRefused', () => {
+            console.log('remoteCapabilityRequestRefused');
+            this.remoteCapabilitiesAccepted = false;
+        });
+        
+        stream.getCapabilities();
+        stream.getConstraints();
+        stream.getSettings();
 
     }
     public getStream(): any {
@@ -122,6 +156,18 @@ export class StreamDecorator {
         this.isSpeaking = isSpeaking;
     }
 
+    // Audio muted
+
+    public setAudioMuted(isAudioMuted: boolean) {
+        this.isAudioMuted = isAudioMuted;
+    }
+
+    // Video muted
+
+    public setVideoMuted(isVideoMuted: boolean) {
+        this.isVideoMuted = isVideoMuted;
+    }
+
     // Published
 
     public setPublished(published: boolean) {
@@ -129,6 +175,12 @@ export class StreamDecorator {
     }
     public isPublished(): boolean {
         return this.published;
+    }
+
+    // Remote
+    
+    public setIsRemote(remote: boolean){
+        this.isRemote = remote;
     }
 
 }
