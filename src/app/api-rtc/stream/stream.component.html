@@ -106,14 +106,12 @@
                                             <th scope="col">Possible values</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        <div *ngIf="streamHolder.settings !== null && streamHolder.settings !== undefined">
-                                            <tr *ngFor="let set of objectKeys(streamHolder.settings)">
-                                                <th scope="row">{{set}}</th>
-                                                <td>{{streamHolder.settings[set]}}</td>
-                                                <td>{{jsonStringify(streamHolder.capabilities[set])}}</td>
-                                            </tr>
-                                        </div>
+                                    <tbody *ngIf="streamHolder.settings !== null && streamHolder.settings !== undefined">
+                                        <tr *ngFor="let set of objectKeys(streamHolder.settings)">
+                                            <th scope="row">{{set}}</th>
+                                            <td>{{streamHolder.settings[set]}}</td>
+                                            <td>{{jsonStringify(streamHolder.capabilities[set])}}</td>
+                                        </tr>
                                     </tbody>
                                   </table> 
                             </div>
@@ -134,8 +132,6 @@
                                     </mat-form-field>
                                     <button mat-raised-button color="accent" (click)="toggleSetCapabilities(capabilitiesInput.value)">UPDATE</button>
                                 </form>
-                                    <!-- ICI FORM POUR SET CAPABILITY
-                                - enlever les capabilities du tableau à cause des advanced ? pas sur si on concatène les strings -->
                             </div>
                             <ng-template class="d-flex justify-content-center" #remoteStreamCap>
                                 <div *ngIf="!streamHolder.remoteCapabilitiesAccepted; else remoteStreamCapRefused">
