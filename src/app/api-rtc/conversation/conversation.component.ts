@@ -328,8 +328,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   createUserAgent() {
     this.userAgent = new apiRTC.UserAgent({
-      // format is like 'apzKey:<APIKEY>'
-      uri: 'apzkey:' + this.apiKeyFc.value
+      // format is like 'apiKey:<APIKEY>'
+      uri: 'apiKey:' + this.apiKeyFc.value
     });
 
     console.log('this.userAgent', this.userAgent);
