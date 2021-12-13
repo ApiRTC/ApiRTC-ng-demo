@@ -118,7 +118,7 @@
                             <div>
                                 <p class="text-center">Applied constraints</p>
                                 <pre *ngIf="streamHolder.constraints !== null && streamHolder.constraints !== undefined && objectKeys(streamHolder.constraints).length > 0; else noConstraints">
-                                    <code>{{jsonStringify(streamHolder.constraints, null, 4)}}</code>
+                                    {{jsonStringify(streamHolder.constraints, undefined, 2)}}
                                 </pre>
                                 <ng-template #noConstraints>
                                     <p class="text-center">No constraints applied</p>
@@ -130,7 +130,7 @@
                                       <mat-label>Capabilities to set as stringified JSON</mat-label>
                                       <textarea matNativeControl #capabilitiesInput></textarea>
                                     </mat-form-field>
-                                    <button mat-raised-button color="accent" (click)="toggleSetCapabilities(capabilitiesInput.value)">UPDATE</button>
+                                    <button mat-raised-button color="accent" (click)="toggleApplyConstraints(capabilitiesInput.value)">UPDATE</button>
                                 </form>
                             </div>
                             <ng-template class="d-flex justify-content-center" #remoteStreamCap>
@@ -143,7 +143,7 @@
                                           <mat-label>Capabilities to set remotely as stringified JSON</mat-label>
                                           <textarea matNativeControl #capabilitiesInput></textarea>
                                         </mat-form-field>
-                                        <button mat-raised-button color="accent" (click)="toggleSetCapabilities(capabilitiesInput.value)">UPDATE</button>
+                                        <button mat-raised-button color="accent" (click)="toggleApplyConstraints(capabilitiesInput.value)">UPDATE</button>
                                     </form>
                                 </ng-template>
                             </ng-template>
@@ -159,7 +159,7 @@
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 [attr.data-bs-target]="'#collapse-stream-qos'+streamHolder.id" aria-expanded="true"
                                 [attr.aria-controls]="'collapse-stream-qos'+streamHolder.id">
-                                Audio and Video publish stats
+                                Audio and Video stats
                             </button>
                         </h2>
                         <div [id]="'collapse-stream-qos'+streamHolder.id" class="accordion-collapse collapse"

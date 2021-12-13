@@ -198,7 +198,7 @@ export class StreamComponent implements OnInit, OnDestroy {
     this.streamHolder.stream.getSettings();
   }
 
-  toggleSetCapabilities(capabilities) {
+  toggleApplyConstraints(capabilities) {
     console.log("StreamComponent::toggleRefreshCapabilities", capabilities);
     try{
       capabilities = JSON.parse(capabilities);
@@ -206,7 +206,7 @@ export class StreamComponent implements OnInit, OnDestroy {
       console.error(e);
       return;
     }
-    this.streamHolder.stream.getLocalMediaStreamTrack().applyConstraints(capabilities).then(() => { //TODO : update this line with future apiRTC version
+    this.streamHolder.stream.applyConstraints(capabilities).then(() => {
       this.toggleRefreshCapabilities();
     });
   }
