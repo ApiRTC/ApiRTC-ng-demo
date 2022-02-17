@@ -12,6 +12,7 @@
                     of
                     <strong>ApiRTC</strong> javascript library.
                 </p>
+                <p ngIf="mobileMode">Mobile Mode</p>
             </div>
         </div>
     </div>
@@ -459,9 +460,9 @@
                         *ngFor="let kv of localCameraStreamsById | keyvalue; index as i; first as isFirst">
                         <div class="mt-3 d-block w-100 h-100">
                             <app-stream [streamHolder]="kv.value" [withSubscription]="false" [withMuteControl]="true"
-                                [withDevicesControl]="true" [audioMuted]="kv.isAudioMuted" [videoMuted]="kv.isVideoMuted"
-                                [audioInDevices]="audioInDevices" [videoDevices]="videoDevices"
-                                (onAudioMute)="handleAudioMute([kv.value, $event])"
+                                [withDevicesControl]="true" [audioMuted]="kv.isAudioMuted"
+                                [videoMuted]="kv.isVideoMuted" [audioInDevices]="audioInDevices"
+                                [videoDevices]="videoDevices" (onAudioMute)="handleAudioMute([kv.value, $event])"
                                 (onVideoMute)="handleVideoMute([kv.value, $event])"
                                 (onAudioInSelected)="selectedAudioInDevice=$event;changeLocalStream(kv.value)"
                                 (onVideoSelected)="selectedVideoDevice=$event;changeLocalStream(kv.value)"

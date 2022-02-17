@@ -66,6 +66,9 @@ MIT
 @angular/router
 MIT
 
+@apirtc/apirtc
+ICS
+
 bootstrap
 MIT
 The MIT License (MIT)

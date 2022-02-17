@@ -109,6 +109,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   publishInPrgs = false;
 
+  mobileMode = false;
+
   // Peer Contacts
   // Keep here only contacts that joined the conversation
   conversationContactHoldersById: Map<string, ContactDecorator> = new Map();
@@ -189,6 +191,12 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+      console.log("Running on mobile")
+      this.mobileMode = true;
+    }
+
     // Get conversation name and base url from current path (pattern : "/path/to/<conversationName>")
     //
     const conversationName = this.activatedRoute.snapshot.paramMap.get("name");
@@ -1147,10 +1155,14 @@ export class ConversationComponent implements OnInit, OnDestroy {
           // or 
           video: {
             width: { min: QVGA.width, ideal: HD.width, max: FHD.width },
-            height: { min: QVGA.height, ideal: HD.height, max: FHD.height }
+            height: { min: QVGA.height, ideal: HD.height, max: FHD.height },
           }
         }
       };
+
+      if (this.mobileMode) {
+        default_createStreamOptions.constraints.video['advanced'] = [{ facingMode: 'environment' }]
+      }
 
       if (options && !options.constraints) {
         options.constraints = default_createStreamOptions.constraints;
