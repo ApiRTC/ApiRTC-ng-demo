@@ -28,3 +28,5 @@ export const FHD: VideoQuality = { name: 'FHD', width: 1920, height: 1080 };
 export const FourK: VideoQuality = { name: '4K', width: 4096, height: 2160 };
 
 export const VideoQualities: Array<VideoQuality> = [QVGA, VGA, HD, FHD, FourK];
+
+export const FacingModes = ["user", "environment"] // "left", "right"
