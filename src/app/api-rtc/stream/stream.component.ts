@@ -33,7 +33,7 @@ export class StreamComponent implements OnInit, OnDestroy {
 
   @Input() withMuteControl: boolean = false;
   @Input() withDevicesControl: boolean = false;
-  
+
   @Input() withSubscription: boolean = false;
 
   @Input() set audioMuted(audioMuted: boolean) {
@@ -136,11 +136,11 @@ export class StreamComponent implements OnInit, OnDestroy {
       this.onVideoQualitySelected.emit(value);
     });
 
-    if(this.streamHolder.isAudioMuted){
+    if (this.streamHolder.isAudioMuted) {
       this.muteAudioFc.setValue(true);
       this.streamHolder.stream.muteAudio();
     }
-    if(this.streamHolder.isVideoMuted){
+    if (this.streamHolder.isVideoMuted) {
       this.muteVideoFc.setValue(true);
       this.streamHolder.stream.muteVideo();
     }
@@ -191,28 +191,56 @@ export class StreamComponent implements OnInit, OnDestroy {
     this.onSubscription.emit(new StreamSubscribeEvent(this.streamHolder, this.streamHolder.stream ? false : true));
   }
 
-  toggleRefreshCapabilities() {
-    console.log("StreamComponent::toggleRefreshCapabilities");
-    this.streamHolder.stream.getCapabilities();
-    this.streamHolder.stream.getConstraints();
-    this.streamHolder.stream.getSettings();
+  refreshCapabilitiesConstraintsSettings() {
+    console.log("StreamComponent::refreshCapabilitiesConstraintsSettings");
+    this.streamHolder.getCapabilitiesConstraintsSettings();
   }
 
-  toggleApplyConstraints(capabilities) {
-    console.log("StreamComponent::toggleRefreshCapabilities", capabilities);
-    try{
-      capabilities = JSON.parse(capabilities);
-    }catch(e){
-      console.error(e);
-      return;
-    }
-    this.streamHolder.stream.applyConstraints(capabilities).then(() => {
-      this.toggleRefreshCapabilities();
-    });
+  // Reworked
+  // applyConstraints(capabilities) {
+  //   console.log("StreamComponent::applyConstraints", capabilities);
+  //   try {
+  //     capabilities = JSON.parse(capabilities);
+  //   } catch (e) {
+  //     console.error(e);
+  //     return;
+  //   }
+  //   this.streamHolder.stream.applyConstraints(capabilities).then(() => {
+  //     this.refreshCapabilities();
+  //   });
+  // }
+
+  applyConstraintsHD() {
+    this.streamHolder.stream.applyConstraints({ video: { height: { exact: 720 }, width: { exact: 1280 } } }).
+      then(() => {
+        console.log('applyConstraintsHD done');
+        this.refreshCapabilitiesConstraintsSettings()
+      })
+      .catch((error: any) => { console.error('applyConstraintsHD', error) });
   }
-  askAuthorization(){
-    console.log("StreamComponent::askAuthorization");
-    this.streamHolder.stream.askRemoteCapabilityAuthorization();
+  applyConstraintsHDTorchOn() {
+    this.streamHolder.stream.applyConstraints({ video: { height: { exact: 720 }, width: { exact: 1280 }, advanced: [{ torch: true }] } }).
+      then(() => {
+        console.log('applyConstraintsHDTorchOn done');
+        this.refreshCapabilitiesConstraintsSettings()
+      })
+      .catch((error: any) => { console.error('applyConstraintsHDTorchOn', error) });
+  }
+  applyConstraintsVGA() {
+    this.streamHolder.stream.applyConstraints({ video: { height: { exact: 480 }, width: { exact: 640 } } }).
+      then(() => {
+        console.log('applyConstraintsVGA done');
+        this.refreshCapabilitiesConstraintsSettings()
+      })
+      .catch((error: any) => { console.error('applyConstraintsVGA', error) });
+  }
+  applyConstraintsVGATorchOff() {
+    this.streamHolder.stream.applyConstraints({ video: { height: { exact: 480 }, width: { exact: 640 }, advanced: [{ torch: false }] } }).
+      then(() => {
+        console.log('applyConstraintsVGATorchOff done');
+        this.refreshCapabilitiesConstraintsSettings()
+      })
+      .catch((error: any) => { console.error('applyConstraintsVGATorchOff', error) });
   }
 
 }
