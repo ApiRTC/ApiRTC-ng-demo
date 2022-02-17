@@ -227,7 +227,7 @@ export class StreamComponent implements OnInit, OnDestroy {
       .catch((error: any) => { console.error('applyConstraintsHDTorchOn', error) });
   }
   applyConstraintsTorchOn() {
-    this.streamHolder.stream.applyConstraints({ video: { torch: true } })
+    this.streamHolder.stream.applyConstraints({ video: { advanced: [{ torch: true }] } })
       .then(() => {
         console.log('applyConstraintsHDTorchOn done');
         this.refreshCapabilitiesConstraintsSettings()

@@ -29,7 +29,7 @@
                 <h3 class="text-center"><span class="badge bg-secondary">Guest or external user management</span></h3>
                 <p>Create <code>UserAgent</code> with an apiKey:</p>
                 <div class="text-center">
-                    <mat-form-field [style.width.%]="60">
+                    <mat-form-field [style.width.%]="60" class="mb-3">
                         <mat-label>apiKey</mat-label>
                         <input matInput placeholder="apiKey" [formControl]="apiKeyFc">
                         <mat-icon matSuffix>fingerprint</mat-icon>
@@ -50,7 +50,7 @@
                         rel="noopener">{{cloudUrlFc.value}}/users</a>:
                 </p>
                 <div class="text-center">
-                    <mat-form-field [style.width.%]="50">
+                    <mat-form-field [style.width.%]="50" class="mb-3">
                         <mat-label>username</mat-label>
                         <input matInput placeholder="username" [formControl]="usernameFc">
                         <mat-icon matSuffix>verified_user</mat-icon>
@@ -426,35 +426,34 @@
         </div>
         <div class="row">
             <div class="col-sm-12 col-md-4 text-center">
-                <div>
-                    <section id="facing-modes">
-                        <label id="facing-mode-label">facingMode:&nbsp;</label>
-                        <mat-radio-group [(ngModel)]="currentFacingMode" enabled="false">
-                            <mat-radio-button class="example-margin" value="user">user</mat-radio-button>
-                            <mat-radio-button class="example-margin" value="environment" [disabled]="!mobileMode">
-                                environment<span *ngIf="!mobileMode">&nbsp;Only available on mobile</span>
-                            </mat-radio-button>
-                        </mat-radio-group>
-                    </section>
+                <div class="mb-3">
+                    <label id="facing-mode-label" class="me-3">facingMode:</label>
+                    <mat-radio-group [(ngModel)]="currentFacingMode" enabled="false">
+                        <mat-radio-button value="user">user</mat-radio-button>
+                        <mat-radio-button value="environment" [disabled]="!mobileMode">
+                            environment<span *ngIf="!mobileMode">(Only available on mobile)</span>
+                        </mat-radio-button>
+                    </mat-radio-group>
                 </div>
-                <button mat-raised-button color="primary" (click)="createCameraStream()" [disabled]="!userAgent"><em
-                        class="bi bi-file-plus"></em> Create Camera
-                    Stream</button>
+                <button class="mb-3" mat-raised-button color="primary" (click)="createCameraStream()"
+                    [disabled]="!userAgent"><em class="bi bi-file-plus"></em> Create Camera Stream</button>
             </div>
             <div class="col-sm-12 col-md-4 text-center">
-                <button mat-raised-button color="{{screenSharingStreamHolder?'accent':'primary'}}"
+                <button class="mb-3" mat-raised-button color="{{screenSharingStreamHolder?'accent':'primary'}}"
                     (click)="toggleScreenSharing()" [disabled]="!joined">{{screenSharingStreamHolder?'Unshare':'Share'}}
                     Screen</button>
             </div>
             <div class="col-sm-12 col-md-4 text-center">
                 <form [formGroup]="videoFileFormGroup">
-                    <input type="file" formControlName="file" (change)="createVideoStream($event)" />
-                    <button mat-raised-button color="{{videoStreamHolder?.published?'accent':'primary'}}"
-                        (click)="togglePublishVideoStream()" [disabled]="!joined||!videoStreamHolder"
-                        title="{{videoStreamHolder?.published?'Unpublish':'Publish'}} Video File">{{videoStreamHolder?.published?'Unpublish':'Publish'}}</button>
-                    <button mat-raised-button color="accent" (click)="releaseVideoStream()"
-                        [disabled]="!videoStreamHolder||videoStreamHolder?.published"
-                        title="Release Stream">Release</button>
+                    <input class="mb-3" type="file" formControlName="file" (change)="createVideoStream($event)" />
+                    <div>
+                        <button mat-raised-button color="{{videoStreamHolder?.published?'accent':'primary'}}"
+                            (click)="togglePublishVideoStream()" [disabled]="!joined||!videoStreamHolder"
+                            title="{{videoStreamHolder?.published?'Unpublish':'Publish'}} Video File">{{videoStreamHolder?.published?'Unpublish':'Publish'}}</button>
+                        <button mat-raised-button color="accent" (click)="releaseVideoStream()"
+                            [disabled]="!videoStreamHolder||videoStreamHolder?.published"
+                            title="Release Stream">Release</button>
+                    </div>
                 </form>
             </div>
         </div>
