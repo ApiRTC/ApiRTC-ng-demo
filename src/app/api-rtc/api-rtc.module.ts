@@ -15,6 +15,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatRadioModule } from '@angular/material/radio';
 
 import { ClipboardModule } from '@angular/cdk/clipboard';
 
@@ -43,7 +44,7 @@ import { StreamVideoComponent } from './stream-video/stream-video.component';
     MatFormFieldModule, MatInputModule, MatIconModule, MatButtonModule,
     MatListModule, MatSlideToggleModule, MatSelectModule, MatChipsModule,
     MatProgressBarModule, MatProgressSpinnerModule, MatDividerModule,
-    MatCheckboxModule,
+    MatCheckboxModule, MatRadioModule,
 
     ClipboardModule,
 

@@ -426,6 +426,17 @@
         </div>
         <div class="row">
             <div class="col-sm-12 col-md-4 text-center">
+                <div>
+                    <section id="facing-modes">
+                        <label id="facing-mode-label">facingMode:&nbsp;</label>
+                        <mat-radio-group [(ngModel)]="currentFacingMode" enabled="false">
+                            <mat-radio-button class="example-margin" value="user">user</mat-radio-button>
+                            <mat-radio-button class="example-margin" value="environment" [disabled]="!mobileMode">
+                                environment<span *ngIf="!mobileMode">&nbsp;Only available on mobile</span>
+                            </mat-radio-button>
+                        </mat-radio-group>
+                    </section>
+                </div>
                 <button mat-raised-button color="primary" (click)="createCameraStream()" [disabled]="!userAgent"><em
                         class="bi bi-file-plus"></em> Create Camera
                     Stream</button>

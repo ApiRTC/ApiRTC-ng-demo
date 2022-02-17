@@ -111,6 +111,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   mobileMode = false;
 
+  currentFacingMode = "user";
+
   // Peer Contacts
   // Keep here only contacts that joined the conversation
   conversationContactHoldersById: Map<string, ContactDecorator> = new Map();
@@ -1156,13 +1158,14 @@ export class ConversationComponent implements OnInit, OnDestroy {
           video: {
             width: { min: QVGA.width, ideal: HD.width, max: FHD.width },
             height: { min: QVGA.height, ideal: HD.height, max: FHD.height },
+            advanced: [{ facingMode: this.currentFacingMode }]
           }
         }
       };
 
-      if (this.mobileMode) {
-        default_createStreamOptions.constraints.video['advanced'] = [{ facingMode: 'environment' }]
-      }
+      // if (this.mobileMode) {
+      //   default_createStreamOptions.constraints.video['advanced'] = [{ facingMode: 'environment' }]
+      // }
 
       if (options && !options.constraints) {
         options.constraints = default_createStreamOptions.constraints;

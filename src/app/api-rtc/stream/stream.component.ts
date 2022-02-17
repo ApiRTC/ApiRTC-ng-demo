@@ -4,7 +4,7 @@ import { FormControl } from '@angular/forms';
 
 import { StreamDecorator } from '../model/model.module';
 
-import { VideoQuality, FacingModes } from '../../consts';
+import { VideoQuality } from '../../consts';
 
 export class StreamSubscribeEvent {
   readonly streamHolder: StreamDecorator;
@@ -91,9 +91,6 @@ export class StreamComponent implements OnInit, OnDestroy {
 
   // Video quality selection
   videoQualityFc = new FormControl();
-
-  facingModes = FacingModes;
-  currentFacingModeIndex = 0;
 
   objectKeys = Object.keys;
   jsonStringify = JSON.stringify;
@@ -213,17 +210,6 @@ export class StreamComponent implements OnInit, OnDestroy {
   //   });
   // }
 
-  toggleFacingMode() {
-    this.currentFacingModeIndex = (this.currentFacingModeIndex + 1) % FacingModes.length;
-    console.log('toggleFacingMode index', this.currentFacingModeIndex)
-    this.streamHolder.stream.applyConstraints({ video: { advanced: [{ facingMode: FacingModes[this.currentFacingModeIndex] }] } })
-      .then(() => {
-        console.log('toggleFacingMode done');
-        this.refreshCapabilitiesConstraintsSettings()
-      })
-      .catch((error: any) => { console.error('toggleFacingMode', error) });
-  }
-
   applyConstraintsHD() {
     this.streamHolder.stream.applyConstraints({ video: { height: { exact: 720 }, width: { exact: 1280 } } })
       .then(() => {
@@ -234,6 +220,14 @@ export class StreamComponent implements OnInit, OnDestroy {
   }
   applyConstraintsHDTorchOn() {
     this.streamHolder.stream.applyConstraints({ video: { height: { exact: 720 }, width: { exact: 1280 }, advanced: [{ torch: true }] } })
+      .then(() => {
+        console.log('applyConstraintsHDTorchOn done');
+        this.refreshCapabilitiesConstraintsSettings()
+      })
+      .catch((error: any) => { console.error('applyConstraintsHDTorchOn', error) });
+  }
+  applyConstraintsTorchOn() {
+    this.streamHolder.stream.applyConstraints({ video: { torch: true } })
       .then(() => {
         console.log('applyConstraintsHDTorchOn done');
         this.refreshCapabilitiesConstraintsSettings()

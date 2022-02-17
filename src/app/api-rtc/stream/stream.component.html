@@ -9,8 +9,6 @@
         </app-stream-video>
         <!-- <span *ngIf="!streamHolder.stream">no stream</span> -->
     </div>
-    <div><button mat-raised-button color="accent" (click)="toggleFacingMode()">
-            toggleFacingMode() current is "{{facingModes[currentFacingModeIndex]}}"</button></div>
     <div *ngIf="streamHolder.stream">
         <div *ngIf="withMuteControl">
             <form class="row row-cols-lg-auto g-3 align-items-center">
@@ -126,6 +124,8 @@
                                     (click)="applyConstraintsHD()">applyConstraintsHD</button>
                                 <button mat-raised-button color="accent"
                                     (click)="applyConstraintsHDTorchOn()">applyConstraintsHDTorchOn</button>
+                                <button mat-raised-button color="accent"
+                                    (click)="applyConstraintsTorchOn()">applyConstraintsTorchOn</button>
                                 <button mat-raised-button color="accent"
                                     (click)="applyConstraintsVGA()">applyConstraintsVGA</button>
                                 <button mat-raised-button color="accent"
