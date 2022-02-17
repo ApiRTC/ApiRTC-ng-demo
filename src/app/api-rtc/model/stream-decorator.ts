@@ -1,10 +1,9 @@
-//declare var apiRTC: any;
 
 import { VideoQuality, VideoQualities } from '../../consts';
 
 import { Stream } from '@apirtc/apirtc';
 
-// Decorator for apiRTC.Stream class
+// Decorator for apirtc Stream class
 //
 export class StreamDecorator {
 

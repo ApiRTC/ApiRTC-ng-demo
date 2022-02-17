@@ -15,15 +15,7 @@ const DEFAULT_NICKNAME = '';
 
 import { VideoQuality, QVGA, HD, FHD } from '../../consts';
 
-declare var apiRTC: any;
-
-// TODO FIXTHIS: generates build error :
-// import { UserAgent, UserData } from '@apirtc/apirtc';
-// Error: node_modules/@apizee/apirtc/apirtc.d.ts:842:22 - error TS2709: Cannot use namespace 'apiRTC' as a type.
-// 842 declare var apiRTC2: apiRTC; // Added for retro compatibility
-
-// TODO test (from dev.apirtc.com FAQ)
-//import * as apiRTC2 from './apiRTC2-vX.Y.Z.js';
+import { UserAgent, UserData, Stream, browser } from '@apirtc/apirtc';
 
 enum UserAgentCreationType {
   Key,
@@ -327,7 +319,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
   //
 
   createUserAgent() {
-    this.userAgent = new apiRTC.UserAgent({
+    this.userAgent = new UserAgent({
       // format is like 'apiKey:<APIKEY>'
       uri: 'apiKey:' + this.apiKeyFc.value
     });
@@ -340,7 +332,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
 
   createUserAgentWithUsername() {
-    this.userAgent = new apiRTC.UserAgent({
+    this.userAgent = new UserAgent({
       // format is like 'apizee:<USERNAME>'
       uri: 'apizee:' + this.usernameFc.value
     });
@@ -355,7 +347,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
   doUserAgentBindings() {
     // Initialize UserData
     // set nickname with default value set for the formControl
-    const userData = new apiRTC.UserData();
+    const userData = new UserData({});
     userData.setProp(PROPERTY_NICKNAME, this.nicknameFc.value);
     this.userAgent.setUserData(userData);
 
@@ -867,7 +859,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   doListenToQosStatistics() {
 
-    if ((apiRTC.browser === 'Chrome') || (apiRTC.browser === 'Firefox')) {
+    if ((browser === 'Chrome') || (browser === 'Firefox')) {
       // TODO : safari ??
       this.userAgent.enableCallStatsMonitoring(true, { interval: 10000 });
       this.userAgent.enableActiveSpeakerDetecting(true, { threshold: 50 });
@@ -1304,8 +1296,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
     const videoElement = this.fileVideoRef.nativeElement;
     videoElement.onloadeddata = () => {
       // Note that video handling should be applied after data loaded
-      const mediaStream = (apiRTC.browser === 'Firefox') ? videoElement.mozCaptureStream() : videoElement.captureStream();
-      apiRTC.Stream.createStreamFromMediaStream(mediaStream)
+      const mediaStream = (browser === 'Firefox') ? videoElement.mozCaptureStream() : videoElement.captureStream();
+      Stream.createStreamFromMediaStream(mediaStream)
         .then((stream: any) => {
           this.videoStreamHolder = StreamDecorator.build(stream);
           console.info('createVideoStream()::createStreamFromMediaStream', stream);
@@ -1369,7 +1361,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
         }
       };
 
-      apiRTC.Stream.createDisplayMediaStream(displayMediaStreamConstraints, false)
+      Stream.createDisplayMediaStream(displayMediaStreamConstraints, false)
         .then((stream: any) => {
           stream.on('stopped', () => {
             // Used to detect when user stop the screenSharing with Chrome DesktopCapture UI
