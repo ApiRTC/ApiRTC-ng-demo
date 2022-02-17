@@ -31,6 +31,8 @@ export class StreamComponent implements OnInit, OnDestroy {
 
   @Input() streamHolder: StreamDecorator;
 
+  @Input() isCameraStream: boolean = false;
+
   @Input() withMuteControl: boolean = false;
   @Input() withDevicesControl: boolean = false;
 
@@ -52,28 +54,28 @@ export class StreamComponent implements OnInit, OnDestroy {
     this._videoDevices = videoDevices;
   }
 
-  @Input() set background(background: string | BackgroundImageEvent) {
-    if (background instanceof BackgroundImageEvent) {
-      this.backgroundFc.setValue('image');
-    } else {
-      this.backgroundFc.setValue(background);
-    }
-  }
+  // @Input() set background(background: string | BackgroundImageEvent) {
+  //   if (background instanceof BackgroundImageEvent) {
+  //     this.backgroundFc.setValue('image');
+  //   } else {
+  //     this.backgroundFc.setValue(background);
+  //   }
+  // }
 
-  backgrounds: any[] = [
-    { value: 'none', viewValue: 'No background' },
-    { value: 'blur', viewValue: 'blur' },
-    { value: 'transparent', viewValue: 'transparent' },
-    { value: 'image', viewValue: 'image' }
-  ];
+  // backgrounds: any[] = [
+  //   { value: 'none', viewValue: 'No background' },
+  //   { value: 'blur', viewValue: 'blur' },
+  //   { value: 'transparent', viewValue: 'transparent' },
+  //   { value: 'image', viewValue: 'image' }
+  // ];
 
   @Output() onSubscription = new EventEmitter<StreamSubscribeEvent>();
   @Output() onAudioMute = new EventEmitter<boolean>();
   @Output() onVideoMute = new EventEmitter<boolean>();
   @Output() onAudioInSelected = new EventEmitter<any>();
   @Output() onVideoSelected = new EventEmitter<any>();
-  @Output() onBackgroundSelected = new EventEmitter<string | BackgroundImageEvent>();
-  @Output() onVideoQualitySelected = new EventEmitter<VideoQuality>();
+  //@Output() onBackgroundSelected = new EventEmitter<string | BackgroundImageEvent>();
+  //@Output() onVideoQualitySelected = new EventEmitter<VideoQuality>();
 
   // Audio/Video Muting
   muteAudioFc = new FormControl(false);
@@ -87,10 +89,15 @@ export class StreamComponent implements OnInit, OnDestroy {
   videoFc = new FormControl('');
 
   // Backgroung selection
-  backgroundFc = new FormControl('none');
+  //backgroundFc = new FormControl('none');
 
   // Video quality selection
   videoQualityFc = new FormControl();
+  videoQualityError: string = undefined;
+
+  // torch
+  toggleTorchFc = new FormControl(false);
+  torchError: string = undefined;
 
   objectKeys = Object.keys;
   jsonStringify = JSON.stringify;
@@ -122,18 +129,48 @@ export class StreamComponent implements OnInit, OnDestroy {
 
     // Background selection
     //
-    this.backgroundFc.valueChanges.subscribe(value => {
-      console.log("backgroundFc#valueChanges", value);
-      if (value !== 'image') {
-        this.onBackgroundSelected.emit(value);
-      }
-    });
+    // this.backgroundFc.valueChanges.subscribe(value => {
+    //   console.log("backgroundFc#valueChanges", value);
+    //   if (value !== 'image') {
+    //     this.onBackgroundSelected.emit(value);
+    //   }
+    // });
 
     // Video quality selection
     //
-    this.videoQualityFc.valueChanges.subscribe(value => {
-      console.log("videoQualityFc#valueChanges", value);
-      this.onVideoQualitySelected.emit(value);
+    this.videoQualityFc.valueChanges.subscribe((videoQuality: VideoQuality) => {
+      console.log("videoQualityFc#valueChanges", videoQuality);
+      this.videoQualityError = undefined;
+      this.streamHolder.stream.applyConstraints({ video: { height: { exact: videoQuality.height }, width: { exact: videoQuality.width } } })
+        .then(() => {
+          console.log('videoQuality applyConstraints done');
+          this.streamHolder.getCapabilitiesConstraintsSettings();
+        })
+        .catch((error: any) => {
+          console.error('videoQuality applyConstraints', error);
+          this.videoQualityError = error;
+          setTimeout(() => {
+            this.videoQualityError = undefined;
+          }, 2000)
+        });
+    });
+
+    // Torch
+    this.toggleTorchFc.valueChanges.subscribe(value => {
+      this.torchError = undefined;
+      console.log("toggleTorchFc#valueChanges", value);
+      this.streamHolder.stream.applyConstraints({ video: { advanced: [{ torch: value }] } })
+        .then(() => {
+          console.log('toggleTorchFc done', value);
+          this.streamHolder.getCapabilitiesConstraintsSettings();
+        })
+        .catch((error: any) => {
+          console.error('toggleTorchFc', error);
+          this.torchError = error;
+          setTimeout(() => {
+            this.torchError = undefined;
+          }, 2000)
+        });
     });
 
     if (this.streamHolder.isAudioMuted) {
@@ -175,7 +212,7 @@ export class StreamComponent implements OnInit, OnDestroy {
       context.drawImage(img, 0, 0);  // draw image onto canvas (lazy method™)
       console.log("onload", img);
       const imageData = context.getImageData(0, 0, img.width, img.height);
-      this.onBackgroundSelected.emit(new BackgroundImageEvent(imageData));
+      //this.onBackgroundSelected.emit(new BackgroundImageEvent(imageData));
       // free memory
       URL.revokeObjectURL(img.src);
     };
@@ -189,66 +226,6 @@ export class StreamComponent implements OnInit, OnDestroy {
   toggleSubscribe() {
     console.log("StreamComponent::toggleSubscribe");
     this.onSubscription.emit(new StreamSubscribeEvent(this.streamHolder, this.streamHolder.stream ? false : true));
-  }
-
-  refreshCapabilitiesConstraintsSettings() {
-    console.log("StreamComponent::refreshCapabilitiesConstraintsSettings");
-    this.streamHolder.getCapabilitiesConstraintsSettings();
-  }
-
-  // Reworked
-  // applyConstraints(capabilities) {
-  //   console.log("StreamComponent::applyConstraints", capabilities);
-  //   try {
-  //     capabilities = JSON.parse(capabilities);
-  //   } catch (e) {
-  //     console.error(e);
-  //     return;
-  //   }
-  //   this.streamHolder.stream.applyConstraints(capabilities).then(() => {
-  //     this.refreshCapabilities();
-  //   });
-  // }
-
-  applyConstraintsHD() {
-    this.streamHolder.stream.applyConstraints({ video: { height: { exact: 720 }, width: { exact: 1280 } } })
-      .then(() => {
-        console.log('applyConstraintsHD done');
-        this.refreshCapabilitiesConstraintsSettings()
-      })
-      .catch((error: any) => { console.error('applyConstraintsHD', error) });
-  }
-  applyConstraintsHDTorchOn() {
-    this.streamHolder.stream.applyConstraints({ video: { height: { exact: 720 }, width: { exact: 1280 }, advanced: [{ torch: true }] } })
-      .then(() => {
-        console.log('applyConstraintsHDTorchOn done');
-        this.refreshCapabilitiesConstraintsSettings()
-      })
-      .catch((error: any) => { console.error('applyConstraintsHDTorchOn', error) });
-  }
-  applyConstraintsTorchOn() {
-    this.streamHolder.stream.applyConstraints({ video: { advanced: [{ torch: true }] } })
-      .then(() => {
-        console.log('applyConstraintsHDTorchOn done');
-        this.refreshCapabilitiesConstraintsSettings()
-      })
-      .catch((error: any) => { console.error('applyConstraintsHDTorchOn', error) });
-  }
-  applyConstraintsVGA() {
-    this.streamHolder.stream.applyConstraints({ video: { height: { exact: 480 }, width: { exact: 640 } } })
-      .then(() => {
-        console.log('applyConstraintsVGA done');
-        this.refreshCapabilitiesConstraintsSettings()
-      })
-      .catch((error: any) => { console.error('applyConstraintsVGA', error) });
-  }
-  applyConstraintsVGATorchOff() {
-    this.streamHolder.stream.applyConstraints({ video: { height: { exact: 480 }, width: { exact: 640 }, advanced: [{ torch: false }] } })
-      .then(() => {
-        console.log('applyConstraintsVGATorchOff done');
-        this.refreshCapabilitiesConstraintsSettings()
-      })
-      .catch((error: any) => { console.error('applyConstraintsVGATorchOff', error) });
   }
 
 }

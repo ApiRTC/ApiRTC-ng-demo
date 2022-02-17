@@ -8,12 +8,12 @@ import { AuthServerService } from '../auth-server.service';
 
 import { ContactDecorator, MessageDecorator, StreamDecorator, RecordingInfoDecorator } from '../model/model.module';
 
-import { StreamSubscribeEvent, BackgroundImageEvent } from '../stream/stream.component';
+import { StreamSubscribeEvent } from '../stream/stream.component';
 
 import { PROPERTY_NICKNAME } from './../../consts';
 const DEFAULT_NICKNAME = '';
 
-import { VideoQuality, QVGA, HD, FHD } from '../../consts';
+import { QVGA, HD, FHD } from '../../consts';
 
 import { UserAgent, UserData, Stream, browser } from '@apirtc/apirtc';
 
@@ -37,6 +37,7 @@ enum UserAgentAuthType {
 export class ConversationComponent implements OnInit, OnDestroy {
 
   @ViewChild('fileVideo') fileVideoRef: ElementRef;
+  @ViewChild('fileInput') fileInputRef: ElementRef;
 
   // FormControl/Group objects
   //
@@ -94,8 +95,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
   screenSharingStreamHolder: StreamDecorator = null;
   videoStreamHolder: StreamDecorator = null;
 
-  activeIndex = 0;
-
   // Template helper attributes
   recording = false;
   recordingError = null;
@@ -138,10 +137,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   selectedAudioInDevice = null;
   selectedVideoDevice = null;
-
-  currentBackground: string | BackgroundImageEvent = 'none';
-
-  selectedVideoQuality: VideoQuality = null;
 
   uploadProgressPercentage = 0;
 
@@ -669,39 +664,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
     if (this.selectedVideoDevice) {
       options['videoInputId'] = this.selectedVideoDevice.id;
     }
-    if (this.selectedVideoQuality) {
-      options['constraints'] = {
-        audio: !audioMuted,
-        video: {
-          width: { min: QVGA.width, ideal: this.selectedVideoQuality.width },
-          height: { min: QVGA.height, ideal: this.selectedVideoQuality.height }
-        }
-      }
-    }
-
-    if (this.currentBackground instanceof BackgroundImageEvent) {
-      options['filters'] = [{ type: 'backgroundSubtraction', options: { backgroundMode: 'image', image: this.currentBackground.imageData } }];
-    }
-    else {
-      switch (this.currentBackground) {
-        case 'none':
-          break;
-        case 'blur':
-          console.log('blur selected');
-          options['filters'] = [{ type: 'backgroundSubtraction', options: { backgroundMode: 'blur' } }];
-          break;
-        case 'transparent':
-          options['filters'] = [{ type: 'backgroundSubtraction', options: { backgroundMode: 'transparent' } }];
-          break;
-        //case 'image':
-        // TODO request for an image  
-        //options['filters'][{ type: 'backgroundSubtraction', options: { backgroundMode: 'image', image: imageData } }];
-        //console.log("backgroundMode 'image' not implemented");
-        //  break;
-        default:
-          console.log(`Sorry, not a good filter value`);
-      }
-    }
 
     // and recreate a new stream
     this.doCreateCameraStream(options)
@@ -1139,7 +1101,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.doCreateCameraStream()
       .then((streamDecorator) => {
         // force next asynchronously to let display happen fine
-        setTimeout(() => { this.next(); }, 1000);
+        //setTimeout(() => { this.next(); }, 1000);
       })
       .catch((error: any) => { console.error('doCreateCameraStream error', error); });
   }
@@ -1282,22 +1244,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
     streamDecorator.setPublished(false);
   }
 
-  // Local Camera Streams Carousel handling
-  //
-  prev() {
-    this.activeIndex = ((this.activeIndex === 0 ? this.localCameraStreamsById.size : this.activeIndex) - 1) % this.localCameraStreamsById.size;
-  }
-  next() {
-    if (this.localCameraStreamsById.size) {
-      this.activeIndex = 0;
-    } else {
-      this.activeIndex = (this.activeIndex + 1) % this.localCameraStreamsById.size;
-    }
-  }
-  navTo(index: number) {
-    this.activeIndex = index;
-  }
-
   // Stream from video file
   //
   createVideoStream(event: any) {
@@ -1322,6 +1268,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
         });
       // free memory
       URL.revokeObjectURL(videoElement.src);
+      this.fileInputRef.nativeElement.value = "";
     };
 
     // Read from file to 'video' DOM element

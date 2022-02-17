@@ -14,8 +14,6 @@ export class PeerComponent {
 
   streamHoldersById: Map<string, StreamDecorator>;
 
-  activeIndex = 0;
-
   _contactHolder: ContactDecorator;
   @Input() set contactHolder(contactHolder: ContactDecorator) {
     this._contactHolder = contactHolder;
@@ -45,16 +43,6 @@ export class PeerComponent {
 
   emitEject() {
     this.onEject.emit(true);
-  }
-
-  prev() {
-    this.activeIndex = ((this.activeIndex === 0 ? this.streamHoldersById.size : this.activeIndex) - 1) % this.streamHoldersById.size;
-  }
-  next() {
-    this.activeIndex = (this.activeIndex + 1) % this.streamHoldersById.size;
-  }
-  navTo(index: number) {
-    this.activeIndex = index;
   }
 
 }

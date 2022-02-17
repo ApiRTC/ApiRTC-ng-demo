@@ -425,60 +425,19 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-sm-12 col-md-4 text-center">
-                <div class="mb-3">
-                    <label id="facing-mode-label" class="me-3">facingMode:</label>
-                    <mat-radio-group [(ngModel)]="currentFacingMode" enabled="false">
-                        <mat-radio-button value="user">user</mat-radio-button>
-                        <mat-radio-button value="environment" [disabled]="!mobileMode">
-                            environment<span *ngIf="!mobileMode">(Only available on mobile)</span>
-                        </mat-radio-button>
-                    </mat-radio-group>
-                </div>
-                <button class="mb-3" mat-raised-button color="primary" (click)="createCameraStream()"
-                    [disabled]="!userAgent"><em class="bi bi-file-plus"></em> Create Camera Stream</button>
-            </div>
-            <div class="col-sm-12 col-md-4 text-center">
-                <button class="mb-3" mat-raised-button color="{{screenSharingStreamHolder?'accent':'primary'}}"
-                    (click)="toggleScreenSharing()" [disabled]="!joined">{{screenSharingStreamHolder?'Unshare':'Share'}}
-                    Screen</button>
-            </div>
-            <div class="col-sm-12 col-md-4 text-center">
-                <form [formGroup]="videoFileFormGroup">
-                    <input class="mb-3" type="file" formControlName="file" (change)="createVideoStream($event)" />
-                    <div>
-                        <button mat-raised-button color="{{videoStreamHolder?.published?'accent':'primary'}}"
-                            (click)="togglePublishVideoStream()" [disabled]="!joined||!videoStreamHolder"
-                            title="{{videoStreamHolder?.published?'Unpublish':'Publish'}} Video File">{{videoStreamHolder?.published?'Unpublish':'Publish'}}</button>
-                        <button mat-raised-button color="accent" (click)="releaseVideoStream()"
-                            [disabled]="!videoStreamHolder||videoStreamHolder?.published"
-                            title="Release Stream">Release</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-sm-12 col-md-4">
-            <div *ngIf="localCameraStreamsById.size > 0" id="local-streams">
-                <!-- <div class="carousel-indicators">
-                    <button type="button" data-bs-target="#local-streams" [attr.data-bs-slide-to]="i" [ngClass]="{'active': i === activeIndex}" [attr.aria-current]="i === activeIndex" *ngFor="let kv of localCameraStreamsById | keyvalue; index as i" (click)="navTo(i)"></button>
-                </div> -->
-                <div>
-                    <div [ngClass]="{'active': i === activeIndex}"
+            <div class="col-sm-12 col-md-4">
+                <div *ngIf="localCameraStreamsById.size > 0" id="local-streams">
+                    <div class="card mb-3"
                         *ngFor="let kv of localCameraStreamsById | keyvalue; index as i; first as isFirst">
-                        <div class="mt-3 d-block w-100 h-100">
-                            <app-stream [streamHolder]="kv.value" [withSubscription]="false" [withMuteControl]="true"
-                                [withDevicesControl]="true" [audioMuted]="kv.isAudioMuted"
+                        <!-- mt-3 d-blo-ck w-100 h-100 -->
+                        <div class="card-body">
+                            <app-stream [streamHolder]="kv.value" [isCameraStream]="true" [withSubscription]="false"
+                                [withMuteControl]="true" [withDevicesControl]="true" [audioMuted]="kv.isAudioMuted"
                                 [videoMuted]="kv.isVideoMuted" [audioInDevices]="audioInDevices"
                                 [videoDevices]="videoDevices" (onAudioMute)="handleAudioMute([kv.value, $event])"
                                 (onVideoMute)="handleVideoMute([kv.value, $event])"
                                 (onAudioInSelected)="selectedAudioInDevice=$event;changeLocalStream(kv.value)"
-                                (onVideoSelected)="selectedVideoDevice=$event;changeLocalStream(kv.value)"
-                                [background]="currentBackground"
-                                (onBackgroundSelected)="currentBackground=$event;changeLocalStream(kv.value)"
-                                (onVideoQualitySelected)="selectedVideoQuality=$event;changeLocalStream(kv.value)">
+                                (onVideoSelected)="selectedVideoDevice=$event;changeLocalStream(kv.value)">
                             </app-stream>
                         </div>
                         <p class="text-center">
@@ -488,25 +447,66 @@
                                 Stream':'Unpublish Stream'}}
                                 <span *ngIf="publishInPrgs" class="spinner-border text-light"
                                     role="status"></span></button>
-                            <button mat-raised-button color="accent" (click)="releaseLocalStream(kv.value);next()"
+                            <button mat-raised-button color="accent" (click)="releaseLocalStream(kv.value);"
                                 [disabled]="!userAgent||kv.value.published">Release Stream</button>
                         </p>
                     </div>
                 </div>
+                <div class="text-center">
+                    <div class="mb-3">
+                        <label id="facing-mode-label" class="me-3">facingMode:</label>
+                        <mat-radio-group [(ngModel)]="currentFacingMode" enabled="false">
+                            <mat-radio-button value="user">user</mat-radio-button>
+                            <mat-radio-button class="ms-3" value="environment" [disabled]="!mobileMode">
+                                environment<span *ngIf="!mobileMode">(Only available on mobile)</span>
+                            </mat-radio-button>
+                        </mat-radio-group>
+                    </div>
+                    <button class="mb-3" mat-raised-button color="primary" (click)="createCameraStream()"
+                        [disabled]="!userAgent"><em class="bi bi-file-plus"></em> Create Camera Stream</button>
+                </div>
             </div>
-        </div>
-
-        <div class="col-sm-12 col-md-4" *ngIf="screenSharingStreamHolder">
-            <div class="alert alert-success clearfix">
-                <app-stream [streamHolder]="screenSharingStreamHolder" [withSubscription]="false"
-                    [withDevicesControl]="false">
-                </app-stream>
+            <div class="col-sm-12 col-md-4">
+                <div class="text-center">
+                    <button class="mb-3" mat-raised-button color="{{screenSharingStreamHolder?'accent':'primary'}}"
+                        (click)="toggleScreenSharing()"
+                        [disabled]="!joined">{{screenSharingStreamHolder?'Unshare':'Share'}}
+                        Screen</button>
+                </div>
+                <div class="card" *ngIf="screenSharingStreamHolder">
+                    <div class="card-body">
+                        <div class="clearfix">
+                            <app-stream [streamHolder]="screenSharingStreamHolder" [withSubscription]="false"
+                                [withDevicesControl]="false">
+                            </app-stream>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="col-sm-12 col-md-4" *ngIf="videoStreamHolder">
-            <div class="alert alert-success clearfix">
-                <app-stream [streamHolder]="videoStreamHolder" [withSubscription]="false" [withDevicesControl]="false">
-                </app-stream>
+            <div class="col-sm-12 col-md-4">
+                <form class="text-center" [formGroup]="videoFileFormGroup">
+                    <!-- <button type="button" mat-raised-button (click)="fileInput.click()">Choose File</button> -->
+                    <!-- <input hidden (change)="onFileSelected()" #fileInput type="file" id="file"> -->
+                    <input #fileInput class="mb-3" type="file" formControlName="file"
+                        (change)="createVideoStream($event)" />
+                </form>
+                <div class="card" *ngIf="videoStreamHolder">
+                    <div class="card-body">
+                        <div class="clearfix">
+                            <app-stream [streamHolder]="videoStreamHolder" [withSubscription]="false"
+                                [withDevicesControl]="false">
+                            </app-stream>
+                        </div>
+                        <div class="text-center">
+                            <button mat-raised-button color="{{videoStreamHolder?.published?'accent':'primary'}}"
+                                (click)="togglePublishVideoStream()" [disabled]="!joined||!videoStreamHolder"
+                                title="{{videoStreamHolder?.published?'Unpublish':'Publish'}} Video File">{{videoStreamHolder?.published?'Unpublish':'Publish'}}</button>
+                            <button mat-raised-button color="accent" (click)="releaseVideoStream()"
+                                [disabled]="!videoStreamHolder||videoStreamHolder?.published"
+                                title="Release Stream">Release</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -533,8 +533,6 @@
             </app-peer>
         </div>
     </div>
-
-
 
     <div class="container">
         <hr>

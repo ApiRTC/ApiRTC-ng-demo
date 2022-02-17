@@ -12,77 +12,81 @@
     <div *ngIf="streamHolder.stream">
         <div *ngIf="withMuteControl">
             <form class="row row-cols-lg-auto g-3 align-items-center">
-                <div class="col-12">
-                    <div class=row>
-                        <div class="col">
-                            <mat-slide-toggle [formControl]="muteVideoFc">
-                                Mute Video
-                            </mat-slide-toggle>
-                        </div>
-                        <div class="col">
-                            <mat-slide-toggle [formControl]="muteAudioFc" checked="true">
-                                Mute Audio
-                            </mat-slide-toggle>
-                        </div>
-                        <div class="col">
-                            <mat-slide-toggle [formControl]="mirrorVideoFc">
-                                Mirror Video
-                            </mat-slide-toggle>
-                        </div>
-                    </div>
+
+                <div class="col">
+                    <mat-slide-toggle [formControl]="muteVideoFc">
+                        Mute Video
+                    </mat-slide-toggle>
+                </div>
+                <div class="col">
+                    <mat-slide-toggle [formControl]="muteAudioFc" checked="true">
+                        Mute Audio
+                    </mat-slide-toggle>
+                </div>
+                <div class="col">
+                    <mat-slide-toggle [formControl]="mirrorVideoFc">
+                        Mirror Video
+                    </mat-slide-toggle>
+                </div>
+                <div class="col" *ngIf="isCameraStream">
+                    <mat-slide-toggle [formControl]="toggleTorchFc">
+                        Torch
+                    </mat-slide-toggle>
+                </div>
+
+            </form>
+        </div>
+        <div class="clearfix my-3" *ngIf="torchError"><span class="alert alert-danger">{{torchError}}</span></div>
+        <div class="clearfix my-3" *ngIf="videoQualityError"><span
+                class="alert alert-danger">{{videoQualityError}}</span></div>
+        <div *ngIf="withDevicesControl" class="mt-3">
+            <form class="row align-items-center">
+                <div class="col">
+                    <mat-form-field appearance="fill">
+                        <mat-label>Video Input</mat-label>
+                        <mat-select [formControl]="videoFc">
+                            <mat-option *ngFor="let device of _videoDevices" [value]="device">
+                                {{device.label}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="col">
+                    <mat-form-field appearance="fill">
+                        <mat-label>Audio Input</mat-label>
+                        <mat-select [formControl]="audioInFc">
+                            <mat-option *ngFor="let device of _audioInDevices" [value]="device">
+                                {{device.label}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
                 </div>
             </form>
         </div>
-        <div *ngIf="withDevicesControl">
-            <form class="row row-cols-lg-auto g-3 align-items-center">
-                <div class="col-12">
-                    <div class=row>
-                        <div class="col">
-                            <mat-form-field appearance="fill">
-                                <mat-label>Video Input</mat-label>
-                                <mat-select [formControl]="videoFc">
-                                    <mat-option *ngFor="let device of _videoDevices" [value]="device">
-                                        {{device.label}}
-                                    </mat-option>
-                                </mat-select>
-                            </mat-form-field>
-                        </div>
-                        <div class="col">
-                            <mat-form-field appearance="fill">
-                                <mat-label>Audio Input</mat-label>
-                                <mat-select [formControl]="audioInFc">
-                                    <mat-option *ngFor="let device of _audioInDevices" [value]="device">
-                                        {{device.label}}
-                                    </mat-option>
-                                </mat-select>
-                            </mat-form-field>
-                        </div>
-                    </div>
-                    <div class=row>
-                        <div class="col">
-                            <!-- <mat-form-field appearance="fill">
-                                <mat-label>Background</mat-label>
-                                <mat-select [formControl]="backgroundFc">
-                                    <mat-option *ngFor="let background of backgrounds" [value]="background.value">
-                                        {{background.viewValue}}
-                                    </mat-option>
-                                </mat-select>
-                            </mat-form-field>
-                            <input *ngIf="backgroundFc.value==='image'" type="file" (change)="chooseImage($event)" /> -->
-                            <mat-form-field *ngIf="streamHolder.videoQualityOptions.length>0" appearance="fill">
-                                <mat-label>VideoQuality</mat-label>
-                                <mat-select [formControl]="videoQualityFc">
-                                    <mat-option *ngFor="let videoQuality of streamHolder.videoQualityOptions"
-                                        [value]="videoQuality">
-                                        {{videoQuality.name}} : {{videoQuality.width}}x{{videoQuality.height}}
-                                    </mat-option>
-                                </mat-select>
-                            </mat-form-field>
-                        </div>
-                    </div>
-                </div>
-            </form>
+
+        <div class="row">
+            <div class="col">
+                <!-- <mat-form-field appearance="fill">
+                    <mat-label>Background</mat-label>
+                    <mat-select [formControl]="backgroundFc">
+                        <mat-option *ngFor="let background of backgrounds" [value]="background.value">
+                            {{background.viewValue}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <input *ngIf="backgroundFc.value==='image'" type="file" (change)="chooseImage($event)" /> -->
+                <mat-form-field *ngIf="streamHolder.videoQualityOptions.length>0" appearance="fill">
+                    <mat-label>VideoQuality</mat-label>
+                    <mat-select [formControl]="videoQualityFc">
+                        <mat-option *ngFor="let videoQuality of streamHolder.videoQualityOptions"
+                            [value]="videoQuality">
+                            {{videoQuality.name}} : {{videoQuality.width}}x{{videoQuality.height}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
         </div>
+
         <div>
             <div class="accordion accordion-flush" [id]="'stream-capabilities-accordion'+streamHolder.id">
                 <div class="accordion-item">
@@ -90,7 +94,7 @@
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             [attr.data-bs-target]="'#collapse-stream-capabilities'+streamHolder.id" aria-expanded="true"
                             [attr.aria-controls]="'collapse-stream-capabilities'+streamHolder.id">
-                            Stream Capabilities/Constraints/Settings
+                            Settings/Capabilities & Constraints
                         </button>
                     </h2>
                     <div [id]="'collapse-stream-capabilities'+streamHolder.id" class="accordion-collapse collapse"
@@ -99,7 +103,7 @@
                         <div class="accordion-body">
                             <div class="d-flex justify-content-center">
                                 <button mat-raised-button color="primary"
-                                    (click)="refreshCapabilitiesConstraintsSettings()">REFRESH</button>
+                                    (click)="streamHolder.getCapabilitiesConstraintsSettings()">Refresh</button>
                             </div>
                             <div class="table-responsive">
                                 <table class="table">
@@ -118,18 +122,6 @@
                                         </tr>
                                     </tbody>
                                 </table>
-                            </div>
-                            <div>
-                                <button mat-raised-button color="accent"
-                                    (click)="applyConstraintsHD()">applyConstraintsHD</button>
-                                <button mat-raised-button color="accent"
-                                    (click)="applyConstraintsHDTorchOn()">applyConstraintsHDTorchOn</button>
-                                <button mat-raised-button color="accent"
-                                    (click)="applyConstraintsTorchOn()">applyConstraintsTorchOn</button>
-                                <button mat-raised-button color="accent"
-                                    (click)="applyConstraintsVGA()">applyConstraintsVGA</button>
-                                <button mat-raised-button color="accent"
-                                    (click)="applyConstraintsVGATorchOff()">applyConstraintsVGATorchOff</button>
                             </div>
                             <div>
                                 <p class="text-center">Applied constraints</p>
@@ -172,7 +164,6 @@
                     </div>
                 </div>
             </div>
-
             <div *ngIf="streamHolder.qosStat">
                 <div class="accordion accordion-flush" [id]="'stream-qos-accordion'+streamHolder.id">
                     <div class="accordion-item">
@@ -203,9 +194,4 @@
             </span>
         </p>
     </div>
-    <!-- <div>
-            <p *ngIf="streamHolder.capabilities">capabilities = {{streamHolder.capabilities | json}}</p>
-            <p *ngIf="streamHolder.constraints">constraints = {{streamHolder.constraints | json}}</p>
-            <p *ngIf="streamHolder.settings">settings = {{streamHolder.constraints | json}}</p>
-        </div> -->
 </div>

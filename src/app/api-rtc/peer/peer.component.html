@@ -11,15 +11,12 @@
         No streams published yet !
     </p>
     <div *ngIf="streamHoldersById.size > 0" id="{{_contactHolder.id}}-streams">
-        <div >
-            <div [ngClass]="{'active': i === activeIndex}"
-                *ngFor="let kv of streamHoldersById | keyvalue; index as i; first as isFirst">
-                <div class="d-block w-100 h-100">
-                    <app-stream [streamHolder]="kv.value" [withSubscription]="true"
-                        (onSubscription)="emitStreamSubscription($event)" [withMuteControl]="true"
-                        (onAudioMute)="relayAudioMute(kv.value,$event)" (onVideoMute)="relayVideoMute(kv.value,$event)">
-                    </app-stream>
-                </div>
+        <div class="card" *ngFor="let kv of streamHoldersById | keyvalue">
+            <div class="card-body">
+                <app-stream [streamHolder]="kv.value" [withSubscription]="true"
+                    (onSubscription)="emitStreamSubscription($event)" [withMuteControl]="true"
+                    (onAudioMute)="relayAudioMute(kv.value,$event)" (onVideoMute)="relayVideoMute(kv.value,$event)">
+                </app-stream>
             </div>
         </div>
     </div>
