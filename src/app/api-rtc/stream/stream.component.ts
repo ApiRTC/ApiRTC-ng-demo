@@ -33,7 +33,7 @@ export class StreamComponent implements OnInit, OnDestroy {
 
   @Input() withMuteControl: boolean = false;
   @Input() withDevicesControl: boolean = false;
-  
+
   @Input() withSubscription: boolean = false;
 
   @Input() set audioMuted(audioMuted: boolean) {
@@ -92,15 +92,20 @@ export class StreamComponent implements OnInit, OnDestroy {
   // Video quality selection
   videoQualityFc = new FormControl();
 
+  objectKeys = Object.keys;
+  jsonStringify = JSON.stringify;
+
   ngOnInit(): void {
     // Audio/Video muting
     //
     this.muteAudioFc.valueChanges.subscribe(value => {
       console.log("muteAudioFc#valueChanges", value);
+      this.streamHolder.setAudioMuted(value);
       this.onAudioMute.emit(value);
     });
     this.muteVideoFc.valueChanges.subscribe(value => {
       console.log("muteVideoFc#valueChanges", value);
+      this.streamHolder.setVideoMuted(value);
       this.onVideoMute.emit(value);
     });
 
@@ -130,6 +135,15 @@ export class StreamComponent implements OnInit, OnDestroy {
       console.log("videoQualityFc#valueChanges", value);
       this.onVideoQualitySelected.emit(value);
     });
+
+    if (this.streamHolder.isAudioMuted) {
+      this.muteAudioFc.setValue(true);
+      this.streamHolder.stream.muteAudio();
+    }
+    if (this.streamHolder.isVideoMuted) {
+      this.muteVideoFc.setValue(true);
+      this.streamHolder.stream.muteVideo();
+    }
   }
 
   chooseImage(event: any): void {
@@ -175,6 +189,58 @@ export class StreamComponent implements OnInit, OnDestroy {
   toggleSubscribe() {
     console.log("StreamComponent::toggleSubscribe");
     this.onSubscription.emit(new StreamSubscribeEvent(this.streamHolder, this.streamHolder.stream ? false : true));
+  }
+
+  refreshCapabilitiesConstraintsSettings() {
+    console.log("StreamComponent::refreshCapabilitiesConstraintsSettings");
+    this.streamHolder.getCapabilitiesConstraintsSettings();
+  }
+
+  // Reworked
+  // applyConstraints(capabilities) {
+  //   console.log("StreamComponent::applyConstraints", capabilities);
+  //   try {
+  //     capabilities = JSON.parse(capabilities);
+  //   } catch (e) {
+  //     console.error(e);
+  //     return;
+  //   }
+  //   this.streamHolder.stream.applyConstraints(capabilities).then(() => {
+  //     this.refreshCapabilities();
+  //   });
+  // }
+
+  applyConstraintsHD() {
+    this.streamHolder.stream.applyConstraints({ video: { height: { exact: 720 }, width: { exact: 1280 } } }).
+      then(() => {
+        console.log('applyConstraintsHD done');
+        this.refreshCapabilitiesConstraintsSettings()
+      })
+      .catch((error: any) => { console.error('applyConstraintsHD', error) });
+  }
+  applyConstraintsHDTorchOn() {
+    this.streamHolder.stream.applyConstraints({ video: { height: { exact: 720 }, width: { exact: 1280 }, advanced: [{ torch: true }] } }).
+      then(() => {
+        console.log('applyConstraintsHDTorchOn done');
+        this.refreshCapabilitiesConstraintsSettings()
+      })
+      .catch((error: any) => { console.error('applyConstraintsHDTorchOn', error) });
+  }
+  applyConstraintsVGA() {
+    this.streamHolder.stream.applyConstraints({ video: { height: { exact: 480 }, width: { exact: 640 } } }).
+      then(() => {
+        console.log('applyConstraintsVGA done');
+        this.refreshCapabilitiesConstraintsSettings()
+      })
+      .catch((error: any) => { console.error('applyConstraintsVGA', error) });
+  }
+  applyConstraintsVGATorchOff() {
+    this.streamHolder.stream.applyConstraints({ video: { height: { exact: 480 }, width: { exact: 640 }, advanced: [{ torch: false }] } }).
+      then(() => {
+        console.log('applyConstraintsVGATorchOff done');
+        this.refreshCapabilitiesConstraintsSettings()
+      })
+      .catch((error: any) => { console.error('applyConstraintsVGATorchOff', error) });
   }
 
 }

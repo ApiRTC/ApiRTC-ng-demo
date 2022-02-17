@@ -328,8 +328,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   createUserAgent() {
     this.userAgent = new apiRTC.UserAgent({
-      // format is like 'apzKey:<APIKEY>'
-      uri: 'apzkey:' + this.apiKeyFc.value
+      // format is like 'apiKey:<APIKEY>'
+      uri: 'apiKey:' + this.apiKeyFc.value
     });
 
     console.log('this.userAgent', this.userAgent);
@@ -793,6 +793,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
           console.log('new remote stream', streamId);
           const streamHolder: StreamDecorator = StreamDecorator.buildFromId(streamId);
           console.log(streamHolder.getId() + "->", streamHolder);
+          streamHolder.setIsRemote(true);
           this.streamHoldersById.set(streamHolder.getId(), streamHolder);
           const contactHolder: ContactDecorator = this.getOrCreateContactHolder(streamInfo.contact);
           contactHolder.addStream(streamHolder);

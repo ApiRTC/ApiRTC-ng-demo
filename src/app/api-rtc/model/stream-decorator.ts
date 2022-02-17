@@ -1,6 +1,8 @@
-declare var apiRTC: any;
+//declare var apiRTC: any;
 
 import { VideoQuality, VideoQualities } from '../../consts';
+
+import { Stream } from '@apirtc/apirtc';
 
 // Decorator for apiRTC.Stream class
 //
@@ -8,14 +10,19 @@ export class StreamDecorator {
 
     public readonly id: string;
 
-    public stream: any;
+    public stream: Stream;
+
     public capabilities: any;
-    public constraints: any;
+    public constraints: MediaStreamConstraints;
     public settings: any;
 
     public qosStat: any;
 
     public isSpeaking = false;
+
+    public isAudioMuted: boolean = false;
+    public isVideoMuted: boolean = false;
+    public isRemote: boolean = false;
 
     public published = false;
 
@@ -26,6 +33,10 @@ export class StreamDecorator {
     constructor(streamId: string, stream?: any) {
         this.id = streamId;
         this.stream = stream;
+
+        if (stream !== undefined) {
+            this.getCapabilitiesConstraintsSettings();
+        }
     }
 
     /**
@@ -64,45 +75,12 @@ export class StreamDecorator {
 
     public setStream(stream: any) {
         this.stream = stream;
-
         if (stream === null) {
             return;
         }
-
-        // getCapabilities only supported by Chrome ?
-        if ((apiRTC.browser !== 'Firefox') && (apiRTC.browser !== 'IE')) {
-            this.capabilities = stream.getCapabilities();
-            console.log('stream capabilities :', this.capabilities);
-            // Exemple on Chrome :
-            // { 
-            //     "aspectRatio": { "max": 1280, "min": 0.001388888888888889 },
-            //     "brightness": { "max": 64, "min": -64, "step": 1 },
-            //     "colorTemperature": { "max": 6500, "min": 2800, "step": 1 },
-            //     "contrast": { "max": 64, "min": 0, "step": 1 },
-            //     "exposureMode": ["manual", "continuous"],
-            //     "exposureTime": { "max": 10000, "min": 39, "step": 1 },
-            //     "frameRate": { "max": 30, "min": 0 },
-            //     "height": { "max": 720, "min": 1 },
-            //     "resizeMode": ["none", "crop-and-scale"],
-            //     "saturation": { "max": 128, "min": 0, "step": 1 },
-            //     "sharpness": { "max": 5, "min": 0, "step": 1 },
-            //     "whiteBalanceMode": ["manual", "continuous"],
-            //     "width": { "max": 1280, "min": 1 }
-            // }
-            if (this.capabilities.width && this.capabilities.height) {
-                for (const quality of VideoQualities) {
-                    console.log("Quality", quality)
-                    if (this.capabilities.width.max >= quality.width && this.capabilities.height.max >= quality.height) {
-                        this.videoQualityOptions.push(quality);
-                    }
-                }
-            }
-            this.constraints = stream.getConstraints();
-
-            this.settings = stream.getSettings();
-        }
-
+        this.getCapabilitiesConstraintsSettings();
     }
+
     public getStream(): any {
         return this.stream;
     }
@@ -122,6 +100,18 @@ export class StreamDecorator {
         this.isSpeaking = isSpeaking;
     }
 
+    // Audio muted
+
+    public setAudioMuted(isAudioMuted: boolean) {
+        this.isAudioMuted = isAudioMuted;
+    }
+
+    // Video muted
+
+    public setVideoMuted(isVideoMuted: boolean) {
+        this.isVideoMuted = isVideoMuted;
+    }
+
     // Published
 
     public setPublished(published: boolean) {
@@ -129,6 +119,44 @@ export class StreamDecorator {
     }
     public isPublished(): boolean {
         return this.published;
+    }
+
+    // Remote
+
+    public setIsRemote(remote: boolean) {
+        this.isRemote = remote;
+    }
+
+    // Events
+    //
+    public getCapabilitiesConstraintsSettings() {
+        this.stream.getCapabilities().then((capabilities: any) => {
+            console.log('stream getCapabilities', capabilities);
+            this.capabilities = capabilities;
+            const videoCapabilities = capabilities.video;
+            if (videoCapabilities.width && videoCapabilities.height) {
+                for (const quality of VideoQualities) {
+                    console.log("Quality", quality)
+                    if (videoCapabilities.width.max >= quality.width && videoCapabilities.height.max >= quality.height) {
+                        this.videoQualityOptions.push(quality);
+                    }
+                }
+            }
+        }).catch((error: any) => {
+            console.error('stream getCapabilities error', error);
+        });
+        this.stream.getConstraints().then((constraints: any) => {
+            console.log('stream getConstraints', constraints);
+            this.constraints = constraints;
+        }).catch((error: any) => {
+            console.error('stream getConstraints error', error);
+        });
+        this.stream.getSettings().then((settings: any) => {
+            console.log('stream getSettings', settings);
+            this.settings = settings;
+        }).catch((error: any) => {
+            console.error('stream getSettings error', error);
+        });
     }
 
 }
