@@ -15,7 +15,9 @@ const DEFAULT_NICKNAME = '';
 
 import { QVGA, HD, FHD } from '../../consts';
 
-import { UserAgent, UserData, Stream, browser } from '@apirtc/apirtc';
+import { fnBrowserDetect, fnDetectMobile } from '../../misc';
+
+import { UserAgent, UserData, Stream } from '@apirtc/apirtc';
 
 enum UserAgentCreationType {
   Key,
@@ -36,8 +38,10 @@ enum UserAgentAuthType {
 })
 export class ConversationComponent implements OnInit, OnDestroy {
 
+  @ViewChild('chatFileInput') chatFileInputRef: ElementRef;
+
   @ViewChild('fileVideo') fileVideoRef: ElementRef;
-  @ViewChild('fileInput') fileInputRef: ElementRef;
+  @ViewChild('videoFileInput') videoFileInputRef: ElementRef;
 
   // FormControl/Group objects
   //
@@ -108,9 +112,10 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   publishInPrgs = false;
 
-  mobileMode = false;
+  currentFacingMode = undefined;
 
-  currentFacingMode = "user";
+  browser: string = fnBrowserDetect();
+  runningOnMobile: boolean = fnDetectMobile();
 
   // Peer Contacts
   // Keep here only contacts that joined the conversation
@@ -188,11 +193,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-
-    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-      console.log("Running on mobile")
-      this.mobileMode = true;
-    }
 
     // Get conversation name and base url from current path (pattern : "/path/to/<conversationName>")
     //
@@ -831,7 +831,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   doListenToQosStatistics() {
 
-    if ((browser === 'Chrome') || (browser === 'Firefox')) {
+    if ((this.browser === 'Chrome') || (this.browser === 'Firefox')) {
       // TODO : safari ??
       this.userAgent.enableCallStatsMonitoring(true, { interval: 10000 });
       this.userAgent.enableActiveSpeakerDetecting(true, { threshold: 50 });
@@ -1080,6 +1080,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
   selectFile(event: any): void {
     const file: File | null = event.target.files.item(0);
     this.selectedFile = file;
+    this.chatFileInputRef.nativeElement.value = "";
   }
 
   sendFile(): void {
@@ -1088,6 +1089,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
         console.log('File uploaded :', cloudMediaInfo);
         // Send file link message to the chat
         this.doSendMessage('New file uploaded: <a href="' + cloudMediaInfo.url + '" target="_blank"><b>OPEN FILE</b></a>');
+        this.selectedFile = undefined;
       })
       .catch((error: any) => {
         console.log('File uploading error :', error);
@@ -1108,7 +1110,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   // if options are specified, this is because a specific device was selected
   doCreateCameraStream(options?: any): Promise<StreamDecorator | any> {
-    console.log("createStream() with options", options);
+    console.log("createStream() with options", options, this.currentFacingMode);
     return new Promise((resolve, reject) => {
 
       //var default_createStreamOptions: any = { enhancedAudioActivated: true }; // => FAILS on chrome
@@ -1120,14 +1122,15 @@ export class ConversationComponent implements OnInit, OnDestroy {
           video: {
             width: { min: QVGA.width, ideal: HD.width, max: FHD.width },
             height: { min: QVGA.height, ideal: HD.height, max: FHD.height },
-            advanced: [{ facingMode: this.currentFacingMode }]
+            // do not force it by default, it would prevent device selection from working fine
+            // advanced: [{ facingMode: this.currentFacingMode }] 
           }
         }
       };
 
-      // if (this.mobileMode) {
-      //   default_createStreamOptions.constraints.video['advanced'] = [{ facingMode: 'environment' }]
-      // }
+      if (this.currentFacingMode) {
+        default_createStreamOptions.constraints.video['advanced'] = [{ facingMode: this.currentFacingMode }]
+      }
 
       if (options && !options.constraints) {
         options.constraints = default_createStreamOptions.constraints;
@@ -1257,7 +1260,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
     const videoElement = this.fileVideoRef.nativeElement;
     videoElement.onloadeddata = () => {
       // Note that video handling should be applied after data loaded
-      const mediaStream = (browser === 'Firefox') ? videoElement.mozCaptureStream() : videoElement.captureStream();
+      const mediaStream = (this.browser === 'Firefox') ? videoElement.mozCaptureStream() : videoElement.captureStream();
       Stream.createStreamFromMediaStream(mediaStream)
         .then((stream: any) => {
           this.videoStreamHolder = StreamDecorator.build(stream);
@@ -1268,7 +1271,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
         });
       // free memory
       URL.revokeObjectURL(videoElement.src);
-      this.fileInputRef.nativeElement.value = "";
+      this.videoFileInputRef.nativeElement.value = "";
     };
 
     // Read from file to 'video' DOM element

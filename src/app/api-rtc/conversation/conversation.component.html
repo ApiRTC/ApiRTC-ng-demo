@@ -12,7 +12,7 @@
                     of
                     <strong>ApiRTC</strong> javascript library.
                 </p>
-                <p *ngIf="mobileMode">Mobile Mode</p>
+                <p *ngIf="runningOnMobile">Mobile Mode</p>
             </div>
         </div>
     </div>
@@ -393,7 +393,10 @@
                 </mat-progress-bar>
                 <hr>
                 <form [formGroup]="fileFormGroup" (ngSubmit)="sendFile()">
-                    <input type="file" formControlName="file" (change)="selectFile($event)" /> &nbsp;
+                    <button class="mb-3" type="button" mat-raised-button color="primary"
+                        (click)="chatFileInput.click()">Select File</button>
+                    <input #chatFileInput hidden type="file" formControlName="file" (change)="selectFile($event)" />
+                    <!-- <input type="file" formControlName="file" (change)="selectFile($event)" />  -->
                     <button mat-raised-button color="primary" type="submit"
                         [disabled]="!fileFormGroup.valid||!joined||!selectedFile" title="Send File">Upload
                         file&nbsp;<em class="bi bi-upload"></em></button>
@@ -403,9 +406,9 @@
         <br>
         <div class="row">
             <div class="col">
-                <div class="alert alert-success clearfix">
+                <div class="alert alert-success">
                     <h3>List of <code>Message</code>s in this conversation :</h3>
-                    <div *ngFor="let message of messages" [ngClass]="{'float-end': !message.message}">
+                    <div *ngFor="let message of messages">
                         <span><strong>{{message.nickname}}</strong>
                             : <span [innerHTML]="message.content"></span></span>
                     </div>
@@ -456,9 +459,10 @@
                     <div class="mb-3">
                         <label id="facing-mode-label" class="me-3">facingMode:</label>
                         <mat-radio-group [(ngModel)]="currentFacingMode" enabled="false">
-                            <mat-radio-button value="user">user</mat-radio-button>
-                            <mat-radio-button class="ms-3" value="environment" [disabled]="!mobileMode">
-                                environment<span *ngIf="!mobileMode">(Only available on mobile)</span>
+                            <mat-radio-button [value]="undefined">undefined</mat-radio-button>
+                            <mat-radio-button class="ms-3" value="user">user</mat-radio-button>
+                            <mat-radio-button class="ms-3" value="environment" [disabled]="!runningOnMobile">
+                                environment<span *ngIf="!runningOnMobile">(Only available on mobile)</span>
                             </mat-radio-button>
                         </mat-radio-group>
                     </div>
@@ -485,9 +489,10 @@
             </div>
             <div class="col-sm-12 col-md-4">
                 <form class="text-center" [formGroup]="videoFileFormGroup">
-                    <!-- <button type="button" mat-raised-button (click)="fileInput.click()">Choose File</button> -->
-                    <!-- <input hidden (change)="onFileSelected()" #fileInput type="file" id="file"> -->
-                    <input #fileInput class="mb-3" type="file" formControlName="file"
+                    <button class="mb-3" type="button" mat-raised-button color="primary"
+                        (click)="videoFileInput.click()">Share Video
+                        File</button>
+                    <input #videoFileInput hidden type="file" formControlName="file"
                         (change)="createVideoStream($event)" />
                 </form>
                 <div class="card" *ngIf="videoStreamHolder">

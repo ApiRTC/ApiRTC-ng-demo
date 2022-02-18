@@ -92,12 +92,16 @@ export class StreamComponent implements OnInit, OnDestroy {
   //backgroundFc = new FormControl('none');
 
   // Video quality selection
-  videoQualityFc = new FormControl();
-  videoQualityError: string = undefined;
+  videoQualityFc = new FormControl(undefined);
 
   // torch
-  toggleTorchFc = new FormControl(false);
-  torchError: string = undefined;
+  torch: boolean = undefined;
+
+  // zoom
+  zoom: number = undefined;
+
+  constraintsError: string = undefined;
+  constraintsOnError: Object = undefined;
 
   objectKeys = Object.keys;
   jsonStringify = JSON.stringify;
@@ -140,37 +144,20 @@ export class StreamComponent implements OnInit, OnDestroy {
     //
     this.videoQualityFc.valueChanges.subscribe((videoQuality: VideoQuality) => {
       console.log("videoQualityFc#valueChanges", videoQuality);
-      this.videoQualityError = undefined;
-      this.streamHolder.stream.applyConstraints({ video: { height: { exact: videoQuality.height }, width: { exact: videoQuality.width } } })
-        .then(() => {
-          console.log('videoQuality applyConstraints done');
-          this.streamHolder.getCapabilitiesConstraintsSettings();
-        })
-        .catch((error: any) => {
-          console.error('videoQuality applyConstraints', error);
-          this.videoQualityError = error;
-          setTimeout(() => {
-            this.videoQualityError = undefined;
-          }, 2000)
-        });
-    });
-
-    // Torch
-    this.toggleTorchFc.valueChanges.subscribe(value => {
-      this.torchError = undefined;
-      console.log("toggleTorchFc#valueChanges", value);
-      this.streamHolder.stream.applyConstraints({ video: { advanced: [{ torch: value }] } })
-        .then(() => {
-          console.log('toggleTorchFc done', value);
-          this.streamHolder.getCapabilitiesConstraintsSettings();
-        })
-        .catch((error: any) => {
-          console.error('toggleTorchFc', error);
-          this.torchError = error;
-          setTimeout(() => {
-            this.torchError = undefined;
-          }, 2000)
-        });
+      this.onConstraintsChanged()
+      // this.constraintsError = undefined;
+      // this.streamHolder.stream.applyConstraints({ video: { height: { exact: videoQuality.height }, width: { exact: videoQuality.width } } })
+      //   .then(() => {
+      //     console.log('videoQuality applyConstraints done');
+      //     this.streamHolder.getCapabilitiesConstraintsSettings();
+      //   })
+      //   .catch((error: any) => {
+      //     console.error('videoQuality applyConstraints', error);
+      //     this.constraintsError = error;
+      //     setTimeout(() => {
+      //       this.constraintsError = undefined;
+      //     }, 2000)
+      //   });
     });
 
     if (this.streamHolder.isAudioMuted) {
@@ -181,6 +168,51 @@ export class StreamComponent implements OnInit, OnDestroy {
       this.muteVideoFc.setValue(true);
       this.streamHolder.stream.muteVideo();
     }
+  }
+
+  private doGetAdvancedConstraints(): Object {
+    const constraints = {};
+    if (this.zoom !== undefined) {
+      constraints['zoom'] = this.zoom;
+    }
+    if (this.torch !== undefined) {
+      constraints['torch'] = this.torch;
+    }
+    return constraints;
+  }
+
+  onConstraintsChanged() {
+
+    const videoConstraints = {}
+
+    if (this.videoQualityFc.value) {
+      const videoQuality = this.videoQualityFc.value;
+      videoConstraints['height'] = { exact: videoQuality.height };
+      videoConstraints['width'] = { exact: videoQuality.width };
+    }
+
+    const advancedConstraints = this.doGetAdvancedConstraints();
+    if (Object.keys(advancedConstraints).length > 0) {
+      videoConstraints['advanced'] = [advancedConstraints];
+    }
+
+    console.log('onConstraintsChanged', videoConstraints)
+
+    this.constraintsError = undefined;
+    this.constraintsOnError = undefined;
+    this.streamHolder.stream.applyConstraints({ video: videoConstraints })
+      .then(() => {
+        console.log('onConstraintsChanged done', videoConstraints);
+        this.streamHolder.getCapabilitiesConstraintsSettings();
+      })
+      .catch((error: any) => {
+        console.error('onConstraintsChanged trying to apply', videoConstraints, error);
+        this.constraintsOnError = { video: videoConstraints };
+        this.constraintsError = error;
+        setTimeout(() => {
+          this.constraintsError = undefined;
+        }, 2000)
+      });
   }
 
   chooseImage(event: any): void {
