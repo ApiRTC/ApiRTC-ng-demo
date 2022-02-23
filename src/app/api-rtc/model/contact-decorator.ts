@@ -2,6 +2,8 @@ import { StreamDecorator } from './stream-decorator'
 
 import { PROPERTY_NICKNAME } from './../../consts';
 
+import { Contact } from '@apirtc/apirtc'
+
 export class ContactDecorator {
 
     public readonly id: string;
@@ -10,19 +12,16 @@ export class ContactDecorator {
     // So we use a local attributes updated on event.
     public username: string;
     public nickname: string;
-
-    public subscribableStreams: Array<any> = new Array();
-
-    private contact: any;
+    private contact: Contact;
 
     private readonly streamHoldersById: Map<string, StreamDecorator> = new Map();
 
-    constructor(contact: any) {
+    constructor(contact: Contact) {
         this.id = String(contact.getId());
         this.update(contact);
     }
 
-    public static build(contact: any): ContactDecorator {
+    public static build(contact: Contact): ContactDecorator {
         return new ContactDecorator(contact);
     }
 
@@ -30,7 +29,7 @@ export class ContactDecorator {
         return this.id;
     }
 
-    public getContact(): any {
+    public getContact(): Contact {
         return this.contact;
     }
 
@@ -38,7 +37,7 @@ export class ContactDecorator {
         return this.streamHoldersById;
     }
 
-    public update(contact: any) {
+    public update(contact: Contact) {
         this.contact = contact;
         this.username = contact.getUsername();
         this.nickname = contact.getUserData().get(PROPERTY_NICKNAME);

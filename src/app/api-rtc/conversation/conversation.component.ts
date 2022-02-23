@@ -17,7 +17,7 @@ import { QVGA, HD, FHD } from '../../consts';
 
 import { fnBrowserDetect, fnDetectMobile } from '../../misc';
 
-import { UserAgent, UserData, Stream } from '@apirtc/apirtc';
+import { Contact, Conversation, CreateStreamOptions, JoinResult, PublishOptions, RecordingInfo, RegisterInformation, Session, Stream, UserAgent, UserData } from '@apirtc/apirtc';
 
 enum UserAgentCreationType {
   Key,
@@ -60,7 +60,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   nicknameFc: FormControl = new FormControl({ value: DEFAULT_NICKNAME, disabled: true });
 
-  contactsByGroup: Map<string, Array<any>> = new Map();
+  contactsByGroup: Map<string, Array<Contact>> = new Map();
 
   conversationAdvancedOptionsFormGroup = this.fb.group({
     meshMode: this.fb.control({ value: false, disabled: false }),
@@ -90,9 +90,9 @@ export class ConversationComponent implements OnInit, OnDestroy {
   fullUrl: string;
 
   // apiRTC objects
-  userAgent: any = null;
-  session: any = null;
-  conversation: any = null;
+  userAgent: UserAgent = null;
+  session: Session = null;
+  conversation: Conversation = null;
 
   // Local Streams
   localCameraStreamsById: Map<string, StreamDecorator> = new Map();
@@ -127,7 +127,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
   streamHoldersById: Map<string, StreamDecorator> = new Map();
 
   // Recorded Media
-  recordingsByMediaId: Map<string, any> = new Map();
+  recordingsByMediaId: Map<string, RecordingInfoDecorator> = new Map();
 
   // Authentication Token (JSON or other)
   token: string;
@@ -179,7 +179,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
   // https://stackoverflow.com/questions/35779372/window-onbeforeunload-doesnt-trigger-on-android-chrome-alt-solution
   //
   @HostListener('window:unload', ['$event'])
-  unloadHandler(event) {
+  unloadHandler(event: any) {
     console.log("unloadHandler");
     this.doDestroy();
   }
@@ -403,8 +403,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
     const options = this.cloudUrlFc.value ? { cloudUrl: this.cloudUrlFc.value } : {};
     console.log('registerWithoutAuth options', options);
-    this.userAgent.register(options).then((session: any) => {
-      //this.userAgent.register().then((session: any) => {
+    this.userAgent.register(options).then((session: Session) => {
       this.session = session;
       console.log("Session:", session);
 
@@ -520,7 +519,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
 
   // Registration with registerInformation
-  doRegisterWithRegisterInformation(registerInformation: Object) {
+  doRegisterWithRegisterInformation(registerInformation: RegisterInformation) {
     this.registrationError = null;
     this.registerInPrgs = true;
 
@@ -528,7 +527,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
       registerInformation['cloudUrl'] = this.cloudUrlFc.value;
     }
 
-    this.userAgent.register(registerInformation).then((session: any) => {
+    this.userAgent.register(registerInformation).then((session: Session) => {
       console.log("userAgent.register", session, this.userAgent);
       this.session = session;
 
@@ -571,8 +570,9 @@ export class ConversationComponent implements OnInit, OnDestroy {
   *  Javascript in the browser is single threaded so regular Javascript programming does not have thread safety issues.
   *  One thread of execution will finish before the next one is started. No two pieces of Javascript are running at exactly the same time.
    */
-  getOrCreateContactHolder(contact: any): ContactDecorator {
+  getOrCreateContactHolder(contact: Contact): ContactDecorator {
     const contactId = String(contact.getId());
+    
     if (this.conversationContactHoldersById.has(contactId)) {
       return this.conversationContactHoldersById.get(contactId);
     } else {
@@ -657,12 +657,15 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.streamHoldersById.delete(streamDecorator.id);
 
     // get selected devices
-    const options = {};
+    const options: CreateStreamOptions = {};
     if (this.selectedAudioInDevice) {
       options['audioInputId'] = this.selectedAudioInDevice.id;
     }
     if (this.selectedVideoDevice) {
       options['videoInputId'] = this.selectedVideoDevice.id;
+    }
+    if (audioMuted) {
+      options['constraints'] = { audio: false }
     }
 
     // and recreate a new stream
@@ -813,10 +816,10 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
 
   doListenToContactsEvents() {
-    this.conversation.on('contactJoined', (contact: any) => {
+    this.conversation.on('contactJoined', (contact: Contact) => {
       console.log("on:contactJoined:", contact);
       this.getOrCreateContactHolder(contact);
-    }).on('contactLeft', (contact: any) => {
+    }).on('contactLeft', (contact: Contact) => {
       console.log("on:contactLeft:", contact);
       this.conversationContactHoldersById.delete(contact.getId());
     });
@@ -903,7 +906,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
 
   doListenToRecording() {
-    this.conversation.on('recordingAvailable', (recordingInfo: any) => {
+    this.conversation.on('recordingAvailable', (recordingInfo: RecordingInfo) => {
       console.log("on:recordingAvailable", recordingInfo);
       this.recordingsByMediaId.set(recordingInfo.mediaId, new RecordingInfoDecorator(recordingInfo, true));
     });
@@ -922,13 +925,13 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
 
   doListenToModerationEvents() {
-    this.conversation.on('contactJoinedWaitingRoom', (contact: any) => {
+    this.conversation.on('contactJoinedWaitingRoom', (contact: Contact) => {
       console.log("on:contactJoinedWaitingRoom", contact);
       // A candidate joined the waiting room.
       const contactHolder: ContactDecorator = ContactDecorator.build(contact);
       this.candidatesById.set(contactHolder.getId(), contactHolder);
 
-    }).on('contactLeftWaitingRoom', (contact: any) => {
+    }).on('contactLeftWaitingRoom', (contact: Contact) => {
       console.log("on:contactLeftWaitingRoom", contact);
       // A candidate left the waiting room.
       const contactHolder: ContactDecorator = ContactDecorator.build(contact);
@@ -976,7 +979,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.joinError = null;
     this.joinInPrgs = true;
     this.conversation.join()
-      .then((response: any) => {
+      .then((response: JoinResult) => {
         console.info('Conversation joined', response);
         this.joined = true;
         this.joinInPrgs = false;
@@ -1032,9 +1035,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
     console.log("toggleRecord", this.recording);
     if (this.recording) {
       this.conversation.startRecording()
-        .then((recordingInfo: any) => {
+        .then((recordingInfo: RecordingInfo) => {
           console.info('startRecording', recordingInfo);
-
         })
         .catch((error: any) => {
           console.error('startRecording', error);
@@ -1045,7 +1047,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
     }
     else {
       this.conversation.stopRecording()
-        .then((recordingInfo: any) => {
+        .then((recordingInfo: RecordingInfo) => {
           console.info('stopRecording', recordingInfo);
           this.recordingsByMediaId.set(recordingInfo.mediaId, new RecordingInfoDecorator(recordingInfo, false));
         })
@@ -1066,7 +1068,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
 
   doSendMessage(messageContent: string) {
-    this.conversation.sendMessage(messageContent).then((uuid: string) => {
+    this.conversation.sendMessage(messageContent).then((uuid: number) => {
       console.log("sendMessage", uuid, messageContent);
       this.messages.push(MessageDecorator.buildLocalMessage(this.userAgent.getUserData().get(PROPERTY_NICKNAME), messageContent));
     })
@@ -1109,11 +1111,10 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
 
   // if options are specified, this is because a specific device was selected
-  doCreateCameraStream(options?: any): Promise<StreamDecorator | any> {
+  doCreateCameraStream(options?: CreateStreamOptions): Promise<StreamDecorator | any> {
     console.log("createStream() with options", options, this.currentFacingMode);
     return new Promise((resolve, reject) => {
 
-      //var default_createStreamOptions: any = { enhancedAudioActivated: true }; // => FAILS on chrome
       const default_createStreamOptions: any = {
         constraints: {
           audio: true,
@@ -1143,7 +1144,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
       // }
 
       this.userAgent.createStream(options ? options : default_createStreamOptions)
-        .then((stream: any) => {
+        .then((stream: Stream) => {
           console.log('createStream :', stream);
           const streamDecorator = StreamDecorator.build(stream);
           this.localCameraStreamsById.set(streamDecorator.getId(), streamDecorator);
@@ -1193,7 +1194,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
       const subscribeOptions = {
         audioOnly: false // true
       };
-      this.conversation.subscribeToStream(event.streamHolder.getId(), subscribeOptions).then((stream: any) => {
+      this.conversation.subscribeToStream(event.streamHolder.getId(), subscribeOptions).then((stream: Stream) => {
         console.log('subscribeToStream success', stream);
       }).catch((error: any) => {
         console.error('subscribeToStream error', error);
@@ -1223,14 +1224,14 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.doPublishStream(streamDecorator, options);
   }
 
-  doPublishStream(streamDecorator: StreamDecorator, options?: Object): void {
+  doPublishStream(streamDecorator: StreamDecorator, options?: PublishOptions): void {
     const localStream = streamDecorator.getStream();
 
     console.log("doPublishStream()", localStream);
 
     // Publish your own stream to the conversation
     this.publishInPrgs = true;
-    this.conversation.publish(localStream, options).then((stream: any) => {
+    this.conversation.publish(localStream, options).then((stream: Stream) => {
       console.log("conversation.publish published", stream);
       streamDecorator.setPublished(true);
       this.publishInPrgs = false;
@@ -1262,7 +1263,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
       // Note that video handling should be applied after data loaded
       const mediaStream = (this.browser === 'Firefox') ? videoElement.mozCaptureStream() : videoElement.captureStream();
       Stream.createStreamFromMediaStream(mediaStream)
-        .then((stream: any) => {
+        .then((stream: Stream) => {
           this.videoStreamHolder = StreamDecorator.build(stream);
           console.info('createVideoStream()::createStreamFromMediaStream', stream);
         })
@@ -1290,7 +1291,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
     if (this.videoStreamHolder.isPublished()) {
       this.unpublishVideoStream();
     } else {
-      this.conversation.publish(this.videoStreamHolder.getStream()).then((stream: any) => {
+      this.conversation.publish(this.videoStreamHolder.getStream()).then((stream: Stream) => {
         this.videoStreamHolder.setPublished(true);
       }).catch((error: any) => {
         console.error('togglePublishVideoStream()::publish', error);
@@ -1327,7 +1328,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
       };
 
       Stream.createDisplayMediaStream(displayMediaStreamConstraints, false)
-        .then((stream: any) => {
+        .then((stream: Stream) => {
           stream.on('stopped', () => {
             // Used to detect when user stop the screenSharing with Chrome DesktopCapture UI
             console.log("screenSharingStream on:stopped");
@@ -1341,7 +1342,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
           // and publish it
           console.log("toggleScreenSharing()::publish", stream);
-          this.conversation.publish(this.screenSharingStreamHolder.getStream()).then((l_stream: any) => {
+          this.conversation.publish(this.screenSharingStreamHolder.getStream()).then((l_stream: Stream) => {
             console.log("toggleScreenSharing() published", l_stream);
             this.screenSharingStreamHolder.setPublished(true);
           }).catch((error: any) => {

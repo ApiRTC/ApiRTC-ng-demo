@@ -29,7 +29,7 @@ export class StreamDecorator {
 
     private listeners: Object = {};
 
-    constructor(streamId: string, stream?: any) {
+    constructor(streamId: string, stream?: Stream) {
         this.id = streamId;
         this.stream = stream;
 
@@ -54,7 +54,7 @@ export class StreamDecorator {
      * @param qosStat 
      * @returns 
      */
-    public static build(stream: any): StreamDecorator {
+    public static build(stream: Stream): StreamDecorator {
         return new StreamDecorator(String(stream.getId()), stream);
     }
 
@@ -72,7 +72,7 @@ export class StreamDecorator {
         return this.id;
     }
 
-    public setStream(stream: any) {
+    public setStream(stream: Stream) {
         this.stream = stream;
         if (stream === null) {
             return;
@@ -80,7 +80,7 @@ export class StreamDecorator {
         this.getCapabilitiesConstraintsSettings();
     }
 
-    public getStream(): any {
+    public getStream(): Stream {
         return this.stream;
     }
 
