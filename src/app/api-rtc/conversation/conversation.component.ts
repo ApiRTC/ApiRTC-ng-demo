@@ -17,7 +17,15 @@ import { QVGA, HD, FHD } from '../../consts';
 
 import { fnBrowserDetect, fnDetectMobile } from '../../misc';
 
-import { Contact, Conversation, CreateStreamOptions, JoinResult, PublishOptions, RecordingInfo, RegisterInformation, Session, Stream, UserAgent, UserData } from '@apirtc/apirtc';
+import {
+  CloudMediaInfo, Contact, Conversation, CreateStreamOptions,
+  JoinResult,
+  MediaDevice, MediaDeviceList,
+  PublishOptions,
+  RecordingInfo, RegisterInformation,
+  Session, Stream, StreamInfo,
+  UserAgent, UserData
+} from '@apirtc/apirtc';
 
 enum UserAgentCreationType {
   Key,
@@ -29,6 +37,11 @@ enum UserAgentAuthType {
   JWT,
   ThirdParty,
   CloudApiRTC
+}
+
+interface Credentials {
+  username: string,
+  password: string
 }
 
 @Component({
@@ -135,10 +148,10 @@ export class ConversationComponent implements OnInit, OnDestroy {
   showToken: boolean = false;
 
   // Devices handling
-  audioInDevices: Array<any>;
-  videoDevices: Array<any>;
+  audioInDevices: Array<MediaDevice>;
+  videoDevices: Array<MediaDevice>;
   // TODO : implement out devices selection
-  audioOutDevices: Array<any>;
+  audioOutDevices: Array<MediaDevice>;
 
   selectedAudioInDevice = null;
   selectedVideoDevice = null;
@@ -179,16 +192,16 @@ export class ConversationComponent implements OnInit, OnDestroy {
   // https://stackoverflow.com/questions/35779372/window-onbeforeunload-doesnt-trigger-on-android-chrome-alt-solution
   //
   @HostListener('window:unload', ['$event'])
-  unloadHandler(event: any) {
-    console.log("unloadHandler");
+  unloadHandler(event: Event) {
+    console.log("unloadHandler", event);
     this.doDestroy();
   }
 
   // Use BEFORE unload to hangup (works for Firefox at least)
   // This is usefull if user closes the tab, or refreshes the page
   @HostListener('window:beforeunload', ['$event'])
-  beforeUnloadHandler(event: any) {
-    console.log("beforeUnloadHandler");
+  beforeUnloadHandler(event: Event) {
+    console.log("beforeUnloadHandler", event);
     this.doDestroy();
   }
 
@@ -364,7 +377,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
     // Media device selection handling
     //
     this.userAgent.on("mediaDeviceChanged", () => {
-      const mediaDevices = this.userAgent.getUserMediaDevices();
+      const mediaDevices: MediaDeviceList = this.userAgent.getUserMediaDevices();
       console.log("mediaDeviceChanged", JSON.stringify(mediaDevices));
       this.doUpdateMediaDevices(mediaDevices);
     });
@@ -430,7 +443,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
    * 
    * @param credentials 
    */
-  registerWithJWTAuth(credentials: any): void {
+  registerWithJWTAuth(credentials: Credentials): void {
     this.registrationError = null;
     this.registerInPrgs = true;
 
@@ -474,7 +487,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
    * 
    * @param credentials 
    */
-  registerWith3rdPartyAuth(credentials: any): void {
+  registerWith3rdPartyAuth(credentials: Credentials): void {
     this.registrationError = null;
     this.registerInPrgs = true;
 
@@ -508,10 +521,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
       });
   }
 
-  registerWithApizeeUserManagement(credentials: any) {
-
+  registerWithApizeeUserManagement(credentials: Credentials) {
     this.userAgentAuthType = UserAgentAuthType.CloudApiRTC;
-
     // the username must have already been set on the userAgent
     this.doRegisterWithRegisterInformation({
       password: credentials.password
@@ -572,7 +583,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
    */
   getOrCreateContactHolder(contact: Contact): ContactDecorator {
     const contactId = String(contact.getId());
-    
     if (this.conversationContactHoldersById.has(contactId)) {
       return this.conversationContactHoldersById.get(contactId);
     } else {
@@ -632,7 +642,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
   // --------------------------------------------------------------------------
   // Handle Media device change
 
-  doUpdateMediaDevices(mediaDevices: any): void {
+  doUpdateMediaDevices(mediaDevices: MediaDeviceList): void {
     // Convert map values to array
     this.audioInDevices = Object.values(mediaDevices.audioinput);
     this.audioOutDevices = Object.values(mediaDevices.audiooutput);
@@ -641,18 +651,13 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   changeLocalStream(streamDecorator: StreamDecorator): void {
 
-    const published = streamDecorator.isPublished();
     const audioMuted = streamDecorator.getStream().isAudioMuted();
 
-    // first, unpublish and release current local stream
-    if (published) {
-      this.conversation.unpublish(streamDecorator.getStream());
-    }
-    streamDecorator.getStream().release();
+    // first, release current local stream
+    const oldStream = streamDecorator.getStream();
+    oldStream.release();
 
-    // Set stream to null in order to destroy the associated component
-    //streamDecorator.setStream(null);
-    // actually even remove from the list
+    // and even remove from the list (so the component will be destroyed)
     this.localCameraStreamsById.delete(streamDecorator.id);
     this.streamHoldersById.delete(streamDecorator.id);
 
@@ -664,19 +669,22 @@ export class ConversationComponent implements OnInit, OnDestroy {
     if (this.selectedVideoDevice) {
       options['videoInputId'] = this.selectedVideoDevice.id;
     }
-    if (audioMuted) {
-      options['constraints'] = { audio: false }
-    }
 
     // and recreate a new stream
     this.doCreateCameraStream(options)
-      .then((streamDecorator) => {
-        // if local stream was published consider we should publish changed one
-        if (published) {
-          this.doPublishStream(streamDecorator);
-        }
+      .then((streamDecorator: StreamDecorator) => {
+        // TODO : request a change in apirtc to move replacePublishedStream to conversation directly
+        // so that we can hide ConversationCall notion ?
+        this.conversation.getConversationCall(oldStream).replacePublishedStream(streamDecorator.getStream())
+          .then((stream: Stream) => {
+            if (audioMuted) {
+              stream.muteAudio()
+            }
+            streamDecorator.setStream(stream);
+            console.info('changeLocalStream done', oldStream, stream);
+          });
       })
-      .catch((error: any) => { console.error('doCreateStream error', error); });
+      .catch((error: any) => { console.error('changeLocalStream->doCreateCameraStream error', error); });
   }
 
   // --------------------------------------------------------------------------
@@ -743,7 +751,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
     // List of Streams published by peers in the Conversation shall be maintained in the application
     // by listening on streamListChanged event
     //
-    this.conversation.on('streamListChanged', (streamInfo: any) => {
+    this.conversation.on('streamListChanged', (streamInfo: StreamInfo) => {
       console.log("on:streamListChanged :", streamInfo);
 
       // The streamListChanged event is usefull to maintain a list of streams published on a conversation.
@@ -785,7 +793,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
 
   doListenToStreamEvents() {
-    this.conversation.on('streamAdded', (stream: any) => {
+    this.conversation.on('streamAdded', (stream: Stream) => {
       console.log('on:streamAdded:', stream);
       // 'streamAdded' means that a stream published by a peer was subscribed to and media is ready to be displayed.
       // The event comes with a Stream object that can be attached to DOM
@@ -794,7 +802,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
       const streamHolder: StreamDecorator = this.streamHoldersById.get(String(stream.getId()));
       // And attach the actual Stream object to it. The corresponding angular component will handle the display.
       streamHolder.setStream(stream);
-    }).on('streamRemoved', (stream: any) => {
+    }).on('streamRemoved', (stream: Stream) => {
       console.log('on:streamRemoved:', stream)
       // 'streamRemoved' actually means that a stream is no more readable : either because :
       // - peer left,
@@ -916,7 +924,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.conversation.on('transferBegun', () => {
       this.uploadProgressPercentage = 0;
     });
-    this.conversation.on('transferProgress', (progress) => {
+    this.conversation.on('transferProgress', (progress:any) => {
       this.uploadProgressPercentage = progress.percentage;
     });
     this.conversation.on('transferEnded', () => {
@@ -1079,15 +1087,15 @@ export class ConversationComponent implements OnInit, OnDestroy {
   // Send Files
 
   selectedFile: File;
-  selectFile(event: any): void {
-    const file: File | null = event.target.files.item(0);
+  selectFile(event: Event): void {
+    const file: File | null = (<HTMLInputElement>event.target).files.item(0);
     this.selectedFile = file;
     this.chatFileInputRef.nativeElement.value = "";
   }
 
   sendFile(): void {
     this.conversation.pushData({ 'file': this.selectedFile })
-      .then((cloudMediaInfo: any) => {
+      .then((cloudMediaInfo: CloudMediaInfo) => {
         console.log('File uploaded :', cloudMediaInfo);
         // Send file link message to the chat
         this.doSendMessage('New file uploaded: <a href="' + cloudMediaInfo.url + '" target="_blank"><b>OPEN FILE</b></a>');
@@ -1103,7 +1111,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   createCameraStream() {
     this.doCreateCameraStream()
-      .then((streamDecorator) => {
+      .then((streamDecorator: StreamDecorator) => {
         // force next asynchronously to let display happen fine
         //setTimeout(() => { this.next(); }, 1000);
       })
@@ -1111,11 +1119,11 @@ export class ConversationComponent implements OnInit, OnDestroy {
   }
 
   // if options are specified, this is because a specific device was selected
-  doCreateCameraStream(options?: CreateStreamOptions): Promise<StreamDecorator | any> {
+  doCreateCameraStream(options?: CreateStreamOptions): Promise<StreamDecorator> {
     console.log("createStream() with options", options, this.currentFacingMode);
     return new Promise((resolve, reject) => {
 
-      const default_createStreamOptions: any = {
+      const default_createStreamOptions: CreateStreamOptions = {
         constraints: {
           audio: true,
           //video: true
@@ -1250,12 +1258,12 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   // Stream from video file
   //
-  createVideoStream(event: any) {
+  createVideoStream(event: Event) {
     // To create a MediaStream from a video file, go through a 'video' DOM element
     //
 
     // Get file the user selected
-    const file: File | null = event.target.files.item(0);
+    const file: File | null = (<HTMLInputElement>event.target).files.item(0);
 
     // Prepare the 'loadeddata' event that will actually create Stream instance
     const videoElement = this.fileVideoRef.nativeElement;
@@ -1349,7 +1357,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
             console.error('toggleScreenSharing()::publish', error);
           });
         })
-        .catch(function (error: any) {
+        .catch((error: any) => {
           console.error('Could not create screensharing stream :', error);
         });
     } else {
