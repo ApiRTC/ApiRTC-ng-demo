@@ -73,7 +73,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   nicknameFc: FormControl = new FormControl({ value: DEFAULT_NICKNAME, disabled: true });
 
-  contactsByGroup: Map<string, Array<Contact>> = new Map();
+  contactsByGroup: Map<string, Set<Contact>> = new Map();
 
   conversationAdvancedOptionsFormGroup = this.fb.group({
     meshMode: this.fb.control({ value: false, disabled: false }),
@@ -605,18 +605,18 @@ export class ConversationComponent implements OnInit, OnDestroy {
       //
       for (const group of Object.keys(updatedContacts.joinedGroup)) {
         if (!this.contactsByGroup.has(group)) {
-          this.contactsByGroup.set(group, new Array());
+          this.contactsByGroup.set(group, new Set());
         }
         for (const contact of updatedContacts.joinedGroup[group]) {
-          this.contactsByGroup.get(group).push(contact);
+          this.contactsByGroup.get(group).add(contact);
         }
       }
       for (const group of Object.keys(updatedContacts.leftGroup)) {
         if (!this.contactsByGroup.has(group)) {
-          this.contactsByGroup.set(group, new Array());
+          this.contactsByGroup.set(group, new Set());
         }
         for (const contact of updatedContacts.leftGroup[group]) {
-          this.contactsByGroup.get(group).push(contact);
+          this.contactsByGroup.get(group).delete(contact);
         }
       }
 
@@ -702,6 +702,10 @@ export class ConversationComponent implements OnInit, OnDestroy {
     }
     this.conversation = this.session.getOrCreateConversation(this.conversationNameFc.value, options);
     console.log('Conversation', this.conversation, options);
+
+    // To test
+    // this.session.subscribeToGroup(this.conversationNameFc.value);
+    // this.session.subscribeToGroup("waiting-room-" + this.conversationNameFc.value);
 
     this.meshModeFc.disable();
     this.meshOnlyFc.disable();
@@ -924,7 +928,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.conversation.on('transferBegun', () => {
       this.uploadProgressPercentage = 0;
     });
-    this.conversation.on('transferProgress', (progress:any) => {
+    this.conversation.on('transferProgress', (progress: any) => {
       this.uploadProgressPercentage = progress.percentage;
     });
     this.conversation.on('transferEnded', () => {
