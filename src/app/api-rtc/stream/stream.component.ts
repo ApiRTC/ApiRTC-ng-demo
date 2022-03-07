@@ -49,6 +49,10 @@ export class StreamComponent implements OnInit, OnDestroy {
   @Input() set audioInDevices(audioInDevices: Array<any>) {
     this._audioInDevices = audioInDevices;
   }
+  _audioOutDevices: Array<any>;
+  @Input() set audioOutDevices(audioOutDevices: Array<any>) {
+    this._audioOutDevices = audioOutDevices;
+  }
   _videoDevices: Array<any>;
   @Input() set videoDevices(videoDevices: Array<any>) {
     this._videoDevices = videoDevices;
@@ -73,6 +77,7 @@ export class StreamComponent implements OnInit, OnDestroy {
   @Output() onAudioMute = new EventEmitter<boolean>();
   @Output() onVideoMute = new EventEmitter<boolean>();
   @Output() onAudioInSelected = new EventEmitter<any>();
+  @Output() onAudioOutSelected = new EventEmitter<any>();
   @Output() onVideoSelected = new EventEmitter<any>();
   //@Output() onBackgroundSelected = new EventEmitter<string | BackgroundImageEvent>();
   //@Output() onVideoQualitySelected = new EventEmitter<VideoQuality>();
@@ -86,6 +91,7 @@ export class StreamComponent implements OnInit, OnDestroy {
 
   // Devices handling
   audioInFc = new FormControl('');
+  audioOutFc = new FormControl('');
   videoFc = new FormControl('');
 
   // Backgroung selection
@@ -125,6 +131,10 @@ export class StreamComponent implements OnInit, OnDestroy {
     this.audioInFc.valueChanges.subscribe(value => {
       console.log("audioInFc#valueChanges", value);
       this.onAudioInSelected.emit(value);
+    });
+    this.audioOutFc.valueChanges.subscribe(value => {
+      console.log("audioOutFc#valueChanges", value);
+      this.onAudioOutSelected.emit(value);
     });
     this.videoFc.valueChanges.subscribe(value => {
       console.log("videoFc#valueChanges", value);

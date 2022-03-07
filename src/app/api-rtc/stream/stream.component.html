@@ -22,6 +22,16 @@
                         Mute Audio
                     </mat-slide-toggle>
                 </div>
+                <div class="col">
+                    <mat-form-field appearance="fill">
+                        <mat-label>Audio Output</mat-label>
+                        <mat-select [formControl]="audioOutFc">
+                            <mat-option *ngFor="let device of _audioOutDevices" [value]="device">
+                                {{device.label}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
             </form>
         </div>
         <form class="row row-cols-lg-auto g-3 align-items-center mt-3">
@@ -31,8 +41,6 @@
                 </mat-slide-toggle>
             </div>
         </form>
-
-
         <div class="accordion accordion-flush mt-3" id="acc-{{streamHolder.id}}">
             <div class="accordion-item" *ngIf="withDevicesControl">
                 <h3 class="accordion-header" id="acc-{{streamHolder.id}}-heading1">

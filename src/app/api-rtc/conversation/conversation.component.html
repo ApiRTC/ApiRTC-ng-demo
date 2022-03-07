@@ -437,9 +437,11 @@
                             <app-stream [streamHolder]="kv.value" [isCameraStream]="true" [withSubscription]="false"
                                 [withMuteControl]="true" [withDevicesControl]="true" [audioMuted]="kv.isAudioMuted"
                                 [videoMuted]="kv.isVideoMuted" [audioInDevices]="audioInDevices"
-                                [videoDevices]="videoDevices" (onAudioMute)="handleAudioMute([kv.value, $event])"
+                                [audioOutDevices]="audioOutDevices" [videoDevices]="videoDevices"
+                                (onAudioMute)="handleAudioMute([kv.value, $event])"
                                 (onVideoMute)="handleVideoMute([kv.value, $event])"
                                 (onAudioInSelected)="selectedAudioInDevice=$event;changeLocalStream(kv.value)"
+                                (onAudioOutSelected)="changeStreamOutDevice(kv.value, $event)"
                                 (onVideoSelected)="selectedVideoDevice=$event;changeLocalStream(kv.value)">
                             </app-stream>
                         </div>
@@ -533,6 +535,7 @@
         <div *ngFor="let kv of conversationContactHoldersById | keyvalue" class="col-sm-12 col-md-4">
             <app-peer [contactHolder]="kv.value"
                 [withModeration]="(moderationFc.value===true)&&(moderatorFc.value===true)"
+                [audioOutDevices]="audioOutDevices"
                 (onStreamSubscription)="subscribeOrUnsubscribeToStream($event)" (onEject)="eject(kv.value)"
                 (onAudioMute)="handleAudioMute($event)" (onVideoMute)="handleVideoMute($event)">
             </app-peer>

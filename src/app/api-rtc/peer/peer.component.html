@@ -13,7 +13,8 @@
     <div *ngIf="streamHoldersById.size > 0" id="{{_contactHolder.id}}-streams">
         <div class="card" *ngFor="let kv of streamHoldersById | keyvalue">
             <div class="card-body">
-                <app-stream [streamHolder]="kv.value" [withSubscription]="true"
+                <app-stream [streamHolder]="kv.value" [withSubscription]="true" [audioOutDevices]="_audioOutDevices"
+                    (onAudioOutSelected)="changeStreamOutDevice(kv.value, $event)"
                     (onSubscription)="emitStreamSubscription($event)" [withMuteControl]="true"
                     (onAudioMute)="relayAudioMute(kv.value,$event)" (onVideoMute)="relayVideoMute(kv.value,$event)">
                 </app-stream>

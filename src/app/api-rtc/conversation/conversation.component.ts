@@ -149,11 +149,11 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   // Devices handling
   audioInDevices: Array<MediaDevice>;
-  videoDevices: Array<MediaDevice>;
-  // TODO : implement out devices selection
   audioOutDevices: Array<MediaDevice>;
+  videoDevices: Array<MediaDevice>;
 
   selectedAudioInDevice = null;
+  selectedAudioOutDevice = null;
   selectedVideoDevice = null;
 
   uploadProgressPercentage = 0;
@@ -685,6 +685,13 @@ export class ConversationComponent implements OnInit, OnDestroy {
           });
       })
       .catch((error: any) => { console.error('changeLocalStream->doCreateCameraStream error', error); });
+  }
+
+  changeStreamOutDevice(streamDecorator: StreamDecorator, device: any) {
+    console.log("changeStreamOutDevice", streamDecorator, device)
+    streamDecorator.getStream().applyConstraints({ audio: { deviceId: device.id } })
+      .then(() => { console.log("changeStreamOutDevice, done", streamDecorator, device) })
+      .catch((error) => { console.error("changeStreamOutDevice", error); });
   }
 
   // --------------------------------------------------------------------------

@@ -4,6 +4,7 @@ import { ContactDecorator, StreamDecorator } from '../model/model.module';
 import { ContactMock } from '../model/contact-decorator.spec';
 
 import { PeerComponent } from './peer.component';
+import { Contact } from '@apirtc/apirtc';
 
 describe('PeerComponent', () => {
   let component: PeerComponent;
@@ -19,7 +20,7 @@ describe('PeerComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(PeerComponent);
     component = fixture.componentInstance;
-    component.contactHolder = ContactDecorator.build(new ContactMock("foo", "bar"));
+    component.contactHolder = ContactDecorator.build(new Contact("foo", {}));
     fixture.detectChanges();
   });
 

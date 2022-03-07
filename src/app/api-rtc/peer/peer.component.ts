@@ -19,6 +19,10 @@ export class PeerComponent {
     this._contactHolder = contactHolder;
     this.streamHoldersById = contactHolder.getStreamHoldersById();
   }
+  _audioOutDevices: Array<any>;
+  @Input() set audioOutDevices(audioOutDevices: Array<any>) {
+    this._audioOutDevices = audioOutDevices;
+  }
 
   @Input() withModeration: boolean = false;
 
@@ -45,4 +49,10 @@ export class PeerComponent {
     this.onEject.emit(true);
   }
 
+  changeStreamOutDevice(streamDecorator: StreamDecorator, device: any) {
+    console.log("PeerComponent::changeStreamOutDevice", streamDecorator, device)
+    streamDecorator.getStream().applyConstraints({ audio: { deviceId: device.id } })
+      .then(() => { console.log("PeerComponent::changeStreamOutDevice, done", streamDecorator, device) })
+      .catch((error) => { console.error("PeerComponent::changeStreamOutDevice", error); });
+  }
 }
