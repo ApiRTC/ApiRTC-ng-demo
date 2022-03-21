@@ -75,6 +75,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   contactsByGroup: Map<string, Set<Contact>> = new Map();
 
+  contactDataEvents: Array<object> = new Array();
+
   conversationAdvancedOptionsFormGroup = this.fb.group({
     meshMode: this.fb.control({ value: false, disabled: false }),
     meshOnly: this.fb.control({ value: false, disabled: false }),
@@ -592,6 +594,9 @@ export class ConversationComponent implements OnInit, OnDestroy {
     }
   }
 
+  // --------------------------------------------------------------------------
+  // Presence
+
   doListenSessionEvents(): void {
     this.session.on('contactListUpdate', (updatedContacts: any) => { //display a list of connected users
       console.log("Session.contactListUpdate", updatedContacts);
@@ -637,6 +642,26 @@ export class ConversationComponent implements OnInit, OnDestroy {
         }
       }
     })
+
+    this.session.on('contactData', (contactDataEvent: any) => {
+      console.log('contactData', contactDataEvent.sender, contactDataEvent.content)
+      this.contactDataEvents.push(contactDataEvent);
+    })
+  }
+
+
+  // --------------------------------------------------------------------------
+  // sendData
+  doSendData(receiver: Contact, content: object) {
+
+    receiver.sendData(content)
+      .then(() => {
+        console.log("message sent")
+      })
+      .catch((error: any) => {
+        console.error("sendData", error)
+      })
+
   }
 
   // --------------------------------------------------------------------------
