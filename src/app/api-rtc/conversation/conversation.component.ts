@@ -700,14 +700,19 @@ export class ConversationComponent implements OnInit, OnDestroy {
       .then((streamDecorator: StreamDecorator) => {
         // TODO : request a change in apirtc to move replacePublishedStream to conversation directly
         // so that we can hide ConversationCall notion ?
-        this.conversation.getConversationCall(oldStream).replacePublishedStream(streamDecorator.getStream())
-          .then((stream: Stream) => {
-            if (audioMuted) {
-              stream.muteAudio()
-            }
-            streamDecorator.setStream(stream);
-            console.info('changeLocalStream done', oldStream, stream);
-          });
+        if (this.conversation != null) {
+          let call = this.conversation.getConversationCall(oldStream);
+          if (call != null) {
+            call.replacePublishedStream(streamDecorator.getStream())
+            .then((stream: Stream) => {
+              if (audioMuted) {
+                stream.muteAudio()
+              }
+              streamDecorator.setStream(stream);
+              console.info('changeLocalStream done', oldStream, stream);
+            });
+          }
+        }
       })
       .catch((error: any) => { console.error('changeLocalStream->doCreateCameraStream error', error); });
   }
@@ -1224,6 +1229,90 @@ export class ConversationComponent implements OnInit, OnDestroy {
       streamDecorator.getStream().unmuteVideo();
     }
     else { streamDecorator.getStream().muteVideo(); }
+  }
+
+  handleApplyVideoProcessor(event: [StreamDecorator, string]) {
+    console.log("handleApplyVideoProcessor", event);
+
+    let imgUrl = null;
+
+    switch (event[1]) {
+      case 'blur':
+        console.log('blur');
+        this.applyEffect(event[0], 'blur');
+        break;
+      case 'bgdGranit':
+        console.log('bgdGranit');
+        imgUrl = 'https://images.unsplash.com/photo-1559131463-f9386f12e2db';
+        var videoProcessorOptions = {
+            backgroundImageUrl : imgUrl,
+        }
+        this.applyEffect(event[0], 'backgroundImage', videoProcessorOptions);
+        break;
+      case 'bgdBeach':
+        console.log('bgdBeach');
+        console.log('bgdGranit');
+        imgUrl = 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e';
+        var videoProcessorOptions = {
+            backgroundImageUrl : imgUrl,
+        }
+        this.applyEffect(event[0], 'backgroundImage', videoProcessorOptions);
+        break;
+      case 'none':
+        console.log('none');
+        this.applyEffect(event[0], 'none');
+        break;
+      default:
+        console.log(`Incorrect event value`);
+    }
+  }
+  
+  updateLocalStreamInDecoratorAndPublish(oldStream : Stream, newStream : Stream) {
+    console.log("updateLocalStreamInDecoratorAndPublish");
+
+    if(oldStream.getId() === newStream.getId()) {
+      console.log('Same stream detected, leaving updateLocalStreamInDecoratorAndPublish');
+      return;
+    }
+
+    const streamDecoratorNew = StreamDecorator.build(newStream);
+    this.localCameraStreamsById.set(streamDecoratorNew.getId(), streamDecoratorNew);
+    this.streamHoldersById.set(streamDecoratorNew.getId(), streamDecoratorNew);
+
+    if (this.conversation != null) {
+      let call = this.conversation.getConversationCall(oldStream);
+      if (call != null) {
+        call.replacePublishedStream(newStream)
+        .then((stream: Stream) => {
+          console.info('changeLocalStream done');
+        });
+      }
+    }
+    //remove from the list (so the component will be destroyed)
+    this.localCameraStreamsById.delete(oldStream.getId());
+    this.streamHoldersById.delete(oldStream.getId());
+  }
+
+  applyEffect(streamDecorator: StreamDecorator, effect : 'none'|'blur'|'backgroundImage', videoProcessorOptions? : any) {
+    console.log("ConversationComponent::applyEffect : ", effect);
+
+    streamDecorator.getStream().applyVideoProcessor(effect, videoProcessorOptions ).then((streamWithEffect) => {
+      console.log('blurred stream :', streamWithEffect);
+      this.updateLocalStreamInDecoratorAndPublish(streamDecorator.getStream(), streamWithEffect);
+
+    }).catch((error) => {
+/*
+        In case of error applyVideoProcessor will give return :
+            - the reason,
+            - the type of effect that is applied to the stream (blur || backgroundImage || none
+            - the stream
+*/
+        console.error('Catch on applyVideoProcessor message : ', error.message);
+        console.error('Catch on applyVideoProcessor appliedVideoProcessorType : ', error.appliedVideoProcessorType);
+        console.error('Catch on applyVideoProcessor stream : ', error.stream);
+
+        this.updateLocalStreamInDecoratorAndPublish(streamDecorator.getStream(), error.stream);
+    });
   }
 
   subscribeOrUnsubscribeToStream(event: StreamSubscribeEvent) {

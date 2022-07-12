@@ -35,6 +35,7 @@ export class StreamComponent implements OnInit, OnDestroy {
 
   @Input() withMuteControl: boolean = false;
   @Input() withDevicesControl: boolean = false;
+  @Input() withApplyVideoProcessorControl: boolean = false;
 
   @Input() withSubscription: boolean = false;
 
@@ -79,6 +80,7 @@ export class StreamComponent implements OnInit, OnDestroy {
   @Output() onAudioInSelected = new EventEmitter<any>();
   @Output() onAudioOutSelected = new EventEmitter<any>();
   @Output() onVideoSelected = new EventEmitter<any>();
+  @Output() onApplyVideoProcessor = new EventEmitter<string>();
   //@Output() onBackgroundSelected = new EventEmitter<string | BackgroundImageEvent>();
   //@Output() onVideoQualitySelected = new EventEmitter<VideoQuality>();
 
@@ -270,4 +272,20 @@ export class StreamComponent implements OnInit, OnDestroy {
     this.onSubscription.emit(new StreamSubscribeEvent(this.streamHolder, this.streamHolder.stream ? false : true));
   }
 
+  applyBlur() {
+    console.log("StreamComponent::applyBlur");
+    this.onApplyVideoProcessor.emit('blur');
+  }
+  applyBgdGranit() {
+    console.log("StreamComponent::applyBgdGranit");
+    this.onApplyVideoProcessor.emit('bgdGranit');
+  }
+  applyBgdBeach() {
+    console.log("StreamComponent::applyBgdBeach");
+    this.onApplyVideoProcessor.emit('bgdBeach');
+  }
+  applyNone() {
+    console.log("StreamComponent::applyNone");
+    this.onApplyVideoProcessor.emit('none');
+  }
 }
