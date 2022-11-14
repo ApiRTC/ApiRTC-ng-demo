@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, Input, EventEmitter, Output } from '@angular/core';
 
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 
 import { StreamDecorator } from '../model/model.module';
 
@@ -85,22 +85,22 @@ export class StreamComponent implements OnInit, OnDestroy {
   //@Output() onVideoQualitySelected = new EventEmitter<VideoQuality>();
 
   // Audio/Video Muting
-  muteAudioFc = new FormControl(false);
-  muteVideoFc = new FormControl(false);
+  muteAudioFc = new UntypedFormControl(false);
+  muteVideoFc = new UntypedFormControl(false);
 
   // Mirror
-  mirrorVideoFc = new FormControl(false);
+  mirrorVideoFc = new UntypedFormControl(false);
 
   // Devices handling
-  audioInFc = new FormControl('');
-  audioOutFc = new FormControl('');
-  videoFc = new FormControl('');
+  audioInFc = new UntypedFormControl('');
+  audioOutFc = new UntypedFormControl('');
+  videoFc = new UntypedFormControl('');
 
-  // Backgroung selection
+  // Background selection
   //backgroundFc = new FormControl('none');
 
   // Video quality selection
-  videoQualityFc = new FormControl(undefined);
+  videoQualityFc = new UntypedFormControl(undefined);
 
   // torch
   torch: boolean = undefined;

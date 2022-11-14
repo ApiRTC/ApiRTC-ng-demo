@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 
-import { FormBuilder, Validators, FormControl } from '@angular/forms';
+import { UntypedFormBuilder, Validators, UntypedFormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-login',
@@ -9,7 +9,7 @@ import { FormBuilder, Validators, FormControl } from '@angular/forms';
 })
 export class LoginComponent {
 
-  fgroup = this.fb.group({
+  formGroup = this.fb.group({
     username: ['', Validators.required],
     password: ['', Validators.required],
   });
@@ -23,24 +23,24 @@ export class LoginComponent {
 
   @Input() set enable(enable: boolean) {
     if (enable) {
-      this.fgroup.enable();
+      this.formGroup.enable();
       if (this.usernameFc.value !== '') {
         this.usernameFc.disable();
       }
     } else {
-      this.fgroup.disable();
+      this.formGroup.disable();
     }
   }
 
   @Output() credentials = new EventEmitter<Object>();
 
-  constructor(private fb: FormBuilder) { }
+  constructor(private fb: UntypedFormBuilder) { }
 
   get usernameFc() {
-    return this.fgroup.get('username') as FormControl;
+    return this.formGroup.get('username') as UntypedFormControl;
   }
   get passwordFc() {
-    return this.fgroup.get('password') as FormControl;
+    return this.formGroup.get('password') as UntypedFormControl;
   }
 
   submit() {

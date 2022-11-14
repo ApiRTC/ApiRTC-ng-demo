@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ContactDecorator, StreamDecorator } from '../model/model.module';
-import { ContactMock } from '../model/contact-decorator.spec';
+import { ContactDecorator } from '../model/model.module';
+// import { ContactMock } from '../model/contact-decorator.spec';
 
 import { PeerComponent } from './peer.component';
 import { Contact } from '@apirtc/apirtc';

@@ -1,4 +1,4 @@
-<form class="form-inline" [formGroup]="fgroup" (ngSubmit)="submit()">
+<form class="form-inline" [formGroup]="formGroup" (ngSubmit)="submit()">
     <div class="form-group">
         <mat-form-field>
             <mat-label>Username</mat-label>
@@ -18,5 +18,6 @@
         </mat-form-field>
     </div>
     &nbsp;
-    <button mat-raised-button color="primary" type="submit" [disabled]="!fgroup.valid" title="{{btnText}}">{{btnText}}&nbsp;<em class="bi bi-box-arrow-in-right"></em></button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="!formGroup.valid"
+        title="{{btnText}}">{{btnText}}&nbsp;<em class="bi bi-box-arrow-in-right"></em></button>
 </form>

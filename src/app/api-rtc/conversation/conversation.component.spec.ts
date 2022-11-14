@@ -5,7 +5,7 @@ import { ConversationComponent } from './conversation.component';
 import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
-import { ReactiveFormsModule } from "@angular/forms";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -19,6 +19,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { WINDOW } from '../../windows-provider';
 
+import { PeerComponent } from '../peer/peer.component';
+import { StreamComponent } from '../stream/stream.component';
 import { LoginComponent } from '../../utils/login/login.component';
 
 
@@ -36,8 +38,8 @@ describe('ConversationComponent', () => {
         ]),
         BrowserAnimationsModule,
         MatFormFieldModule, MatInputModule, MatChipsModule, MatCheckboxModule, MatProgressBarModule, MatProgressSpinnerModule,
-        ReactiveFormsModule, HttpClientModule, HttpClientTestingModule],
-      declarations: [ConversationComponent, LoginComponent],
+        FormsModule, ReactiveFormsModule, HttpClientModule, HttpClientTestingModule],
+      declarations: [ConversationComponent, LoginComponent, PeerComponent, StreamComponent],
       providers: [{ provide: WINDOW, useValue: mockWindow }]
     })
       .compileComponents();

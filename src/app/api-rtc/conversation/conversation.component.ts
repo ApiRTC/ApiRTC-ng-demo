@@ -1,5 +1,5 @@
 import { Component, Inject, OnDestroy, OnInit, ViewChild, ElementRef, HostListener } from '@angular/core';
-import { FormBuilder, FormControl, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, Validators } from '@angular/forms';
 import { ActivatedRoute } from "@angular/router";
 
 import { WINDOW } from '../../windows-provider';
@@ -58,11 +58,11 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   // FormControl/Group objects
   //
-  apiKeyFc: FormControl = new FormControl('myDemoApiKey');
+  apiKeyFc: UntypedFormControl = new UntypedFormControl('myDemoApiKey');
 
-  cloudUrlFc: FormControl = new FormControl('https://cloud.apirtc.com');
+  cloudUrlFc: UntypedFormControl = new UntypedFormControl('https://cloud.apirtc.com');
 
-  usernameFc: FormControl = new FormControl(null, [Validators.required]);
+  usernameFc: UntypedFormControl = new UntypedFormControl(null, [Validators.required]);
 
   userAgentCreationType: UserAgentCreationType;
   userAgentAuthType: UserAgentAuthType;
@@ -71,7 +71,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
   userAgentCreationTypeEnum = UserAgentCreationType;
   userAgentAuthTypeEnum = UserAgentAuthType;
 
-  nicknameFc: FormControl = new FormControl({ value: DEFAULT_NICKNAME, disabled: true });
+  nicknameFc: UntypedFormControl = new UntypedFormControl({ value: DEFAULT_NICKNAME, disabled: true });
 
   contactsByGroup: Map<string, Set<Contact>> = new Map();
 
@@ -162,29 +162,29 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   // Convenient FormControl getters
   //
-  get meshModeFc(): FormControl {
-    return this.conversationAdvancedOptionsFormGroup.get('meshMode') as FormControl;
+  get meshModeFc(): UntypedFormControl {
+    return this.conversationAdvancedOptionsFormGroup.get('meshMode') as UntypedFormControl;
   }
-  get meshOnlyFc(): FormControl {
-    return this.conversationAdvancedOptionsFormGroup.get('meshOnly') as FormControl;
+  get meshOnlyFc(): UntypedFormControl {
+    return this.conversationAdvancedOptionsFormGroup.get('meshOnly') as UntypedFormControl;
   }
-  get moderationFc(): FormControl {
-    return this.conversationAdvancedOptionsFormGroup.get('moderation') as FormControl;
+  get moderationFc(): UntypedFormControl {
+    return this.conversationAdvancedOptionsFormGroup.get('moderation') as UntypedFormControl;
   }
-  get moderatorFc(): FormControl {
-    return this.conversationAdvancedOptionsFormGroup.get('moderator') as FormControl;
+  get moderatorFc(): UntypedFormControl {
+    return this.conversationAdvancedOptionsFormGroup.get('moderator') as UntypedFormControl;
   }
-  get conversationNameFc(): FormControl {
-    return this.conversationFormGroup.get('name') as FormControl;
+  get conversationNameFc(): UntypedFormControl {
+    return this.conversationFormGroup.get('name') as UntypedFormControl;
   }
-  get messageFc(): FormControl {
-    return this.messageFormGroup.get('message') as FormControl;
+  get messageFc(): UntypedFormControl {
+    return this.messageFormGroup.get('message') as UntypedFormControl;
   }
 
   constructor(@Inject(WINDOW) public window: Window,
     private activatedRoute: ActivatedRoute,
     private authServerService: AuthServerService,
-    private fb: FormBuilder) {
+    private fb: UntypedFormBuilder) {
 
     console.log("window.location", window.location);
   }
