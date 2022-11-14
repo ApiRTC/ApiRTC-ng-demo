@@ -849,7 +849,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
       // - peer left,
       // - or peer decided to unpublish this stream,
       // - or we decided to unsubscribe to this stream. (in which case we won't receive a 'streamListChanged' with listEventType==='removed' event)
-      // - a thechnical issue happened and the media is not available
+      // - a technical issue happened and the media is not available
       //
       // Get our object representing to notion of a peer stream and just set its apiRTC stream to null : the
       // component will remove the video tag from the DOM.
