@@ -484,7 +484,7 @@
                 <div class="text-center">
                     <div class="mb-3">
                         <label id="facing-mode-label" class="me-3">facingMode:</label>
-                        <mat-radio-group [(ngModel)]="currentFacingMode" enabled="false">
+                        <mat-radio-group [(ngModel)]="currentFacingMode" ngDefaultControl enabled="false">
                             <mat-radio-button [value]="undefined">undefined</mat-radio-button>
                             <mat-radio-button class="ms-3" value="user">user</mat-radio-button>
                             <mat-radio-button class="ms-3" value="environment" [disabled]="!runningOnMobile">

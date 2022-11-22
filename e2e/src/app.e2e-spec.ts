@@ -10,7 +10,9 @@ describe('workspace-project App', () => {
 
   it('should display welcome message', () => {
     page.navigateTo();
-    expect(page.getTitleText()).toEqual('apirtc-ng-demo app is running!');
+    page.getTitleText().then((text: string) => {
+      expect(text).toEqual('1. Create UserAgent');
+    })
   });
 
   afterEach(async () => {
