@@ -35,6 +35,9 @@ export class StreamComponent implements OnInit, OnDestroy {
 
   @Input() withMuteControl: boolean = false;
   @Input() withDevicesControl: boolean = false;
+
+  @Input() withApplyAudioProcessorControl: boolean = false;
+
   @Input() withApplyVideoProcessorControl: boolean = false;
 
   @Input() withSubscription: boolean = false;
@@ -81,6 +84,7 @@ export class StreamComponent implements OnInit, OnDestroy {
   @Output() onAudioOutSelected = new EventEmitter<any>();
   @Output() onVideoSelected = new EventEmitter<any>();
   @Output() onApplyVideoProcessor = new EventEmitter<string>();
+  @Output() onApplyAudioProcessor = new EventEmitter<string>();
   //@Output() onBackgroundSelected = new EventEmitter<string | BackgroundImageEvent>();
   //@Output() onVideoQualitySelected = new EventEmitter<VideoQuality>();
 
@@ -287,5 +291,13 @@ export class StreamComponent implements OnInit, OnDestroy {
   applyNone() {
     console.log("StreamComponent::applyNone");
     this.onApplyVideoProcessor.emit('none');
+  }
+  applyNoiseReduction() {
+    console.log("StreamComponent::applyNoiseReduction");
+    this.onApplyAudioProcessor.emit('noiseReduction');
+  }
+  applyNoneAudio() {
+    console.log("StreamComponent::applyNone");
+    this.onApplyAudioProcessor.emit('none');
   }
 }

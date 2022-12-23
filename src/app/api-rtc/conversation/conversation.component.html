@@ -457,7 +457,9 @@
                         <!-- mt-3 d-blo-ck w-100 h-100 -->
                         <div class="card-body">
                             <app-stream [streamHolder]="kv.value" [isCameraStream]="true" [withSubscription]="false"
-                                [withMuteControl]="true" [withDevicesControl]="true" [withApplyVideoProcessorControl]="true"
+                                [withMuteControl]="true" [withDevicesControl]="true"
+                                [withApplyAudioProcessorControl]="true"
+                                [withApplyVideoProcessorControl]="true"
                                 [audioMuted]="kv.isAudioMuted"
                                 [videoMuted]="kv.isVideoMuted" [audioInDevices]="audioInDevices"
                                 [audioOutDevices]="audioOutDevices" [videoDevices]="videoDevices"
@@ -466,7 +468,8 @@
                                 (onAudioInSelected)="selectedAudioInDevice=$event;changeLocalStream(kv.value)"
                                 (onAudioOutSelected)="changeStreamOutDevice(kv.value, $event)"
                                 (onVideoSelected)="selectedVideoDevice=$event;changeLocalStream(kv.value)"
-                                (onApplyVideoProcessor)="handleApplyVideoProcessor([kv.value, $event])">
+                                (onApplyVideoProcessor)="handleApplyVideoProcessor([kv.value, $event])"
+                                (onApplyAudioProcessor)="handleApplyAudioProcessor([kv.value, $event])">
                             </app-stream>
                         </div>
                         <p class="text-center">

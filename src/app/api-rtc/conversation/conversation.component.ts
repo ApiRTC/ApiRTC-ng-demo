@@ -1239,7 +1239,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
     switch (event[1]) {
       case 'blur':
         console.log('blur');
-        this.applyEffect(event[0], 'blur');
+        this.applyVideoEffect(event[0], 'blur');
         break;
       case 'bgdGranit':
         console.log('bgdGranit');
@@ -1247,7 +1247,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
         var videoProcessorOptions = {
             backgroundImageUrl : imgUrl,
         }
-        this.applyEffect(event[0], 'backgroundImage', videoProcessorOptions);
+        this.applyVideoEffect(event[0], 'backgroundImage', videoProcessorOptions);
         break;
       case 'bgdBeach':
         console.log('bgdBeach');
@@ -1256,17 +1256,34 @@ export class ConversationComponent implements OnInit, OnDestroy {
         var videoProcessorOptions = {
             backgroundImageUrl : imgUrl,
         }
-        this.applyEffect(event[0], 'backgroundImage', videoProcessorOptions);
+        this.applyVideoEffect(event[0], 'backgroundImage', videoProcessorOptions);
         break;
       case 'none':
         console.log('none');
-        this.applyEffect(event[0], 'none');
+        this.applyVideoEffect(event[0], 'none');
         break;
       default:
         console.log(`Incorrect event value`);
     }
   }
-  
+
+  handleApplyAudioProcessor(event: [StreamDecorator, string]) {
+    console.log("handleApplyAudioProcessor", event);
+
+    switch (event[1]) {
+      case 'noiseReduction':
+        console.log('noiseReduction');
+        this.applyAudioEffect(event[0], 'noiseReduction');
+        break;
+      case 'none':
+        console.log('none');
+        this.applyAudioEffect(event[0], 'none');
+        break;
+      default:
+        console.log(`Incorrect event value`);
+    }
+  }
+
   updateLocalStreamInDecoratorAndPublish(oldStream : Stream, newStream : Stream) {
     console.log("updateLocalStreamInDecoratorAndPublish");
 
@@ -1293,8 +1310,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.streamHoldersById.delete(oldStream.getId());
   }
 
-  applyEffect(streamDecorator: StreamDecorator, effect : 'none'|'blur'|'backgroundImage', videoProcessorOptions? : any) {
-    console.log("ConversationComponent::applyEffect : ", effect);
+  applyVideoEffect(streamDecorator: StreamDecorator, effect : 'none'|'blur'|'backgroundImage', videoProcessorOptions? : any) {
+    console.log("ConversationComponent::applyVideoEffect : ", effect);
 
     streamDecorator.getStream().applyVideoProcessor(effect, videoProcessorOptions ).then((streamWithEffect) => {
       console.log('blurred stream :', streamWithEffect);
@@ -1310,6 +1327,28 @@ export class ConversationComponent implements OnInit, OnDestroy {
         console.error('Catch on applyVideoProcessor message : ', error.message);
         console.error('Catch on applyVideoProcessor appliedVideoProcessorType : ', error.appliedVideoProcessorType);
         console.error('Catch on applyVideoProcessor stream : ', error.stream);
+
+        this.updateLocalStreamInDecoratorAndPublish(streamDecorator.getStream(), error.stream);
+    });
+  }
+
+  applyAudioEffect(streamDecorator: StreamDecorator, effect : 'none'|'noiseReduction') {
+    console.log("ConversationComponent::applyAudioEffect : ", effect);
+
+    streamDecorator.getStream().applyAudioProcessor(effect).then((streamWithEffect) => {
+      console.log('stream With Effect :', streamWithEffect);
+      this.updateLocalStreamInDecoratorAndPublish(streamDecorator.getStream(), streamWithEffect);
+
+    }).catch((error) => {
+/*
+        In case of error applyVideoProcessor will give return :
+            - the reason,
+            - the type of effect that is applied to the stream (noiseReduction || none
+            - the stream
+*/
+        console.error('Catch on applyAudioProcessor message : ', error.message);
+        console.error('Catch on applyAudioProcessor appliedAudioProcessorType : ', error.appliedVideoProcessorType);
+        console.error('Catch on applyAudioProcessor stream : ', error.stream);
 
         this.updateLocalStreamInDecoratorAndPublish(streamDecorator.getStream(), error.stream);
     });

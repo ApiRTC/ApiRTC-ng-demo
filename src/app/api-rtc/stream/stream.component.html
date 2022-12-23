@@ -79,6 +79,33 @@
                     </div>
                 </div>
             </div>
+
+            <div class="accordion-item" *ngIf="withApplyAudioProcessorControl">
+                <h3 class="accordion-header" id="acc-{{streamHolder.id}}-heading1">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                        [attr.data-bs-target]="'#acc-'+streamHolder.id+'-collapse01'" aria-expanded="true"
+                        [attr.aria-controls]="'acc-'+streamHolder.id+'-collapse01'">
+                        Apply Audio Processor
+                    </button>
+                </h3>
+                <div id="acc-{{streamHolder.id}}-collapse01" class="accordion-collapse collapse show"
+                    [attr.aria-labelledby]="'acc-'+streamHolder.id+'-heading1'"
+                    [attr.data-bs-parent]="'#acc-'+streamHolder.id">
+                    <div class="accordion-body">
+                        <form class="row align-items-center col-md-10">
+                            <div>
+                                <button mat-raised-button color="primary" (click)="applyNoiseReduction()"
+                                    title="Apply Noise Reduction">Apply Noise Reduction</button>
+                            </div>
+                            <div>
+                                <button mat-raised-button color="primary" (click)="applyNoneAudio()"
+                                    title="Apply None">Remove Processor</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
             <div class="accordion-item" *ngIf="withApplyVideoProcessorControl">
                 <h3 class="accordion-header" id="acc-{{streamHolder.id}}-heading1">
                     <button class="accordion-button" type="button" data-bs-toggle="collapse"
