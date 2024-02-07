@@ -886,7 +886,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
     if ((this.browser === 'Chrome') || (this.browser === 'Firefox')) {
       // TODO : safari ??
       this.userAgent.enableCallStatsMonitoring(true, { interval: 10000 });
-      this.userAgent.enableActiveSpeakerDetecting(true, { threshold: 50 });
+      this.userAgent.enableActiveSpeakerDetecting(true, { threshold: 0.4 });
     }
 
     this.conversation.on('callStatsUpdate', (callStats: any) => {

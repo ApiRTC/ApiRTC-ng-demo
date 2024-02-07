@@ -22,7 +22,7 @@
     "@angular/platform-browser": "^14.2.10",
     "@angular/platform-browser-dynamic": "^14.2.10",
     "@angular/router": "^14.2.10",
-    "@apirtc/apirtc": "^5.0.0",
+    "@apirtc/apirtc": "^5.0.19",
     "bootstrap": "^5.0.2",
     "bootstrap-icons": "^1.4.0",
     "jquery": "^3.6.0",
